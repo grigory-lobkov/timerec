@@ -1,0 +1,15 @@
+<!DOCTYPE web-app PUBLIC
+ "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+ "http://java.sun.com/dtd/web-app_2_3.dtd" >
+
+<web-app>
+  <display-name>TimeRec Web Application</display-name>
+  <request-character-encoding>UTF-8</request-character-encoding>
+  <metadata-complete>false</metadata-complete>
+
+  <servlet><!-- prepare storage to use, destroy connection on close-->
+    <servlet-name>initializer</servlet-name>
+    <servlet-class>storage.jdbc.CreateStructure</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+</web-app>

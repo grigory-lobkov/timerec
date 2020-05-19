@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<!-- Required meta tags -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+	
+	<script src="js/common.js"></script>
+
+	<title>TimeRec: Service profile</title>
+</head>
+<body>
+
+<nav id="navMenuContainer" style="background-color: #e3f2fd; display:block; height: 56px;"></nav>
+
+<!-- CONTENT -->
+<div class="container" style="display:none">
+  <form role="form" class="sProfile">
+    <h1 id="mainHeader">Service Profile</h1>
+  	<hr>
+	<div class="row">
+      <!-- avatar column -->
+      <div class="col-md-4">
+        <div class="text-center">
+          <img width="256" height="256" src="img/service.png" class="avatar img-circle" alt="Imargine service">
+		  <br/><br/>
+          <input name="image" type="file" class="form-control">
+        </div>
+      </div>
+      
+      <!-- properties column -->
+      <div class="col-md-8">
+		  <div id="alertMessage"></div>
+		
+		  <h3>Service info</h3>
+		  
+          <input id="serviceId" style="display:none" type="text" value="">
+		  <div class="form-group">
+			<label class="col-lg-3 control-label">Name</label>
+			<div class="col-lg-8">
+			  <input id="serviceName" class="form-control" type="text" value="">
+			</div>
+		  </div>
+		  <div class="form-group" style="display:none">
+			<label class="col-lg-3 control-label">Cost</label>
+			<div class="col-lg-8">
+			  <input id="serviceCost" class="form-control" type="number" value="0">
+			</div>
+		  </div>
+		  <div class="form-group">
+			<label class="col-lg-3 control-label">Description</label>
+			<div class="col-lg-8">
+			  <textarea id="serviceDescription" class="form-control" rows="5"></textarea>
+			</div>
+		  </div>
+		  <div class="form-group">
+			<label class="col-lg-3 control-label">Default duration</label>
+			<div class="col-lg-8">
+			  <input id="serviceDuration" class="form-control" type="text" value="">
+			</div>
+			<label class="col-lg-5 control-label"></label>
+		  </div>
+		  
+		  <h3>Client usage limit</h3>
+		  
+		  <div class="form-group row">
+			<label class="col-lg-3 control-label">Limit per day</label>
+			<div class="col-lg-5">
+			  <input id="clientLimitDay" class="form-control" type="number" value="">
+			</div>
+		  </div>
+		  <div class="form-group row">
+			<label class="col-lg-3 control-label">Limit per week</label>
+			<div class="col-lg-5">
+			  <input id="clientLimitWeek" class="form-control" type="number" value="">
+			</div>
+		  </div>
+		  <div class="form-group row">
+			<label class="col-lg-3 control-label">Limit per month</label>
+			<div class="col-lg-5">
+			  <input id="clientLimitMonth" class="form-control" type="number" value="">
+			</div>
+		  </div>
+		  
+		  <div class="form-group">
+			<label class="col-lg-5 control-label"></label>
+			<div class="col-lg-8">
+			  <input type="button" class="btn btn-primary" value="Save Changes" onclick="postData()">
+			  <span></span>
+			  <input type="reset" class="btn btn-default" value="Cancel" onclick="getData()">
+			</div>
+		  </div>
+      </div>
+    </div>
+  </form>
+</div>
+<script>
+
+API_URL = API_SERVER_URI + "service/";
+newServiceText = "New Service";
+SERVICE_ID = null;
+
+function getData() {
+	alertMessageHide();
+	SERVICE_ID = getUrlVars()["service_id"];
+	if(SERVICE_ID == null) {
+		//errorText = "Parameter service_id is not set";
+		//$(".container").html('<br><br><h4>'+errorText+'</h4>');
+		//alert( errorText );
+		$("#mainHeader").text(newServiceText);
+		$(".container").show();
+		return;
+	}
+	var url = API_URL + SERVICE_ID + "?_=" + (new Date()).getTime();
+	$.get( url )
+		.done(function( data ) {
+			$("#serviceId").val(data.service_id);
+			$("#serviceName").val(data.name);
+			$("#serviceCost").val(data.cost);
+			$("#serviceDescription").val(data.description);
+			$("#serviceDuration").val(data.duration);
+			/*$("#clientLimitDay").val(data.limitDay);
+			$("#clientLimitWeek").val(data.limitWeek);
+			$("#clientLimitMonth").val(data.limitMonth);*/
+			$(".container").show();
+		})
+		.fail(function() {
+			alertMessage( url, "Cannot load data" );
+		});
+}
+
+function checkData() {
+	alertMessageHide();
+	
+	if(!(0+$("#serviceDuration").val()>0)) {
+		alertMessage( "''Default duration'' must be numeric" );
+		return false;
+	}
+	if(!(0+$("#serviceCost").val()>-1)) {
+		alertMessage( "''Cost'' must be numeric" );
+		return false;
+	}
+	return true;
+}
+
+function postData() {
+	alertMessageHide();
+	if(!checkData()) return;
+	SERVICE_ID = getUrlVars()["service_id"];
+	if(SERVICE_ID!=null) SERVICE_ID = $("#serviceId").val();
+	if(SERVICE_ID==='undefined') SERVICE_ID = null;
+	var url = API_URL + (SERVICE_ID == null ? "" : SERVICE_ID)
+	$.ajax({
+		method: SERVICE_ID==null ? "POST" : "PUT",
+		url: url,
+		cache: false,
+		dataType: "json",
+		data: JSON.stringify({
+			service_id: SERVICE_ID,
+			name: $("#serviceName").val(),
+			cost: $("#serviceCost").val(),
+			description: $("#serviceDescription").val(),
+			duration: $("#serviceDuration").val(),
+		})
+	})
+		.done(SERVICE_ID==null ? function( data ) {
+			$("#serviceId").val(data.service_id);
+			SERVICE_ID = data.service_id;
+			getMenu(false);
+			alertMessage( "Service created sucessfully" );
+		} : function( data ) {
+			alertMessage( "Service saved sucessfully" );
+		})
+		.fail(function() {
+			alertMessage( url, "Cannot save data" );
+		});
+}
+
+document.addEventListener('DOMContentLoaded', function(){ getData() });
+</script>
+<!-- /CONTENT -->
+
+	<hr>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+</body>
+</html>
