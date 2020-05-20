@@ -173,7 +173,10 @@ public class ServiceWeb extends HttpServlet {
                 }
             }
         }
-        if (!done1) {
+        if (done1) {
+            resp.setContentType("application/json; charset=UTF-8");
+            resp.getWriter().println("{}");
+        } else {
             if (debugLog) System.out.println("SC_NOT_FOUND");
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
@@ -211,7 +214,10 @@ public class ServiceWeb extends HttpServlet {
                 done1 = true;
                 e.printStackTrace();
             }
-        if (!done1) {
+        if (done1) {
+            resp.setContentType("application/json; charset=UTF-8");
+            resp.getWriter().println("{}");
+        } else {
             if (debugLog) System.out.println("SC_NOT_FOUND");
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
