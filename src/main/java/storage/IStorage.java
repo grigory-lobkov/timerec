@@ -13,6 +13,14 @@ public interface IStorage<T> {
      */
     T select(long object_id) throws Exception;
 
+    /**
+     * Get model.Service object from storage by {@code service_id}
+     *
+     * @param filter object to search
+     * @return model.Service object
+     * @throws Exception on error accessing storage
+     */
+    T select(String filter) throws Exception;
 
     /**
      * Set model.Service object to storage by {@code service.service_id}
