@@ -6,11 +6,10 @@
 
   <groupId>ru.timerec</groupId>
   <artifactId>timerec</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0</version>
   <packaging>war</packaging>
 
-  <name>TimeRec Maven Webapp</name>
-  <!-- FIXME change it to the project's website -->
+  <name>TimeRec</name>
   <url>http://localhost/timerec/</url>
 
   <properties>

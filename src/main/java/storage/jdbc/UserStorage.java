@@ -40,11 +40,13 @@ public class UserStorage implements IStorage<User> {
 
             User r = new User();
             r.user_id = rs.getLong("user_id");
+            r.role_id = rs.getLong("role_id");
             r.name = rs.getString("name");
-            r.description = rs.getString("description");
+            r.tz_id = rs.getLong("tz_id");
+            r.email = rs.getString("email");
+            r.password = rs.getString("password");
             r.image_id = rs.getLong("image_id");
-            r.duration = rs.getInt("duration");
-            r.cost = rs.getInt("cost");
+            r.owner_id = rs.getLong("owner_id");
             return r;
         } finally {
             rs.close();
@@ -69,11 +71,13 @@ public class UserStorage implements IStorage<User> {
 
             User r = new User();
             r.user_id = rs.getLong("user_id");
+            r.role_id = rs.getLong("role_id");
             r.name = rs.getString("name");
-            r.description = rs.getString("description");
+            r.tz_id = rs.getLong("tz_id");
+            r.email = rs.getString("email");
+            r.password = rs.getString("password");
             r.image_id = rs.getLong("image_id");
-            r.duration = rs.getInt("duration");
-            r.cost = rs.getInt("cost");
+            r.owner_id = rs.getLong("owner_id");
             return r;
         } finally {
             rs.close();
@@ -84,21 +88,23 @@ public class UserStorage implements IStorage<User> {
     /**
      * Set {@code model.User} object to storage by {@code user.user_id}
      *
-     * @param service updated object
+     * @param user updated object
      * @return {@code true} on success
      * @throws Exception on error accessing storage
      */
-    public boolean update(User service) throws Exception {
+    public boolean update(User user) throws Exception {
         PreparedStatement ps = dbConn.prepareStatement(
-                "UPDATE user SET name = ?, description = ?, image_id = ?, duration = ?, cost = ?" +
+                "UPDATE user SET role_id = ?, name = ?, tz_id = ?, email = ?, password = ?, image_id = ?, owner_id = ?" +
                         " WHERE user_id = ?");
         try {
-            ps.setString(1, service.name);
-            ps.setString(2, service.description);
-            ps.setLong(3, service.image_id);
-            ps.setInt(4, service.duration);
-            ps.setInt(5, service.cost);
-            ps.setLong(6, service.user_id);
+            ps.setLong(1, user.role_id);
+            ps.setString(2, user.name);
+            ps.setLong(3, user.tz_id);
+            ps.setString(4, user.email);
+            ps.setString(5, user.password);
+            ps.setLong(6, user.image_id);
+            ps.setLong(7, user.owner_id);
+            ps.setLong(8, user.user_id);
 
             int affectedRows = ps.executeUpdate();
             return affectedRows == 1;
@@ -111,27 +117,29 @@ public class UserStorage implements IStorage<User> {
      * Create new {@code model.User} object in storage
      * {@code user.user_id} will be update to new value
      *
-     * @param service new object
+     * @param user new object
      * @return {@code true} on success
      * @throws Exception on error accessing storage
      */
-    public boolean insert(User service) throws Exception {
+    public boolean insert(User user) throws Exception {
         String resultColumns[] = new String[]{"user_id"};
         PreparedStatement ps = dbConn.prepareStatement(
-                "INSERT INTO user (user_id, name, description, image_id, duration, cost)" +
-                        "VALUES (seq_user_id.nextval, ?, ?, ?, ?, ?)", resultColumns);
+                "INSERT INTO user (user_id, role_id, name, tz_id, email, password, image_id, owner_id)" +
+                        "VALUES (seq_user_id.nextval, ?, ?, ?, ?, ?, ?, ?)", resultColumns);
         try {
-            ps.setString(1, service.name);
-            ps.setString(2, service.description);
-            ps.setLong(3, service.image_id);
-            ps.setInt(4, service.duration);
-            ps.setInt(5, service.cost);
+            ps.setLong(1, user.role_id);
+            ps.setString(2, user.name);
+            ps.setLong(3, user.tz_id);
+            ps.setString(4, user.email);
+            ps.setString(5, user.password);
+            ps.setLong(6, user.image_id);
+            ps.setLong(7, user.owner_id);
 
             int affectedRows = ps.executeUpdate();
             if (affectedRows == 1) {
                 ResultSet generatedKeys = ps.getGeneratedKeys();
                 if (generatedKeys.next()) {
-                    service.user_id = generatedKeys.getLong(1);
+                    user.user_id = generatedKeys.getLong(1);
                 }
             }
             return affectedRows == 1;

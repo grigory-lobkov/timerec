@@ -54,7 +54,7 @@ public class ServiceWeb extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (debugLog) System.out.println("doGet()");
+        if (debugLog) System.out.println("ServiceWeb.doGet()");
 
         String path = req.getPathInfo();
         if (path == null || path.length() < 2) return;
@@ -96,7 +96,7 @@ public class ServiceWeb extends HttpServlet {
      */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (debugLog) System.out.println("doPost()");
+        if (debugLog) System.out.println("ServiceWeb.doPost()");
 
         Gson gson = (new GsonBuilder()).create();
         BufferedReader br = req.getReader();
@@ -147,7 +147,7 @@ public class ServiceWeb extends HttpServlet {
      */
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (debugLog) System.out.println("doPut()");
+        if (debugLog) System.out.println("ServiceWeb.doPut()");
 
         Gson gson = (new GsonBuilder()).create();
         BufferedReader rr = req.getReader();
@@ -194,7 +194,7 @@ public class ServiceWeb extends HttpServlet {
      */
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (debugLog) System.out.println("doDelete()");
+        if (debugLog) System.out.println("ServiceWeb.doDelete()");
 
         String path = req.getPathInfo();
         if (path == null) return;

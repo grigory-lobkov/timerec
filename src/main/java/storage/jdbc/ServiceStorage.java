@@ -45,11 +45,23 @@ public class ServiceStorage implements IStorage<Service> {
             r.image_id = rs.getLong("image_id");
             r.duration = rs.getInt("duration");
             r.cost = rs.getInt("cost");
+            r.owner_id = rs.getLong("owner_id");
             return r;
         } finally {
             rs.close();
             ps.close();
         }
+    }
+
+    /**
+     * Get {@code model.Service} object from storage by {@code filter}
+     *
+     * @param filter
+     * @return {@code model.Service} object
+     * @throws Exception on error accessing storage
+     */
+    public Service select(String filter) throws Exception {
+        throw new RuntimeException("ServiceStorage.select(String filter) not implemented.");
     }
 
     /**
@@ -61,7 +73,7 @@ public class ServiceStorage implements IStorage<Service> {
      */
     public boolean update(Service service) throws Exception {
         PreparedStatement ps = dbConn.prepareStatement(
-                "UPDATE service SET name = ?, description = ?, image_id = ?, duration = ?, cost = ?" +
+                "UPDATE service SET name = ?, description = ?, image_id = ?, duration = ?, cost = ?, owner_id = ?" +
                         " WHERE service_id = ?");
         try {
             ps.setString(1, service.name);
@@ -69,7 +81,8 @@ public class ServiceStorage implements IStorage<Service> {
             ps.setLong(3, service.image_id);
             ps.setInt(4, service.duration);
             ps.setInt(5, service.cost);
-            ps.setLong(6, service.service_id);
+            ps.setLong(6, service.owner_id);
+            ps.setLong(7, service.service_id);
 
             int affectedRows = ps.executeUpdate();
             return affectedRows == 1;
@@ -89,14 +102,15 @@ public class ServiceStorage implements IStorage<Service> {
     public boolean insert(Service service) throws Exception {
         String resultColumns[] = new String[]{"service_id"};
         PreparedStatement ps = dbConn.prepareStatement(
-                "INSERT INTO service (service_id, name, description, image_id, duration, cost)" +
-                        "VALUES (seq_service_id.nextval, ?, ?, ?, ?, ?)", resultColumns);
+                "INSERT INTO service (service_id, name, description, image_id, duration, cost, owner_id)" +
+                        "VALUES (seq_service_id.nextval, ?, ?, ?, ?, ?, ?)", resultColumns);
         try {
             ps.setString(1, service.name);
             ps.setString(2, service.description);
             ps.setLong(3, service.image_id);
             ps.setInt(4, service.duration);
             ps.setInt(5, service.cost);
+            ps.setLong(6, service.image_id);
 
             int affectedRows = ps.executeUpdate();
             if (affectedRows == 1) {

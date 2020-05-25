@@ -14,4 +14,6 @@ public class Service {
 
     public int cost;
 
+    public long owner_id;
+
 }
