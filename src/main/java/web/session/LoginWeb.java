@@ -50,8 +50,7 @@ public class LoginWeb extends HttpServlet {
                     String jsonStr;
 
                     if (dbUser != null) {
-                        jsonStr = gson.toJson(dbUser);
-                        jsonStr = "{success:1,user:" + jsonStr + "}";
+                        jsonStr = "{success:1,user:" + gson.toJson(dbUser) + "}";
                         resp.setStatus(HttpServletResponse.SC_CREATED);
                     } else {
                         jsonStr = "{success:0}";
