@@ -38,27 +38,28 @@ public class AccessFilter implements Filter {
         if(debugLog) System.out.println("AccessFilter.fillAccAlways()");
         accAlways = new HashSet<>();
         List<String> urls = Arrays.asList(
-                "login" // manager login servlet
+                "login", // manager login servlet
+                "tz" // list of time zones
         );
         accAlways.addAll(urls);
     }
 
     private void fillAccTable() {
         if(debugLog) System.out.println("AccessFilter.fillAccTable()");
-        accTable = new HashMap<>();
+        accTable = new Hashtable<>();
         List<Access> list;
         try {
             list = storage.selectAllQuick();
             for (Access a:list) {
                 Map<String, Access> tbl = accTable.get(a.role_id);
                 if(tbl==null) {
-                    tbl = new HashMap<>();
+                    tbl = new Hashtable<>();
                     accTable.put(a.role_id, tbl);
                 }
                 tbl.put(a.object_name, a);
             }
         } catch (Exception e) {
-            System.out.println("AccessFilter.init(): Critical error! cannot access storage.");
+            System.out.println("AccessFilter.fillAccTable(): Critical error! cannot access storage. "+e.getMessage());
             e.printStackTrace();
         }
     }

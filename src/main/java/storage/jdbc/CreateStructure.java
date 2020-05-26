@@ -21,7 +21,7 @@ public class CreateStructure implements ServletContextListener {
         boolean result = true;
         try {
             DatabaseMetaData meta = StorageFactory.connection.getMetaData();
-            ResultSet res = meta.getTables("", null, "USER", new String[]{"TABLE"});
+            ResultSet res = meta.getTables("", null, "ACCESS", new String[]{"TABLE"});
             while (res.next())
                 result = false;
             res.close();
@@ -39,7 +39,7 @@ public class CreateStructure implements ServletContextListener {
      */
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
-        if (debugLog) System.out.println("CreateStructure.init()");
+        if (debugLog) System.out.println("CreateStructure.contextInitialized()");
         try {
             System.out.println("Check database...");
             if (checkStructureNeedCreate()) {
@@ -56,7 +56,7 @@ public class CreateStructure implements ServletContextListener {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        if (debugLog) System.out.println("CreateStructure.init() end");
+        if (debugLog) System.out.println("CreateStructure.contextInitialized() end");
     }
 
 
@@ -70,6 +70,7 @@ public class CreateStructure implements ServletContextListener {
      */
     @Override
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
+        if (debugLog) System.out.println("CreateStructure.contextDestroyed()");
         StorageFactory.dbConn.close();
     }
 
@@ -142,29 +143,6 @@ class Updater {
                         " SELECT 12*60, 'Anadyr, Petropavlovsk-Kamchatsky' FROM dual" +
                         ")WHERE (name) NOT IN (SELECT name FROM tz)");
 
-        exec("seq_user_id drop", "DROP SEQUENCE IF EXISTS seq_user_id");
-        exec("user drop", "DROP TABLE IF EXISTS user");
-        exec("seq_user_id",
-                "CREATE SEQUENCE IF NOT EXISTS seq_user_id");
-
-        exec("user",
-                "CREATE TABLE IF NOT EXISTS user " +
-                        "(user_id BIGINT PRIMARY KEY," +
-                        " name VARCHAR2(1000)," +
-                        " tz_id BIGINT," +
-                        " email VARCHAR2(100)," +
-                        " password VARCHAR2(100)," +
-                        " image_id BIGINT," +
-                        " owner_id BIGINT)");
-
-        exec("user_email_idx",
-                "CREATE INDEX IF NOT EXISTS user_email_idx ON user (email)");
-
-        exec("user_insert_admin",
-                "INSERT INTO user (user_id, name, tz_id, email, password)" +
-                        "SELECT seq_user_id.nextval, 'Admin', 2, 'admin@timerec.ru', '" + Passwords.encrypt("admin") + "' FROM dual " +
-                        "WHERE (SELECT COUNT(user_id) FROM user) = 0");
-
         exec("seq_service_id drop", "DROP SEQUENCE IF EXISTS seq_service_id");
         exec("service drop", "DROP TABLE IF EXISTS service");
         exec("seq_service_id",
@@ -172,13 +150,16 @@ class Updater {
 
         exec("service",
                 "CREATE TABLE IF NOT EXISTS service " +
-                        "(service_id BIGINT PRIMARY KEY, " +
-                        " name VARCHAR(1000), " +
-                        " description CLOB, " +
-                        " image_id BIGINT, " +
-                        " duration INT, " +
+                        "(service_id BIGINT PRIMARY KEY," +
+                        " name VARCHAR(1000)," +
+                        " description CLOB," +
+                        " image_id BIGINT," +
+                        " duration INT," +
                         " cost DECIMAL," +
                         " owner_id BIGINT)");
+
+
+        userAndRights();
 /*
         exec("repeat",
                 "CREATE TABLE IF NOT EXISTS repeat " +
@@ -224,6 +205,67 @@ class Updater {
                         " owner_id BIGINT)");
 */
         statement.close();
+    }
+
+    /**
+     * ROLE, ACCESS, USER tables creation
+     *
+     * @throws SQLException
+     */
+    private static void userAndRights() throws SQLException {
+
+        exec("seq_role_id drop", "DROP SEQUENCE IF EXISTS seq_role_id");
+        exec("role drop", "DROP TABLE IF EXISTS role");
+        exec("seq_role_id",
+                "CREATE SEQUENCE IF NOT EXISTS seq_role_id");
+        exec("role",
+                "CREATE TABLE IF NOT EXISTS role " +
+                        "(role_id BIGINT PRIMARY KEY," +
+                        " name VARCHAR2(1000)," +
+                        " owner_id BIGINT)");
+
+
+        exec("seq_access_id drop", "DROP SEQUENCE IF EXISTS seq_access_id");
+        exec("access drop", "DROP TABLE IF EXISTS access");
+        exec("seq_access_id",
+                "CREATE SEQUENCE IF NOT EXISTS seq_access_id");
+        exec("role",
+                "CREATE TABLE IF NOT EXISTS access " +
+                        "(access_id BIGINT PRIMARY KEY," +
+                        " role_id BIGINT," +
+                        " object_name VARCHAR2(100)," +
+                        " all_get BOOLEAN," +
+                        " all_put BOOLEAN," +
+                        " all_post BOOLEAN," +
+                        " all_delete BOOLEAN," +
+                        " own_get BOOLEAN," +
+                        " own_put BOOLEAN," +
+                        " own_post BOOLEAN," +
+                        " own_delete BOOLEAN,)");
+
+
+        exec("seq_user_id drop", "DROP SEQUENCE IF EXISTS seq_user_id");
+        exec("user drop", "DROP TABLE IF EXISTS user");
+        exec("seq_user_id",
+                "CREATE SEQUENCE IF NOT EXISTS seq_user_id");
+        exec("user",
+                "CREATE TABLE IF NOT EXISTS user " +
+                        "(user_id BIGINT PRIMARY KEY," +
+                        " role_id BIGINT," +
+                        " name VARCHAR2(1000)," +
+                        " tz_id BIGINT," +
+                        " email VARCHAR2(100)," +
+                        " password VARCHAR2(100)," +
+                        " image_id BIGINT," +
+                        " owner_id BIGINT)");
+
+        exec("user_email_idx",
+                "CREATE INDEX IF NOT EXISTS user_email_idx ON user (email)");
+
+        exec("user_insert_admin",
+                "INSERT INTO user (user_id, name, tz_id, email, password)" +
+                        "SELECT seq_user_id.nextval, 'Admin', 2, 'admin@timerec.ru', '" + Passwords.encrypt("admin") + "' FROM dual " +
+                        "WHERE (SELECT COUNT(user_id) FROM user) = 0");
     }
 
     /**

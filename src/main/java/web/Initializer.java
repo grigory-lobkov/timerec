@@ -16,7 +16,7 @@ public class Initializer implements ServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
-        storageInit.contextInitialized(servletContextEvent);
+        storageInit.contextDestroyed(servletContextEvent);
     }
 
 }
