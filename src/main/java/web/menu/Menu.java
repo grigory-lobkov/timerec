@@ -10,7 +10,7 @@ import java.util.List;
 
 import storage.IStorage;
 import storage.StorageFactory;
-import web.model.Service;
+import model.Service;
 
 @WebServlet(name="UserMenu", urlPatterns = "/menu")
 public class Menu extends HttpServlet {

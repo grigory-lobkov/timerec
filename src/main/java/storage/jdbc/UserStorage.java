@@ -1,7 +1,7 @@
 package storage.jdbc;
 
 import storage.IStorage;
-import web.model.User;
+import model.User;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -22,6 +22,7 @@ public class UserStorage implements IStorage<User> {
     public UserStorage(Connection connection) {
         dbConn = connection;
     }
+
 
     /**
      * Get {@code model.User} object from storage by {@code user_id}
@@ -54,6 +55,7 @@ public class UserStorage implements IStorage<User> {
         }
     }
 
+
     /**
      * Get {@code model.User} object from storage by {@code email}
      *
@@ -85,6 +87,7 @@ public class UserStorage implements IStorage<User> {
         }
     }
 
+
     /**
      * Set {@code model.User} object to storage by {@code user.user_id}
      *
@@ -112,6 +115,7 @@ public class UserStorage implements IStorage<User> {
             ps.close();
         }
     }
+
 
     /**
      * Create new {@code model.User} object in storage
@@ -149,7 +153,7 @@ public class UserStorage implements IStorage<User> {
     }
 
     /**
-     * Delete {@code model.Service} object from storage by {@code service_id}
+     * Delete {@code model.User} object from storage by {@code user_id}
      *
      * @param object_id
      * @return {@code true} on success
@@ -168,10 +172,11 @@ public class UserStorage implements IStorage<User> {
         }
     }
 
+
     /**
-     * Reads only {@code service_id} and {@code name} from list of services
+     * Reads only {@code user_id} and {@code name} from list of users
      *
-     * @return list of shortened {@code model.Service} objects
+     * @return list of shortened {@code model.User} objects
      * @throws Exception
      */
     @Override
@@ -193,5 +198,28 @@ public class UserStorage implements IStorage<User> {
         }
         return list;
     }
+
+
+    /*
+     * Check model.User object {@code object_id} is owned by {@code user_id}
+     *
+     * @param object_id object to check
+     * @param user_id user to check
+     * @return true if {@code user_id} is owner of object {@code object_id}
+
+    @Override
+    public boolean checkIsOwner(long object_id, long user_id) throws SQLException {
+        PreparedStatement ps = dbConn.prepareStatement(
+                "SELECT * FROM user WHERE user_id = ? AND owner_id = ?");
+        ps.setLong(1, object_id);
+        ps.setLong(2, user_id);
+        ResultSet rs = ps.executeQuery();
+        try {
+            return rs.next();
+        } finally {
+            rs.close();
+            ps.close();
+        }
+    }*/
 
 }

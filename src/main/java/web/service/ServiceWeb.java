@@ -11,7 +11,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import storage.IStorage;
 import storage.StorageFactory;
-import web.model.Service;
+import model.Service;
+import web.session.SessionUtils;
 
 /**
  * Services actions
@@ -71,6 +72,12 @@ public class ServiceWeb extends HttpServlet {
                 if (debugLog) System.out.println("SC_NOT_FOUND");
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             } else {
+                // check owner rights
+                Long user_id = (Long) req.getAttribute("onlyIfOwner");
+                if (user_id != null) {
+                    if (!SessionUtils.checkOwner(resp, user_id, data.owner_id))
+                        return;
+                }
                 String jsonStr = gson.toJson(data);
                 if (debugLog) System.out.println(jsonStr);
                 resp.setContentType("application/json; charset=UTF-8");
@@ -109,6 +116,7 @@ public class ServiceWeb extends HttpServlet {
             if (data != null) {
                 try {
                     if (debugLog) System.out.println("object: " + data);
+                    data.owner_id = SessionUtils.getSessionUserId(req);
 
                     // update storage
                     boolean done = storage.insert(data);
@@ -159,6 +167,13 @@ public class ServiceWeb extends HttpServlet {
             Service data = gson.fromJson(line, Service.class);
             if (data != null) {
                 try {
+                    // check owner rights
+                    Long user_id = (Long) req.getAttribute("onlyIfOwner");
+                    if (user_id != null) {
+                        Service dbData = storage.select(data.service_id);
+                        if (!SessionUtils.checkOwner(resp, user_id, dbData.owner_id))
+                            return;
+                    }
                     // update storage
                     boolean done = storage.update(data);
 
@@ -205,6 +220,13 @@ public class ServiceWeb extends HttpServlet {
 
         if (service_id > 0)
             try {
+                // check owner rights
+                Long user_id = (Long) req.getAttribute("onlyIfOwner");
+                if (user_id != null) {
+                    Service dbData = storage.select(service_id);
+                    if (!SessionUtils.checkOwner(resp, user_id, dbData.owner_id))
+                        return;
+                }
                 // update storage
                 done1 = storage.delete(service_id);
 

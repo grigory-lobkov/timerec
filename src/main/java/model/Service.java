@@ -1,4 +1,4 @@
-package web.model;
+package model;
 
 public class Service {
 

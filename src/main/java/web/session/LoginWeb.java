@@ -2,10 +2,7 @@ package web.session;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import storage.IStorage;
-import storage.Passwords;
-import storage.StorageFactory;
-import web.model.User;
+import model.User;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -18,7 +15,7 @@ import java.io.IOException;
 @WebServlet(urlPatterns = "/login/*")
 public class LoginWeb extends HttpServlet {
 
-    private IStorage<User> storage = StorageFactory.getUserInstance();
+    //private IStorage<User> storage = StorageFactory.getUserInstance();
     private boolean debugLog = true;
 
     /**
@@ -46,12 +43,14 @@ public class LoginWeb extends HttpServlet {
                     if (debugLog) System.out.println("object: " + data);
 
                     // look for storage
-                    User dbUser = getUser(data.email, data.password);
+                    User dbUser = SessionUtils.checkAndGetUser(data.email, data.password);
                     String jsonStr;
 
                     if (dbUser != null) {
-                        jsonStr = "{success:1,user:" + gson.toJson(dbUser) + "}";
+                        jsonStr = "{\"success\":\"1\",\"user\":" + gson.toJson(dbUser) + "}";
                         resp.setStatus(HttpServletResponse.SC_CREATED);
+                        SessionUtils.setResponceCookies(resp, dbUser.email, dbUser.password);
+                        SessionUtils.createUserSession(req, dbUser);
                     } else {
                         jsonStr = "{success:0}";
                         resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
@@ -73,24 +72,5 @@ public class LoginWeb extends HttpServlet {
         }
     }
 
-    public User getUser(String email, String password) {
-        try {
-            User dbUser = storage.select(email);
-            if(dbUser!=null) {
-                String gotPass = Passwords.encrypt(password);
-                boolean success = password.equals(dbUser.password) || gotPass.equals(dbUser.password);
-                if(success) {
-                    if (debugLog) System.out.println("LoginWeb.getUser("+(email!=null?email:"")+","+(password!=null?password:"")+") success.");
-                    return dbUser;
-                } else {
-                    if (debugLog) System.out.println("LoginWeb.getUser("+(email!=null?email:"")+","+(password!=null?password:"")+") failure.");
-                    return null;
-                }
-            }
-        } catch (Exception e) {
-            if (debugLog) System.out.println("LoginWeb.getUser("+(email!=null?email:"")+","+(password!=null?password:"")+") not found in USER table.");
-        }
-        return null;
-    }
 
 }

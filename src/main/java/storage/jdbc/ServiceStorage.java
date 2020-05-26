@@ -1,7 +1,7 @@
 package storage.jdbc;
 
 import storage.IStorage;
-import web.model.Service;
+import model.Service;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -19,9 +19,11 @@ public class ServiceStorage implements IStorage<Service> {
      */
     Connection dbConn;
 
+
     public ServiceStorage(Connection connection) {
         dbConn = connection;
     }
+
 
     /**
      * Get {@code model.Service} object from storage by {@code service_id}
@@ -53,6 +55,7 @@ public class ServiceStorage implements IStorage<Service> {
         }
     }
 
+
     /**
      * Get {@code model.Service} object from storage by {@code filter}
      *
@@ -63,6 +66,7 @@ public class ServiceStorage implements IStorage<Service> {
     public Service select(String filter) throws Exception {
         throw new RuntimeException("ServiceStorage.select(String filter) not implemented.");
     }
+
 
     /**
      * Set {@code model.Service} object to storage by {@code service.service_id}
@@ -90,6 +94,7 @@ public class ServiceStorage implements IStorage<Service> {
             ps.close();
         }
     }
+
 
     /**
      * Create new {@code model.Service} object in storage
@@ -125,6 +130,7 @@ public class ServiceStorage implements IStorage<Service> {
         }
     }
 
+
     /**
      * Delete {@code model.Service} object from storage by {@code service_id}
      *
@@ -144,6 +150,7 @@ public class ServiceStorage implements IStorage<Service> {
             ps.close();
         }
     }
+
 
     /**
      * Reads only {@code service_id} and {@code name} from list of services
@@ -170,5 +177,28 @@ public class ServiceStorage implements IStorage<Service> {
         }
         return list;
     }
+
+
+    /*
+     * Check model.Service object {@code object_id} is owned by {@code user_id}
+     *
+     * @param object_id object to check
+     * @param user_id user to check
+     * @return true if {@code user_id} is owner of object {@code object_id}
+
+    @Override
+    public boolean checkIsOwner(long object_id, long user_id) throws SQLException {
+        PreparedStatement ps = dbConn.prepareStatement(
+                "SELECT * FROM service WHERE service_id = ? AND owner_id = ?");
+        ps.setLong(1, object_id);
+        ps.setLong(2, user_id);
+        ResultSet rs = ps.executeQuery();
+        try {
+            return rs.next();
+        } finally {
+            rs.close();
+            ps.close();
+        }
+    }*/
 
 }
