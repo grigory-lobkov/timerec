@@ -6,4 +6,14 @@
   <display-name>TimeRec Web Application</display-name>
   <request-character-encoding>UTF-8</request-character-encoding>
   <metadata-complete>false</metadata-complete>
+  <servlet-mapping>
+    <servlet-name>default</servlet-name>
+    <url-pattern>*.html</url-pattern>
+    <url-pattern>*.js</url-pattern>
+    <url-pattern>*.css</url-pattern>
+    <url-pattern>*.ico</url-pattern>
+    <url-pattern>*.png</url-pattern>
+    <url-pattern>*.jpg</url-pattern>
+    <url-pattern>*.gif</url-pattern>
+  </servlet-mapping>
 </web-app>

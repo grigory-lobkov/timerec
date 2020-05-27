@@ -1,4 +1,4 @@
-package web.service;
+package api.service;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -12,7 +12,7 @@ import com.google.gson.GsonBuilder;
 import storage.IStorage;
 import storage.StorageFactory;
 import model.Service;
-import web.session.SessionUtils;
+import api.session.SessionUtils;
 
 /**
  * Services actions
@@ -37,8 +37,8 @@ import web.session.SessionUtils;
  * 404 (Not Found), if ID not found or invalid.
  */
 
-@WebServlet(urlPatterns = "/service/*")
-public class ServiceWeb extends HttpServlet {
+@WebServlet(urlPatterns = "/api/service/*")
+public class ServiceApi extends HttpServlet {
 
     private IStorage<Service> storage = StorageFactory.getServiceInstance();
     private boolean debugLog = true;
@@ -55,10 +55,13 @@ public class ServiceWeb extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (debugLog) System.out.println("ServiceWeb.doGet()");
+        if (debugLog) System.out.println("ServiceApi.doGet()");
 
         String path = req.getPathInfo();
-        if (path == null || path.length() < 2) return;
+        if (path == null || path.length() < 2
+                || !path.substring(1).matches("[0-9]*"))
+            return;
+
         Gson gson = (new GsonBuilder()).create();
         if (debugLog) System.out.println("service_id=" + path.substring(1));
 
@@ -103,7 +106,7 @@ public class ServiceWeb extends HttpServlet {
      */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (debugLog) System.out.println("ServiceWeb.doPost()");
+        if (debugLog) System.out.println("ServiceApi.doPost()");
 
         Gson gson = (new GsonBuilder()).create();
         BufferedReader br = req.getReader();
@@ -155,7 +158,7 @@ public class ServiceWeb extends HttpServlet {
      */
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (debugLog) System.out.println("ServiceWeb.doPut()");
+        if (debugLog) System.out.println("ServiceApi.doPut()");
 
         Gson gson = (new GsonBuilder()).create();
         BufferedReader rr = req.getReader();
@@ -209,7 +212,7 @@ public class ServiceWeb extends HttpServlet {
      */
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (debugLog) System.out.println("ServiceWeb.doDelete()");
+        if (debugLog) System.out.println("ServiceApi.doDelete()");
 
         String path = req.getPathInfo();
         if (path == null) return;

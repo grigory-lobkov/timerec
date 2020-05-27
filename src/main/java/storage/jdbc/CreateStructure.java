@@ -78,6 +78,12 @@ public class CreateStructure implements ServletContextListener {
 
 class Updater {
 
+    static final String ROLE_ADMIN = "Administrators";
+    static final String ROLE_OPER = "Operators";
+    static final String ADMIN_NAME = "Admin";
+    static final String ADMIN_EMAIL = "admin@timerec.ru";
+    static final String ADMIN_PASSWORD = "admin";
+
     /**
      * One statement for all scripts, executed here
      */
@@ -223,13 +229,18 @@ class Updater {
                         "(role_id BIGINT PRIMARY KEY," +
                         " name VARCHAR2(1000)," +
                         " owner_id BIGINT)");
-
+        exec("role_update_list",
+                "INSERT INTO role (role_id, name)" +
+                        "SELECT seq_role_id.nextval role_id, name FROM (" +
+                        " SELECT '"+ROLE_ADMIN+"' name FROM dual UNION ALL" +
+                        " SELECT '"+ROLE_OPER+"' name FROM dual" +
+                        ")WHERE (name) NOT IN (SELECT name FROM role)");
 
         exec("seq_access_id drop", "DROP SEQUENCE IF EXISTS seq_access_id");
         exec("access drop", "DROP TABLE IF EXISTS access");
         exec("seq_access_id",
                 "CREATE SEQUENCE IF NOT EXISTS seq_access_id");
-        exec("role",
+        exec("access",
                 "CREATE TABLE IF NOT EXISTS access " +
                         "(access_id BIGINT PRIMARY KEY," +
                         " role_id BIGINT," +
@@ -262,10 +273,34 @@ class Updater {
         exec("user_email_idx",
                 "CREATE INDEX IF NOT EXISTS user_email_idx ON user (email)");
 
+
         exec("user_insert_admin",
-                "INSERT INTO user (user_id, name, tz_id, email, password)" +
-                        "SELECT seq_user_id.nextval, 'Admin', 2, 'admin@timerec.ru', '" + Passwords.encrypt("admin") + "' FROM dual " +
-                        "WHERE (SELECT COUNT(user_id) FROM user) = 0");
+                "INSERT INTO user (user_id, role_id, name, tz_id, email, password)" +
+                        "SELECT seq_user_id.nextval, role_id, '"+ADMIN_NAME+"', 2, '"+ADMIN_EMAIL+"', '" + Passwords.encrypt(ADMIN_PASSWORD) + "'" +
+                        "FROM role " +
+                        "WHERE name = '"+ROLE_ADMIN+"' AND (SELECT COUNT(user_id) FROM user) = 0");
+
+        exec("access_insert_admin",
+                "INSERT INTO access (access_id, role_id, object_name," +
+                        " all_get, all_put, all_post, all_delete, own_get, own_put, own_post, own_delete)" +
+                        "SELECT seq_access_id.nextval, role_id, page.name, true, true, true, true, true, true, true, true " +
+                        "FROM user, (" +
+                        " SELECT 'login' name FROM dual UNION ALL" +
+                        " SELECT 'menu' FROM dual UNION ALL" +
+                        " SELECT 'setting' FROM dual UNION ALL" +
+                        " SELECT 'user' FROM dual UNION ALL" +
+                        " SELECT 'role' FROM dual UNION ALL" +
+                        " SELECT 'access' FROM dual UNION ALL" +
+                        " SELECT 'image' FROM dual UNION ALL" +
+                        " SELECT 'service' FROM dual UNION ALL" +
+                        " SELECT 'repeat' FROM dual UNION ALL" +
+                        " SELECT 'schedule' FROM dual UNION ALL" +
+                        " SELECT 'client' FROM dual UNION ALL" +
+                        " SELECT 'tz' FROM dual" +
+                        ") page " +
+                        "WHERE email = '"+ADMIN_EMAIL+"' AND 0 = (" +
+                        " SELECT COUNT(access_id) FROM access " +
+                        " WHERE role_id = user.role_id AND object_name = page.name)");
     }
 
     /**

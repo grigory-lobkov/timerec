@@ -8,7 +8,7 @@
 	<!-- Bootstrap CSS -->
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
 	
-	<script src="js/common.js"></script>
+	<script src="common.js"></script>
 
 	<title>TimeRec: Service profile</title>
 </head>
@@ -88,9 +88,9 @@
 		  <div class="form-group">
 			<label class="col-lg-5 control-label"></label>
 			<div class="col-lg-8">
-			  <input type="button" class="btn btn-primary" value="Save Changes" onclick="postData()">
+			  <input type="button" class="btn btn-primary" value="Save Changes" onclick="postData(); return false;">
 			  <span></span>
-			  <input type="reset" class="btn btn-default" value="Cancel" onclick="getData()">
+			  <input type="reset" class="btn btn-default" value="Cancel" onclick="getData(); return false;">
 			</div>
 		  </div>
       </div>
@@ -100,46 +100,73 @@
 <script>
 
 API_URL = API_SERVER_URI + "service/";
-newServiceText = "New Service";
+newServiceHeader = "New Service";
 SERVICE_ID = null;
 
 function getData() {
-	alertMessageHide();
+	//alertMessageHide();
 	SERVICE_ID = getUrlVars()["service_id"];
-	if(SERVICE_ID == null) {
+	if( SERVICE_ID == null ) {
 		//errorText = "Parameter service_id is not set";
 		//$(".container").html('<br><br><h4>'+errorText+'</h4>');
 		//alert( errorText );
-		$("#mainHeader").text(newServiceText);
-		$(".container").show();
+		$( "#mainHeader" ).text( newServiceHeader );
+		$( ".container" ).show();
 		return;
 	}
 	var url = API_URL + SERVICE_ID + "?_=" + (new Date()).getTime();
-	$.get( url )
+/*	$.ajax({
+		method: "GET",
+		url: url,
+		cache: false,
+		dataType: "json",
+		statusCode: AJAX_ERRSTATUS_CODE_PRC
+	})
 		.done(function( data ) {
 			$("#serviceId").val(data.service_id);
 			$("#serviceName").val(data.name);
 			$("#serviceCost").val(data.cost);
 			$("#serviceDescription").val(data.description);
 			$("#serviceDuration").val(data.duration);
-			/*$("#clientLimitDay").val(data.limitDay);
-			$("#clientLimitWeek").val(data.limitWeek);
-			$("#clientLimitMonth").val(data.limitMonth);*/
+			$(".container").show();
+		})
+		.fail(AJAX_FAIL_PRC);*/
+/*	$.get( url )
+		.done(function( data ) {
+			$("#serviceId").val(data.service_id);
+			$("#serviceName").val(data.name);
+			$("#serviceCost").val(data.cost);
+			$("#serviceDescription").val(data.description);
+			$("#serviceDuration").val(data.duration);
+			//$("#clientLimitDay").val(data.limitDay);
+			//$("#clientLimitWeek").val(data.limitWeek);
+			//$("#clientLimitMonth").val(data.limitMonth);
 			$(".container").show();
 		})
 		.fail(function() {
 			alertMessage( url, "Cannot load data" );
-		});
+		});*/
+	getAjaxJson({
+		url: url,
+		done: function( data ) {
+			$( "#serviceId" ).val( data.service_id );
+			$( "#serviceName" ).val( data.name );
+			$( "#serviceCost" ).val( data.cost );
+			$( "#serviceDescription" ).val( data.description );
+			$( "#serviceDuration" ).val( data.duration );
+			$( ".container" ).show();
+		}
+	});
 }
 
 function checkData() {
 	alertMessageHide();
 	
-	if(!(0+$("#serviceDuration").val()>0)) {
+	if( !( 0 + $( "#serviceDuration" ).val() > 0 ) ) {
 		alertMessage( "''Default duration'' must be numeric" );
 		return false;
 	}
-	if(!(0+$("#serviceCost").val()>-1)) {
+	if( !( 0 + $( "#serviceCost" ).val() > -1 ) ) {
 		alertMessage( "''Cost'' must be numeric" );
 		return false;
 	}
@@ -147,13 +174,13 @@ function checkData() {
 }
 
 function postData() {
-	alertMessageHide();
-	if(!checkData()) return;
+	//alertMessageHide();
+	if( !checkData() ) return false;
 	SERVICE_ID = getUrlVars()["service_id"];
-	if(SERVICE_ID!=null) SERVICE_ID = $("#serviceId").val();
-	if(SERVICE_ID==='undefined') SERVICE_ID = null;
+	if( SERVICE_ID != null ) SERVICE_ID = $( "#serviceId" ).val();
+	if( SERVICE_ID === 'undefined' ) SERVICE_ID = null;
 	var url = API_URL + (SERVICE_ID == null ? "" : SERVICE_ID)
-	$.ajax({
+	/*$.ajax({
 		method: SERVICE_ID==null ? "POST" : "PUT",
 		url: url,
 		cache: false,
@@ -164,7 +191,8 @@ function postData() {
 			cost: $("#serviceCost").val(),
 			description: $("#serviceDescription").val(),
 			duration: $("#serviceDuration").val(),
-		})
+		}),
+		statusCode: AJAX_ERRSTATUS_CODE_PRC
 	})
 		.done(SERVICE_ID==null ? function( data ) {
 			$("#serviceId").val(data.service_id);
@@ -174,12 +202,29 @@ function postData() {
 		} : function( data ) {
 			alertMessage( "Service saved sucessfully" );
 		})
-		.fail(function() {
-			alertMessage( url, "Cannot save data" );
-		});
+		.fail(AJAX_FAIL_PRC);*/
+	getAjaxJson({
+		method: SERVICE_ID == null ? "POST" : "PUT",
+		url: url,
+		data: JSON.stringify({
+			service_id: SERVICE_ID,
+			name: $( "#serviceName" ).val(),
+			cost: $( "#serviceCost" ).val(),
+			description: $("#serviceDescription").val(),
+			duration: $("#serviceDuration").val(),
+		}),
+		done: SERVICE_ID == null ? function( data ) {
+			$( "#serviceId" ).val( data.service_id );
+			SERVICE_ID = data.service_id;
+			getMenu( false );
+			alertMessage( "Service created sucessfully" );
+		} : function( data ) {
+			alertMessage( "Service saved sucessfully" );
+		}
+	})
 }
 
-document.addEventListener('DOMContentLoaded', function(){ getData() });
+document.addEventListener( 'DOMContentLoaded', function(){ getData() } );
 </script>
 <!-- /CONTENT -->
 

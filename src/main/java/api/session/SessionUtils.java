@@ -1,4 +1,4 @@
-package web.session;
+package api.session;
 
 import storage.IStorage;
 import storage.Passwords;
@@ -27,7 +27,7 @@ public class SessionUtils {
      * @return {@code model.User} if {@code email} and {@code password} is correct
      */
     static public User checkAndGetUser(String email, String password) {
-        if (debugLog) System.out.println("SessionUtils.checkAndGetUser(");
+        if (debugLog) System.out.println("SessionUtils.checkAndGetUser()");
         try {
             User dbUser = storage.select(email);
             if (dbUser != null) {
@@ -59,7 +59,7 @@ public class SessionUtils {
      * @param password
      */
     static void setResponceCookies(HttpServletResponse resp, String email, String password) {
-        if (debugLog) System.out.println("SessionUtils.setResponceCookies(");
+        if (debugLog) System.out.println("SessionUtils.setResponceCookies()");
         Cookie cookie = new Cookie("email", email);
         cookie.setMaxAge(COOKIE_SESSION_LIFETIME);
         resp.addCookie(cookie);

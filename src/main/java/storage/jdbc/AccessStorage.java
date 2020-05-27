@@ -112,7 +112,9 @@ public class AccessStorage implements IStorage<Access> {
     public boolean insert(Access access) throws Exception {
         String resultColumns[] = new String[]{"access_id"};
         PreparedStatement ps = dbConn.prepareStatement(
-                "INSERT INTO access (access_id, role_id, name, tz_id, email, password, image_id, owner_id)" +
+                "INSERT INTO access (access_id, role_id, object_name," +
+                        " all_get, all_put, all_post, all_delete," +
+                        " own_get, own_put, own_post, own_delete)" +
                         "VALUES (seq_access_id.nextval, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", resultColumns);
         try {
             ps.setLong(1, access.role_id);

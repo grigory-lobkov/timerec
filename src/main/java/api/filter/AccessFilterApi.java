@@ -1,10 +1,10 @@
-package web.filter;
+package api.filter;
 
 import storage.IStorage;
 import storage.StorageFactory;
 import model.Access;
 import model.User;
-import web.session.SessionUtils;
+import api.session.SessionUtils;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
@@ -14,8 +14,10 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.*;
 
-@WebFilter
-public class AccessFilter implements Filter {
+//@WebFilter(urlPatterns={"/service/*","/repeat/*","/schedule/*"})
+//@WebFilter
+@WebFilter(urlPatterns="/api/*")
+public class AccessFilterApi implements Filter {
 
     private IStorage<Access> storage = StorageFactory.getAccessInstance();
     private boolean debugLog = true;
@@ -29,15 +31,16 @@ public class AccessFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        if(debugLog) System.out.println("AccessFilter.init()");
+        if(debugLog) System.out.println("AccessFilterApi.init()");
         fillAccTable();
         fillAccAlways();
     }
 
     private void fillAccAlways() {
-        if(debugLog) System.out.println("AccessFilter.fillAccAlways()");
+        if(debugLog) System.out.println("AccessFilterApi.fillAccAlways()");
         accAlways = new HashSet<>();
         List<String> urls = Arrays.asList(
+                "menu", // top menu
                 "login", // manager login servlet
                 "tz" // list of time zones
         );
@@ -45,12 +48,13 @@ public class AccessFilter implements Filter {
     }
 
     private void fillAccTable() {
-        if(debugLog) System.out.println("AccessFilter.fillAccTable()");
+        if(debugLog) System.out.println("AccessFilterApi.fillAccTable()");
         accTable = new Hashtable<>();
         List<Access> list;
         try {
             list = storage.selectAllQuick();
             for (Access a:list) {
+                System.out.println("role_id="+a.role_id+" object="+a.object_name);
                 Map<String, Access> tbl = accTable.get(a.role_id);
                 if(tbl==null) {
                     tbl = new Hashtable<>();
@@ -59,17 +63,18 @@ public class AccessFilter implements Filter {
                 tbl.put(a.object_name, a);
             }
         } catch (Exception e) {
-            System.out.println("AccessFilter.fillAccTable(): Critical error! cannot access storage. "+e.getMessage());
+            System.out.println("AccessFilterApi.fillAccTable(): Critical error! cannot access storage. "+e.getMessage());
             e.printStackTrace();
         }
     }
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        if(debugLog) System.out.println("AccessFilter.doFilter()");
+        if(debugLog) System.out.println("AccessFilterApi.doFilter("+((HttpServletRequest) servletRequest).getServletPath()+")");
 
         HttpServletRequest req = (HttpServletRequest) servletRequest;
-        HttpServletResponse resp = (HttpServletResponse) servletRequest;
+        HttpServletResponse resp = (HttpServletResponse) servletResponse;
+
         HttpSession session = req.getSession();
 
         User user = (User)session.getAttribute("user");
@@ -83,30 +88,38 @@ public class AccessFilter implements Filter {
             filterChain.doFilter(servletRequest, servletResponse);
         } else {
             resp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            if(debugLog) System.out.println("AccessFilterApi.doFilter("+user+") UNAUTHORIZED");
         }
     }
 
 
     private boolean checkRights(HttpServletRequest req, User user) {
-        if(debugLog) System.out.println("AccessFilter.checkRights()");
+        if(debugLog) System.out.println("AccessFilterApi.checkRights("+req.getServletPath()+")");
 
-        String page = req.getContextPath();
         String action = req.getMethod();
+        String page = req.getServletPath();
+        int slash = page.lastIndexOf('/');
+        if(slash>0)
+            page = page.substring(slash+1);
+        //if(debugLog) System.out.println("AccessFilterApi.checkRights action="+action+", page="+page);
 
         if(accAlways.contains(page)) {
             return true; // page is public
         }
 
-        Map<String, Access> roleRights = accTable.get(action);
-        if(roleRights != null) {
-            Access pageAccess = roleRights.get(page);
-            if(pageAccess!=null) {
-                boolean actionAccess = getAllActionAccess(action, pageAccess);
-                if(actionAccess) {
-                    return true; // everybody have access
-                }
-                actionAccess = getOwnActionAccess(action, pageAccess);
-                if(actionAccess) {
+        if(user!=null) {
+            Map<String, Access> roleRights = accTable.get(user.role_id);
+            if (roleRights != null) {
+                //if (debugLog) System.out.println("AccessFilterApi.checkRights roleRights.size=" + roleRights.size());
+                Access pageAccess = roleRights.get(page);
+                if (pageAccess != null) {
+                    //if (debugLog) System.out.println("AccessFilterApi.checkRights pageAccess.id=" + pageAccess.access_id);
+                    boolean actionAccess = getAllActionAccess(action, pageAccess);
+                    if (actionAccess) {
+                        return true; // everybody have access
+                    }
+                    actionAccess = getOwnActionAccess(action, pageAccess);
+                    if (actionAccess) {
 //                    IStorage storage = StorageFactory.getInstance(page);
 //                    long object_id = getRequestObjectId(req);
 //                    if(object_id>=0) {
@@ -119,7 +132,8 @@ public class AccessFilter implements Filter {
 //                            e.printStackTrace();
 //                        }
 //                    }
-                    req.setAttribute("onlyIfOwner", user.user_id);
+                        req.setAttribute("onlyIfOwner", user.user_id);
+                    }
                 }
             }
         }
@@ -132,7 +146,7 @@ public class AccessFilter implements Filter {
 //    }
 
     private boolean getAllActionAccess(String action, Access access) {
-        if(debugLog) System.out.println("AccessFilter.getAllActionAccess("+action+")");
+        if(debugLog) System.out.println("AccessFilterApi.getAllActionAccess("+action+")");
         switch(action) {
             case "GET": return access.all_get;
             case "PUT": return access.all_put;
@@ -143,7 +157,7 @@ public class AccessFilter implements Filter {
     }
 
     private boolean getOwnActionAccess(String action, Access access) {
-        if(debugLog) System.out.println("AccessFilter.getOwnActionAccess("+action+")");
+        if(debugLog) System.out.println("AccessFilterApi.getOwnActionAccess("+action+")");
         switch(action) {
             case "GET": return access.own_get;
             case "PUT": return access.own_put;
@@ -155,7 +169,7 @@ public class AccessFilter implements Filter {
 
     @Override
     public void destroy() {
-        if(debugLog) System.out.println("AccessFilter.destroy()");
+        if(debugLog) System.out.println("AccessFilterApi.destroy()");
         accTable = null;
     }
 

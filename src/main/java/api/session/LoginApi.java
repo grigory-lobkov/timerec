@@ -1,4 +1,4 @@
-package web.session;
+package api.session;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -12,8 +12,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-@WebServlet(urlPatterns = "/login/*")
-public class LoginWeb extends HttpServlet {
+@WebServlet(urlPatterns = "/api/login/*")
+public class LoginApi extends HttpServlet {
 
     //private IStorage<User> storage = StorageFactory.getUserInstance();
     private boolean debugLog = true;
@@ -28,7 +28,7 @@ public class LoginWeb extends HttpServlet {
      */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (debugLog) System.out.println("LoginWeb.doPost()");
+        if (debugLog) System.out.println("LoginApi.doPost()");
 
         Gson gson = (new GsonBuilder()).create();
         BufferedReader br = req.getReader();
@@ -36,11 +36,11 @@ public class LoginWeb extends HttpServlet {
         boolean done1 = false;
 
         while ((line = br.readLine()) != null) {
-            if (debugLog) System.out.println("in: " + line);
+            if (debugLog) System.out.println("LoginApi in: " + line);
             User data = gson.fromJson(line, User.class);
             if (data != null) {
                 try {
-                    if (debugLog) System.out.println("object: " + data);
+                    if (debugLog) System.out.println("LoginApi object: " + data);
 
                     // look for storage
                     User dbUser = SessionUtils.checkAndGetUser(data.email, data.password);
@@ -52,14 +52,14 @@ public class LoginWeb extends HttpServlet {
                         SessionUtils.setResponceCookies(resp, dbUser.email, dbUser.password);
                         SessionUtils.createUserSession(req, dbUser);
                     } else {
-                        jsonStr = "{success:0}";
+                        jsonStr = "{\"success\":\"0\"}";
                         resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
                     }
                     resp.getWriter().println(jsonStr);
-                    if (debugLog) System.out.println("out: " + jsonStr);
+                    if (debugLog) System.out.println("LoginApi out: " + jsonStr);
                     done1 = true;
                 } catch (Exception e) {
-                    if (debugLog) System.out.println("SC_NO_CONTENT");
+                    if (debugLog) System.out.println("LoginApi SC_NO_CONTENT");
                     resp.sendError(HttpServletResponse.SC_NO_CONTENT);
                     done1 = true;
                     e.printStackTrace();
@@ -67,7 +67,7 @@ public class LoginWeb extends HttpServlet {
             }
         }
         if (!done1) {
-            if (debugLog) System.out.println("SC_NOT_FOUND");
+            if (debugLog) System.out.println("LoginApi SC_NOT_FOUND");
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
     }

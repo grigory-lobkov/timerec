@@ -1,4 +1,4 @@
-package web.menu;
+package api.menu;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -12,8 +12,8 @@ import storage.IStorage;
 import storage.StorageFactory;
 import model.Service;
 
-@WebServlet(name="UserMenu", urlPatterns = "/menu")
-public class Menu extends HttpServlet {
+@WebServlet(urlPatterns = "/api/menu")
+public class MenuApi extends HttpServlet {
 
     private IStorage<Service> serviceStorage = StorageFactory.getServiceInstance();
 
