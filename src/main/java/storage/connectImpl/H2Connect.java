@@ -1,6 +1,6 @@
-package storage.jdbc.h2;
+package storage.connectImpl;
 
-import storage.jdbc.IDBConn;
+import storage.IConnect;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -9,7 +9,7 @@ import java.sql.SQLException;
 /**
  * Singleton class, returning one JDBC connection
  */
-public class H2Conn implements IDBConn {
+public class H2Connect implements IConnect {
 
     // JDBC driver name and database URL
     static private final String JDBC_DRIVER = "org.h2.Driver";
@@ -30,7 +30,7 @@ public class H2Conn implements IDBConn {
     /**
      * Constructor of class
      */ {
-        if (debugLog) System.out.println("H2Conn init anonymous block");
+        if (debugLog) System.out.println("H2Connect init anonymous block");
         try {
             // Register JDBC driver
             Class.forName(JDBC_DRIVER);
@@ -39,7 +39,7 @@ public class H2Conn implements IDBConn {
         } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
-        if (debugLog) System.out.println("H2Conn init anonymous block end");
+        if (debugLog) System.out.println("H2Connect init anonymous block end");
     }
 
     /**
@@ -49,7 +49,7 @@ public class H2Conn implements IDBConn {
      * If not - Tomcat will not update WebServlet automatically.
      */
     public void close() {
-        if (debugLog) System.out.println("H2Conn.close()");
+        if (debugLog) System.out.println("H2Connect.close()");
         try {
             if (connection != null && !connection.isClosed()) {
                 connection.close();
@@ -57,7 +57,7 @@ public class H2Conn implements IDBConn {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        if (debugLog) System.out.println("H2Conn.close() end");
+        if (debugLog) System.out.println("H2Connect.close() end");
     }
 
     /**
@@ -68,10 +68,10 @@ public class H2Conn implements IDBConn {
     @Override
     public Connection connection() {
         try {
-            if (debugLog) System.out.println("H2Conn.connection()");
+            if (debugLog) System.out.println("H2Connect.connection()");
             return connection;
         } finally {
-            if (debugLog) System.out.println("H2Conn.connection() end");
+            if (debugLog) System.out.println("H2Connect.connection() end");
         }
     }
 }

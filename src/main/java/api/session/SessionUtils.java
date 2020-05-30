@@ -1,6 +1,6 @@
 package api.session;
 
-import storage.IStorage;
+import storage.ITable;
 import storage.Passwords;
 import storage.StorageFactory;
 import model.User;
@@ -15,7 +15,7 @@ public class SessionUtils {
 
     static public final int COOKIE_SESSION_LIFETIME = 60 * 60 * 24 * 30; // set user and password cookies lifetime in milliseconds
 
-    static private IStorage<User> storage = StorageFactory.getUserInstance();
+    static private ITable<User> storage = StorageFactory.getUserInstance();
     static private boolean debugLog = true;
 
 

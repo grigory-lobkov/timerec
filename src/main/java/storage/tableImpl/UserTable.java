@@ -1,6 +1,6 @@
-package storage.jdbc;
+package storage.tableImpl;
 
-import storage.IStorage;
+import storage.ITable;
 import model.User;
 
 import java.sql.Connection;
@@ -12,14 +12,14 @@ import java.util.List;
 /**
  * JDBC storage access to {@code model.User} objects
  */
-public class UserStorage implements IStorage<User> {
+public class UserTable implements ITable<User> {
 
     /**
      * Connection fast access variable
      */
     Connection dbConn;
 
-    public UserStorage(Connection connection) {
+    public UserTable(Connection connection) {
         dbConn = connection;
     }
 
@@ -209,7 +209,7 @@ public class UserStorage implements IStorage<User> {
 
     @Override
     public boolean checkIsOwner(long object_id, long user_id) throws SQLException {
-        PreparedStatement ps = dbConn.prepareStatement(
+        PreparedStatement ps = connectImpl.prepareStatement(
                 "SELECT * FROM user WHERE user_id = ? AND owner_id = ?");
         ps.setLong(1, object_id);
         ps.setLong(2, user_id);

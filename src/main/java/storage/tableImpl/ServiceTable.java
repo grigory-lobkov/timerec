@@ -1,6 +1,6 @@
-package storage.jdbc;
+package storage.tableImpl;
 
-import storage.IStorage;
+import storage.ITable;
 import model.Service;
 
 import java.sql.Connection;
@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * JDBC storage access to {@code model.Service} objects
  */
-public class ServiceStorage implements IStorage<Service> {
+public class ServiceTable implements ITable<Service> {
 
     /**
      * Connection fast access variable
@@ -20,7 +20,7 @@ public class ServiceStorage implements IStorage<Service> {
     Connection dbConn;
 
 
-    public ServiceStorage(Connection connection) {
+    public ServiceTable(Connection connection) {
         dbConn = connection;
     }
 
@@ -64,7 +64,7 @@ public class ServiceStorage implements IStorage<Service> {
      * @throws Exception on error accessing storage
      */
     public Service select(String filter) throws Exception {
-        throw new RuntimeException("ServiceStorage.select(String filter) not implemented.");
+        throw new RuntimeException("ServiceTable.select(String filter) not implemented.");
     }
 
 
@@ -188,7 +188,7 @@ public class ServiceStorage implements IStorage<Service> {
 
     @Override
     public boolean checkIsOwner(long object_id, long user_id) throws SQLException {
-        PreparedStatement ps = dbConn.prepareStatement(
+        PreparedStatement ps = connectImpl.prepareStatement(
                 "SELECT * FROM service WHERE service_id = ? AND owner_id = ?");
         ps.setLong(1, object_id);
         ps.setLong(2, user_id);

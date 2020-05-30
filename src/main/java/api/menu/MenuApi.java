@@ -8,14 +8,14 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
-import storage.IStorage;
+import storage.ITable;
 import storage.StorageFactory;
 import model.Service;
 
 @WebServlet(urlPatterns = "/api/menu")
 public class MenuApi extends HttpServlet {
 
-    private IStorage<Service> serviceStorage = StorageFactory.getServiceInstance();
+    private ITable<Service> serviceStorage = StorageFactory.getServiceInstance();
 
     /**
      * Returns data to fill user interface main menu

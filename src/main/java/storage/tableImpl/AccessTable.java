@@ -1,6 +1,6 @@
-package storage.jdbc;
+package storage.tableImpl;
 
-import storage.IStorage;
+import storage.ITable;
 import model.Access;
 
 import java.sql.Connection;
@@ -12,14 +12,14 @@ import java.util.List;
 /**
  * JDBC storage access to {@code model.Access} objects
  */
-public class AccessStorage implements IStorage<Access> {
+public class AccessTable implements ITable<Access> {
 
     /**
      * Connection fast access variable
      */
     Connection dbConn;
 
-    public AccessStorage(Connection connection) {
+    public AccessTable(Connection connection) {
         dbConn = connection;
     }
 

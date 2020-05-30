@@ -2,7 +2,7 @@ package storage;
 
 import java.util.List;
 
-public interface IStorage<T> {
+public interface ITable<T> {
 
     /**
      * Get model.* object from storage by {@code id}

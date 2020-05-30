@@ -15,7 +15,7 @@ import java.io.IOException;
 @WebServlet(urlPatterns = "/api/login/*")
 public class LoginApi extends HttpServlet {
 
-    //private IStorage<User> storage = StorageFactory.getUserInstance();
+    //private ITable<User> storage = StorageFactory.getUserInstance();
     private boolean debugLog = true;
 
     /**

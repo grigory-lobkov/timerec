@@ -1,11 +1,11 @@
-package storage.jdbc;
+package storage;
 
 import java.sql.*;
 
 /**
  * Interface for class, returning one JDBC connection
  */
-public interface IDBConn {
+public interface IConnect {
 
     /**
      * Connection to JDBC

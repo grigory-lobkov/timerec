@@ -9,7 +9,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import storage.IStorage;
+import storage.ITable;
 import storage.StorageFactory;
 import model.Service;
 import api.session.SessionUtils;
@@ -40,7 +40,7 @@ import api.session.SessionUtils;
 @WebServlet(urlPatterns = "/api/service/*")
 public class ServiceApi extends HttpServlet {
 
-    private IStorage<Service> storage = StorageFactory.getServiceInstance();
+    private ITable<Service> storage = StorageFactory.getServiceInstance();
     private boolean debugLog = true;
 
     /**

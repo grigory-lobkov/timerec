@@ -1,5 +1,7 @@
 package api;
 
+import storage.CreateStructure;
+
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
@@ -8,7 +10,7 @@ import java.util.Date;
 @WebListener
 public class Initializer implements ServletContextListener {
 
-    ServletContextListener storageInit = new storage.jdbc.CreateStructure();
+    ServletContextListener storageInit = new CreateStructure();
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {

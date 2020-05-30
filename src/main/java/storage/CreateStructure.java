@@ -1,7 +1,4 @@
-package storage.jdbc;
-
-import storage.Passwords;
-import storage.StorageFactory;
+package storage;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;

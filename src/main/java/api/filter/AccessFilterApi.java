@@ -1,6 +1,6 @@
 package api.filter;
 
-import storage.IStorage;
+import storage.ITable;
 import storage.StorageFactory;
 import model.Access;
 import model.User;
@@ -19,7 +19,7 @@ import java.util.*;
 @WebFilter(urlPatterns="/api/*")
 public class AccessFilterApi implements Filter {
 
-    private IStorage<Access> storage = StorageFactory.getAccessInstance();
+    private ITable<Access> storage = StorageFactory.getAccessInstance();
     private boolean debugLog = true;
     /**
      * Map for fast right access
@@ -120,7 +120,7 @@ public class AccessFilterApi implements Filter {
                     }
                     actionAccess = getOwnActionAccess(action, pageAccess);
                     if (actionAccess) {
-//                    IStorage storage = StorageFactory.getInstance(page);
+//                    ITable storage = StorageFactory.getInstance(page);
 //                    long object_id = getRequestObjectId(req);
 //                    if(object_id>=0) {
 //                        try {
