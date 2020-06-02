@@ -25,22 +25,22 @@ public interface ITable<T> {
     /**
      * Set model.* object to storage by {@code id}
      *
-     * @param service updated object
+     * @param object updated object
      * @return true on success
      * @throws Exception on error accessing storage
      */
-    boolean update(T service) throws Exception;
+    boolean update(T object) throws Exception;
 
 
     /**
      * Create new model.* object in storage
      * {@code id} will be update to new value
      *
-     * @param service new object
+     * @param object new object
      * @return true on success
      * @throws Exception on error accessing storage
      */
-    boolean insert(T service) throws Exception;
+    boolean insert(T object) throws Exception;
 
 
     /**

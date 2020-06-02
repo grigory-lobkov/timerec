@@ -10,12 +10,12 @@ import java.util.List;
 
 import storage.ITable;
 import storage.StorageFactory;
-import model.Service;
+import model.ServiceRow;
 
 @WebServlet(urlPatterns = "/api/menu")
 public class MenuApi extends HttpServlet {
 
-    private ITable<Service> serviceStorage = StorageFactory.getServiceInstance();
+    private ITable<ServiceRow> serviceStorage = StorageFactory.getServiceInstance();
 
     /**
      * Returns data to fill user interface main menu
@@ -32,11 +32,11 @@ public class MenuApi extends HttpServlet {
         String jsonServices = "";
         try {
             // query storage
-            List<Service> services = serviceStorage.selectAllQuick();
+            List<ServiceRow> services = serviceStorage.selectAllQuick();
 
             // self generate simple json
             StringBuilder sb = new StringBuilder();
-            for (Service s : services) {
+            for (ServiceRow s : services) {
                 if (sb.length() > 0) sb.append(',');
                 sb.append("{\"service_id\":\"" + s.service_id + "\",\"name\":\"" + s.name.replace("\\", "\\\\") + "\"}");
             }

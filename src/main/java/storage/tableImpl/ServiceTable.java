@@ -1,7 +1,8 @@
 package storage.tableImpl;
 
+import model.ServiceRow;
+import storage.IConnect;
 import storage.ITable;
-import model.Service;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,37 +11,37 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * JDBC storage access to {@code model.Service} objects
+ * JDBC storage access to {@code model.ServiceRow} objects
  */
-public class ServiceTable implements ITable<Service> {
+public class ServiceTable implements ITable<ServiceRow> {
 
     /**
      * Connection fast access variable
      */
-    Connection dbConn;
+    IConnect dbConn;
 
 
-    public ServiceTable(Connection connection) {
+    public ServiceTable(IConnect connection) {
         dbConn = connection;
     }
 
 
     /**
-     * Get {@code model.Service} object from storage by {@code service_id}
+     * Get {@code model.ServiceRow} object from storage by {@code service_id}
      *
      * @param object_id object identifier
-     * @return {@code model.Service} object
+     * @return {@code model.ServiceRow} object
      * @throws Exception on error accessing storage
      */
-    public Service select(long object_id) throws Exception {
-        PreparedStatement ps = dbConn.prepareStatement(
+    public ServiceRow select(long object_id) throws Exception {
+        PreparedStatement ps = dbConn.connection().prepareStatement(
                 "SELECT * FROM service WHERE service_id = ?");
         ps.setLong(1, object_id);
         ResultSet rs = ps.executeQuery();
         try {
             if (!rs.next()) return null;
 
-            Service r = new Service();
+            ServiceRow r = new ServiceRow();
             r.service_id = rs.getLong("service_id");
             r.name = rs.getString("name");
             r.description = rs.getString("description");
@@ -57,26 +58,26 @@ public class ServiceTable implements ITable<Service> {
 
 
     /**
-     * Get {@code model.Service} object from storage by {@code filter}
+     * Get {@code model.ServiceRow} object from storage by {@code filter}
      *
      * @param filter
-     * @return {@code model.Service} object
+     * @return {@code model.ServiceRow} object
      * @throws Exception on error accessing storage
      */
-    public Service select(String filter) throws Exception {
+    public ServiceRow select(String filter) throws Exception {
         throw new RuntimeException("ServiceTable.select(String filter) not implemented.");
     }
 
 
     /**
-     * Set {@code model.Service} object to storage by {@code service.service_id}
+     * Set {@code model.ServiceRow} object to storage by {@code service.service_id}
      *
      * @param service updated object
      * @return {@code true} on success
      * @throws Exception on error accessing storage
      */
-    public boolean update(Service service) throws Exception {
-        PreparedStatement ps = dbConn.prepareStatement(
+    public boolean update(ServiceRow service) throws Exception {
+        PreparedStatement ps = dbConn.connection().prepareStatement(
                 "UPDATE service SET name = ?, description = ?, image_id = ?, duration = ?, cost = ?, owner_id = ?" +
                         " WHERE service_id = ?");
         try {
@@ -97,16 +98,16 @@ public class ServiceTable implements ITable<Service> {
 
 
     /**
-     * Create new {@code model.Service} object in storage
+     * Create new {@code model.ServiceRow} object in storage
      * {@code service.service_id} will be update to new value
      *
      * @param service new object
      * @return {@code true} on success
      * @throws Exception on error accessing storage
      */
-    public boolean insert(Service service) throws Exception {
+    public boolean insert(ServiceRow service) throws Exception {
         String resultColumns[] = new String[]{"service_id"};
-        PreparedStatement ps = dbConn.prepareStatement(
+        PreparedStatement ps = dbConn.connection().prepareStatement(
                 "INSERT INTO service (service_id, name, description, image_id, duration, cost, owner_id)" +
                         "VALUES (seq_service_id.nextval, ?, ?, ?, ?, ?, ?)", resultColumns);
         try {
@@ -132,7 +133,7 @@ public class ServiceTable implements ITable<Service> {
 
 
     /**
-     * Delete {@code model.Service} object from storage by {@code service_id}
+     * Delete {@code model.ServiceRow} object from storage by {@code service_id}
      *
      * @param object_id
      * @return {@code true} on success
@@ -140,7 +141,7 @@ public class ServiceTable implements ITable<Service> {
      */
     @Override
     public boolean delete(long object_id) throws Exception {
-        PreparedStatement ps = dbConn.prepareStatement(
+        PreparedStatement ps = dbConn.connection().prepareStatement(
                 "DELETE FROM service WHERE service_id = ?");
         ps.setLong(1, object_id);
         try {
@@ -155,18 +156,18 @@ public class ServiceTable implements ITable<Service> {
     /**
      * Reads only {@code service_id} and {@code name} from list of services
      *
-     * @return list of shortened {@code model.Service} objects
+     * @return list of shortened {@code model.ServiceRow} objects
      * @throws Exception
      */
     @Override
-    public List<Service> selectAllQuick() throws Exception {
-        PreparedStatement ps = dbConn.prepareStatement(
+    public List<ServiceRow> selectAllQuick() throws Exception {
+        PreparedStatement ps = dbConn.connection().prepareStatement(
                 "SELECT service_id, name FROM service ORDER BY name");
         ResultSet rs = ps.executeQuery();
-        List<Service> list = new ArrayList<Service>();
+        List<ServiceRow> list = new ArrayList<ServiceRow>();
         try {
             while (rs.next()) {
-                Service r = new Service();
+                ServiceRow r = new ServiceRow();
                 r.service_id = rs.getLong("service_id");
                 r.name = rs.getString("name");
                 list.add(r);
@@ -180,7 +181,7 @@ public class ServiceTable implements ITable<Service> {
 
 
     /*
-     * Check model.Service object {@code object_id} is owned by {@code user_id}
+     * Check model.ServiceRow object {@code object_id} is owned by {@code user_id}
      *
      * @param object_id object to check
      * @param user_id user to check

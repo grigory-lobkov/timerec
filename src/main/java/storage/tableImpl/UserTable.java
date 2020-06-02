@@ -1,7 +1,8 @@
 package storage.tableImpl;
 
+import model.UserRow;
+import storage.IConnect;
 import storage.ITable;
-import model.User;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,36 +11,36 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * JDBC storage access to {@code model.User} objects
+ * JDBC storage access to {@code model.UserRow} objects
  */
-public class UserTable implements ITable<User> {
+public class UserTable implements ITable<UserRow> {
 
     /**
      * Connection fast access variable
      */
-    Connection dbConn;
+    IConnect dbConn;
 
-    public UserTable(Connection connection) {
+    public UserTable(IConnect connection) {
         dbConn = connection;
     }
 
 
     /**
-     * Get {@code model.User} object from storage by {@code user_id}
+     * Get {@code model.UserRow} object from storage by {@code user_id}
      *
      * @param object_id object identifier
-     * @return {@code model.User} object
+     * @return {@code model.UserRow} object
      * @throws Exception on error accessing storage
      */
-    public User select(long object_id) throws Exception {
-        PreparedStatement ps = dbConn.prepareStatement(
+    public UserRow select(long object_id) throws Exception {
+        PreparedStatement ps = dbConn.connection().prepareStatement(
                 "SELECT * FROM user WHERE user_id = ?");
         ps.setLong(1, object_id);
         ResultSet rs = ps.executeQuery();
         try {
             if (!rs.next()) return null;
 
-            User r = new User();
+            UserRow r = new UserRow();
             r.user_id = rs.getLong("user_id");
             r.role_id = rs.getLong("role_id");
             r.name = rs.getString("name");
@@ -57,21 +58,21 @@ public class UserTable implements ITable<User> {
 
 
     /**
-     * Get {@code model.User} object from storage by {@code email}
+     * Get {@code model.UserRow} object from storage by {@code email}
      *
      * @param filter object
-     * @return {@code model.User} object
+     * @return {@code model.UserRow} object
      * @throws Exception on error accessing storage
      */
-    public User select(String filter) throws Exception {
-        PreparedStatement ps = dbConn.prepareStatement(
+    public UserRow select(String filter) throws Exception {
+        PreparedStatement ps = dbConn.connection().prepareStatement(
                 "SELECT * FROM user WHERE email = ?");
         ps.setString(1, filter);
         ResultSet rs = ps.executeQuery();
         try {
             if (!rs.next()) return null;
 
-            User r = new User();
+            UserRow r = new UserRow();
             r.user_id = rs.getLong("user_id");
             r.role_id = rs.getLong("role_id");
             r.name = rs.getString("name");
@@ -89,14 +90,14 @@ public class UserTable implements ITable<User> {
 
 
     /**
-     * Set {@code model.User} object to storage by {@code user.user_id}
+     * Set {@code model.UserRow} object to storage by {@code user.user_id}
      *
      * @param user updated object
      * @return {@code true} on success
      * @throws Exception on error accessing storage
      */
-    public boolean update(User user) throws Exception {
-        PreparedStatement ps = dbConn.prepareStatement(
+    public boolean update(UserRow user) throws Exception {
+        PreparedStatement ps = dbConn.connection().prepareStatement(
                 "UPDATE user SET role_id = ?, name = ?, tz_id = ?, email = ?, password = ?, image_id = ?, owner_id = ?" +
                         " WHERE user_id = ?");
         try {
@@ -118,16 +119,16 @@ public class UserTable implements ITable<User> {
 
 
     /**
-     * Create new {@code model.User} object in storage
+     * Create new {@code model.UserRow} object in storage
      * {@code user.user_id} will be update to new value
      *
      * @param user new object
      * @return {@code true} on success
      * @throws Exception on error accessing storage
      */
-    public boolean insert(User user) throws Exception {
+    public boolean insert(UserRow user) throws Exception {
         String resultColumns[] = new String[]{"user_id"};
-        PreparedStatement ps = dbConn.prepareStatement(
+        PreparedStatement ps = dbConn.connection().prepareStatement(
                 "INSERT INTO user (user_id, role_id, name, tz_id, email, password, image_id, owner_id)" +
                         "VALUES (seq_user_id.nextval, ?, ?, ?, ?, ?, ?, ?)", resultColumns);
         try {
@@ -153,7 +154,7 @@ public class UserTable implements ITable<User> {
     }
 
     /**
-     * Delete {@code model.User} object from storage by {@code user_id}
+     * Delete {@code model.UserRow} object from storage by {@code user_id}
      *
      * @param object_id
      * @return {@code true} on success
@@ -161,7 +162,7 @@ public class UserTable implements ITable<User> {
      */
     @Override
     public boolean delete(long object_id) throws Exception {
-        PreparedStatement ps = dbConn.prepareStatement(
+        PreparedStatement ps = dbConn.connection().prepareStatement(
                 "DELETE FROM user WHERE user_id = ?");
         ps.setLong(1, object_id);
         try {
@@ -176,18 +177,18 @@ public class UserTable implements ITable<User> {
     /**
      * Reads only {@code user_id} and {@code name} from list of users
      *
-     * @return list of shortened {@code model.User} objects
+     * @return list of shortened {@code model.UserRow} objects
      * @throws Exception
      */
     @Override
-    public List<User> selectAllQuick() throws Exception {
-        PreparedStatement ps = dbConn.prepareStatement(
+    public List<UserRow> selectAllQuick() throws Exception {
+        PreparedStatement ps = dbConn.connection().prepareStatement(
                 "SELECT user_id, name FROM user ORDER BY name");
         ResultSet rs = ps.executeQuery();
-        List<User> list = new ArrayList<User>();
+        List<UserRow> list = new ArrayList<UserRow>();
         try {
             while (rs.next()) {
-                User r = new User();
+                UserRow r = new UserRow();
                 r.user_id = rs.getLong("user_id");
                 r.name = rs.getString("name");
                 list.add(r);
@@ -201,7 +202,7 @@ public class UserTable implements ITable<User> {
 
 
     /*
-     * Check model.User object {@code object_id} is owned by {@code user_id}
+     * Check model.UserRow object {@code object_id} is owned by {@code user_id}
      *
      * @param object_id object to check
      * @param user_id user to check

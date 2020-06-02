@@ -1,6 +1,6 @@
 package storage;
 
-import java.sql.*;
+import java.sql.Connection;
 
 /**
  * Interface for class, returning one JDBC connection

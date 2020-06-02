@@ -1,9 +1,9 @@
 package api.filter;
 
+import model.AccessRow;
+import model.UserRow;
 import storage.ITable;
 import storage.StorageFactory;
-import model.Access;
-import model.User;
 import api.session.SessionUtils;
 
 import javax.servlet.*;
@@ -16,17 +16,17 @@ import java.util.*;
 
 //@WebFilter(urlPatterns={"/service/*","/repeat/*","/schedule/*"})
 //@WebFilter
-@WebFilter(urlPatterns="/api/*")
+@WebFilter(urlPatterns="/api/**")
 public class AccessFilterApi implements Filter {
 
-    private ITable<Access> storage = StorageFactory.getAccessInstance();
+    private ITable<AccessRow> storage = StorageFactory.getAccessInstance();
     private boolean debugLog = true;
     /**
      * Map for fast right access
      * Long = role_id - user role
      * String = object_name - current page
      */
-    private Map<Long, Map<String,Access>> accTable;
+    private Map<Long, Map<String, AccessRow>> accTable;
     private Set<String> accAlways;
 
     @Override
@@ -50,12 +50,12 @@ public class AccessFilterApi implements Filter {
     private void fillAccTable() {
         if(debugLog) System.out.println("AccessFilterApi.fillAccTable()");
         accTable = new Hashtable<>();
-        List<Access> list;
+        List<AccessRow> list;
         try {
             list = storage.selectAllQuick();
-            for (Access a:list) {
+            for (AccessRow a:list) {
                 System.out.println("role_id="+a.role_id+" object="+a.object_name);
-                Map<String, Access> tbl = accTable.get(a.role_id);
+                Map<String, AccessRow> tbl = accTable.get(a.role_id);
                 if(tbl==null) {
                     tbl = new Hashtable<>();
                     accTable.put(a.role_id, tbl);
@@ -77,7 +77,7 @@ public class AccessFilterApi implements Filter {
 
         HttpSession session = req.getSession();
 
-        User user = (User)session.getAttribute("user");
+        UserRow user = (UserRow)session.getAttribute("user");
         if(user==null) {
             user = SessionUtils.createUserSessionCook(req);
         }
@@ -93,7 +93,7 @@ public class AccessFilterApi implements Filter {
     }
 
 
-    private boolean checkRights(HttpServletRequest req, User user) {
+    private boolean checkRights(HttpServletRequest req, UserRow user) {
         if(debugLog) System.out.println("AccessFilterApi.checkRights("+req.getServletPath()+")");
 
         String action = req.getMethod();
@@ -108,15 +108,15 @@ public class AccessFilterApi implements Filter {
         }
 
         if(user!=null) {
-            Map<String, Access> roleRights = accTable.get(user.role_id);
+            Map<String, AccessRow> roleRights = accTable.get(user.role_id);
             if (roleRights != null) {
                 //if (debugLog) System.out.println("AccessFilterApi.checkRights roleRights.size=" + roleRights.size());
-                Access pageAccess = roleRights.get(page);
+                AccessRow pageAccess = roleRights.get(page);
                 if (pageAccess != null) {
                     //if (debugLog) System.out.println("AccessFilterApi.checkRights pageAccess.id=" + pageAccess.access_id);
                     boolean actionAccess = getAllActionAccess(action, pageAccess);
                     if (actionAccess) {
-                        return true; // everybody have access
+                        return true; // have access to all objects
                     }
                     actionAccess = getOwnActionAccess(action, pageAccess);
                     if (actionAccess) {
@@ -145,7 +145,7 @@ public class AccessFilterApi implements Filter {
 //        request = new RequestWrapper(req);
 //    }
 
-    private boolean getAllActionAccess(String action, Access access) {
+    private boolean getAllActionAccess(String action, AccessRow access) {
         if(debugLog) System.out.println("AccessFilterApi.getAllActionAccess("+action+")");
         switch(action) {
             case "GET": return access.all_get;
@@ -156,7 +156,7 @@ public class AccessFilterApi implements Filter {
         return false;
     }
 
-    private boolean getOwnActionAccess(String action, Access access) {
+    private boolean getOwnActionAccess(String action, AccessRow access) {
         if(debugLog) System.out.println("AccessFilterApi.getOwnActionAccess("+action+")");
         switch(action) {
             case "GET": return access.own_get;

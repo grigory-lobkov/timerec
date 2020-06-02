@@ -2,7 +2,7 @@ package api.session;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import model.User;
+import model.UserRow;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -15,7 +15,7 @@ import java.io.IOException;
 @WebServlet(urlPatterns = "/api/login/*")
 public class LoginApi extends HttpServlet {
 
-    //private ITable<User> storage = StorageFactory.getUserInstance();
+    //private ITable<UserRow> storage = StorageFactory.getUserInstance();
     private boolean debugLog = true;
 
     /**
@@ -37,13 +37,13 @@ public class LoginApi extends HttpServlet {
 
         while ((line = br.readLine()) != null) {
             if (debugLog) System.out.println("LoginApi in: " + line);
-            User data = gson.fromJson(line, User.class);
+            UserRow data = gson.fromJson(line, UserRow.class);
             if (data != null) {
                 try {
                     if (debugLog) System.out.println("LoginApi object: " + data);
 
                     // look for storage
-                    User dbUser = SessionUtils.checkAndGetUser(data.email, data.password);
+                    UserRow dbUser = SessionUtils.checkAndGetUser(data.email, data.password);
                     String jsonStr;
 
                     if (dbUser != null) {

@@ -1,10 +1,11 @@
 package storage;
 
+import model.AccessRow;
+import model.RepeatRow;
+import model.ServiceRow;
 import storage.tableImpl.*;
 import storage.connectImpl.H2Connect;
-import model.Access;
-import model.Service;
-import model.User;
+import model.UserRow;
 
 import java.sql.Connection;
 
@@ -14,62 +15,78 @@ import java.sql.Connection;
 public class StorageFactory {
 
     public static IConnect dbConn = new H2Connect();
-    public static Connection connection = dbConn.connection();
 
 
-    static private volatile ITable<Service> serviceInstance = null;
+    static private volatile ITable<ServiceRow> serviceInstance = null;
 
     /**
      * Generate Service storage actions
      *
      * @return singleton instance
      */
-    static public ITable<Service> getServiceInstance() {
+    static public ITable<ServiceRow> getServiceInstance() {
         if (serviceInstance == null)
             synchronized (StorageFactory.class) {
                 if (serviceInstance == null) {
-                    serviceInstance = new ServiceTable(connection);
+                    serviceInstance = new ServiceTable(dbConn);
                 }
             }
         return serviceInstance;
     }
 
 
-    static private volatile ITable<User> userInstance = null;
+    static private volatile ITable<UserRow> userInstance = null;
 
     /**
      * Generate User storage actions
      *
      * @return singleton instance
      */
-    static public ITable<User> getUserInstance() {
+    static public ITable<UserRow> getUserInstance() {
         if (userInstance == null)
             synchronized (StorageFactory.class) {
                 if (userInstance == null) {
-                    userInstance = new UserTable(connection);
+                    userInstance = new UserTable(dbConn);
                 }
             }
         return userInstance;
     }
 
 
-    static private volatile ITable<Access> accessInstance = null;
+    static private volatile ITable<AccessRow> accessInstance = null;
 
     /**
      * Generate Access storage actions
      *
      * @return singleton instance
      */
-    public static ITable<Access> getAccessInstance() {
+    public static ITable<AccessRow> getAccessInstance() {
         if (accessInstance == null)
             synchronized (StorageFactory.class) {
                 if (accessInstance == null) {
-                    accessInstance = new AccessTable(connection);
+                    accessInstance = new AccessTable(dbConn);
                 }
             }
         return accessInstance;
     }
 
+
+    static private volatile ITable<RepeatRow> repeatInstance = null;
+
+    /**
+     * Generate Access storage actions
+     *
+     * @return singleton instance
+     */
+    public static ITable<RepeatRow> getRepeatInstance() {
+        if (repeatInstance == null)
+            synchronized (StorageFactory.class) {
+                if (repeatInstance == null) {
+                    repeatInstance = new RepeatTable(dbConn);
+                }
+            }
+        return repeatInstance;
+    }
 
     /**
      * Generate parameter-based storage {@code ITable} object
@@ -85,4 +102,5 @@ public class StorageFactory {
         }
         return null;
     }
+
 }

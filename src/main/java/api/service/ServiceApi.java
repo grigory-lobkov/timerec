@@ -9,9 +9,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import model.ServiceRow;
 import storage.ITable;
 import storage.StorageFactory;
-import model.Service;
 import api.session.SessionUtils;
 
 /**
@@ -20,7 +20,7 @@ import api.session.SessionUtils;
  * RESTful: https://www.restapitutorial.com/lessons/httpmethods.html
  *
  * POST - Create
- * 201 (Created), 'Location' header with link to /customers/{id} containing new ID.
+ * 201 (Created), 'Location' header with link to /api/service/{id} containing new ID.
  * 404 (Not Found),
  * -409 (Conflict) if resource already exists.
  *
@@ -40,7 +40,7 @@ import api.session.SessionUtils;
 @WebServlet(urlPatterns = "/api/service/*")
 public class ServiceApi extends HttpServlet {
 
-    private ITable<Service> storage = StorageFactory.getServiceInstance();
+    private ITable<ServiceRow> storage = StorageFactory.getServiceInstance();
     private boolean debugLog = true;
 
     /**
@@ -69,7 +69,7 @@ public class ServiceApi extends HttpServlet {
 
         try {
             // query storage
-            Service data = storage.select(service_id);
+            ServiceRow data = storage.select(service_id);
 
             if (data == null) {
                 if (debugLog) System.out.println("SC_NOT_FOUND");
@@ -115,7 +115,7 @@ public class ServiceApi extends HttpServlet {
 
         while ((line = br.readLine()) != null) {
             if (debugLog) System.out.println("in: " + line);
-            Service data = gson.fromJson(line, Service.class);
+            ServiceRow data = gson.fromJson(line, ServiceRow.class);
             if (data != null) {
                 try {
                     if (debugLog) System.out.println("object: " + data);
@@ -167,13 +167,13 @@ public class ServiceApi extends HttpServlet {
 
         while ((line = rr.readLine()) != null) {
             if (debugLog) System.out.println(line);
-            Service data = gson.fromJson(line, Service.class);
+            ServiceRow data = gson.fromJson(line, ServiceRow.class);
             if (data != null) {
                 try {
                     // check owner rights
                     Long user_id = (Long) req.getAttribute("onlyIfOwner");
                     if (user_id != null) {
-                        Service dbData = storage.select(data.service_id);
+                        ServiceRow dbData = storage.select(data.service_id);
                         if (!SessionUtils.checkOwner(resp, user_id, dbData.owner_id))
                             return;
                     }
@@ -226,7 +226,7 @@ public class ServiceApi extends HttpServlet {
                 // check owner rights
                 Long user_id = (Long) req.getAttribute("onlyIfOwner");
                 if (user_id != null) {
-                    Service dbData = storage.select(service_id);
+                    ServiceRow dbData = storage.select(service_id);
                     if (!SessionUtils.checkOwner(resp, user_id, dbData.owner_id))
                         return;
                 }

@@ -1,9 +1,9 @@
 package storage.connectImpl;
 
+import org.h2.jdbcx.JdbcConnectionPool;
 import storage.IConnect;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 /**
@@ -25,7 +25,7 @@ public class H2Connect implements IConnect {
     /**
      * The main property of this class - connection to JDBC
      */
-    private Connection connection = null;
+    private JdbcConnectionPool connection = null;
 
     /**
      * Constructor of class
@@ -35,8 +35,8 @@ public class H2Connect implements IConnect {
             // Register JDBC driver
             Class.forName(JDBC_DRIVER);
             // Open a connection
-            connection = DriverManager.getConnection(JDBC_URL, DB_USER, DB_PASSWORD);
-        } catch (SQLException | ClassNotFoundException e) {
+            connection = JdbcConnectionPool.create(JDBC_URL, DB_USER, DB_PASSWORD);
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
         if (debugLog) System.out.println("H2Connect init anonymous block end");
@@ -50,12 +50,8 @@ public class H2Connect implements IConnect {
      */
     public void close() {
         if (debugLog) System.out.println("H2Connect.close()");
-        try {
-            if (connection != null && !connection.isClosed()) {
-                connection.close();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if (connection != null) {
+            connection.dispose();
         }
         if (debugLog) System.out.println("H2Connect.close() end");
     }
@@ -69,9 +65,12 @@ public class H2Connect implements IConnect {
     public Connection connection() {
         try {
             if (debugLog) System.out.println("H2Connect.connection()");
-            return connection;
+            return connection.getConnection();
+        } catch (SQLException e) {
+            e.printStackTrace();
         } finally {
             if (debugLog) System.out.println("H2Connect.connection() end");
         }
+        return null;
     }
 }

@@ -18,7 +18,7 @@ public class CreateStructure implements ServletContextListener {
         boolean result = true;
         try {
             DatabaseMetaData meta = StorageFactory.connection.getMetaData();
-            ResultSet res = meta.getTables("", null, "ACCESS", new String[]{"TABLE"});
+            ResultSet res = meta.getTables("", null, "REPEAT", new String[]{"TABLE"});
             while (res.next())
                 result = false;
             res.close();
@@ -146,49 +146,11 @@ class Updater {
                         " SELECT 12*60, 'Anadyr, Petropavlovsk-Kamchatsky' FROM dual" +
                         ")WHERE (name) NOT IN (SELECT name FROM tz)");
 
-        exec("seq_service_id drop", "DROP SEQUENCE IF EXISTS seq_service_id");
-        exec("service drop", "DROP TABLE IF EXISTS service");
-        exec("seq_service_id",
-                "CREATE SEQUENCE IF NOT EXISTS seq_service_id");
-
-        exec("service",
-                "CREATE TABLE IF NOT EXISTS service " +
-                        "(service_id BIGINT PRIMARY KEY," +
-                        " name VARCHAR(1000)," +
-                        " description CLOB," +
-                        " image_id BIGINT," +
-                        " duration INT," +
-                        " cost DECIMAL," +
-                        " owner_id BIGINT)");
-
-
         userAndRights();
+
+        serviceSchedule();
+
 /*
-        exec("repeat",
-                "CREATE TABLE IF NOT EXISTS repeat " +
-                        "(repeat_id BIGINT PRIMARY KEY, " +
-                        " service_id BIGINT," +
-                        " dow INTEGER," +
-                        " duration INTEGER," +
-                        " time_from TIME," +
-                        " time_to TIME," +
-                        " date_from DATE," +
-                        " date_to DATE," +
-                        " owner_id BIGINT)");
-
-        exec("schedule",
-                "CREATE TABLE IF NOT EXISTS schedule " +
-                        "(schedule_id BIGINT PRIMARY KEY, " +
-                        " repeat_id BIGINT," +
-                        " client_id BIGINT," +
-                        " date_from DATE," +
-                        " duration INTEGER," +
-                        " title  VARCHAR2(4000)," +
-                        " height INTEGER," +
-                        " description CLOB," +
-                        " bitmap BLOB," +
-                        " owner_id BIGINT)");
-
         exec("client",
                 "CREATE TABLE IF NOT EXISTS client " +
                         "(client_id BIGINT PRIMARY KEY, " +
@@ -298,6 +260,57 @@ class Updater {
                         "WHERE email = '"+ADMIN_EMAIL+"' AND 0 = (" +
                         " SELECT COUNT(access_id) FROM access " +
                         " WHERE role_id = user.role_id AND object_name = page.name)");
+    }
+
+    /**
+     * SERVICE, REPEAT, SCHEDULE tables creation
+     *
+     * @throws SQLException
+     */
+    private static void serviceSchedule() throws SQLException {
+
+        exec("seq_service_id drop", "DROP SEQUENCE IF EXISTS seq_service_id");
+        exec("service drop", "DROP TABLE IF EXISTS service");
+        exec("seq_service_id",
+                "CREATE SEQUENCE IF NOT EXISTS seq_service_id");
+
+        exec("service",
+                "CREATE TABLE IF NOT EXISTS service " +
+                        "(service_id BIGINT PRIMARY KEY," +
+                        " name VARCHAR(1000)," +
+                        " description CLOB," +
+                        " image_id BIGINT," +
+                        " duration INT," +
+                        " cost DECIMAL," +
+                        " owner_id BIGINT)");
+
+        exec("seq_repeat_id drop", "DROP SEQUENCE IF EXISTS seq_repeat_id");
+        exec("repeat drop", "DROP TABLE IF EXISTS repeat");
+        exec("seq_repeat_id",
+                "CREATE SEQUENCE IF NOT EXISTS seq_repeat_id");
+
+        exec("repeat",
+                "CREATE TABLE IF NOT EXISTS repeat " +
+                        "(repeat_id BIGINT PRIMARY KEY, " +
+                        " service_id BIGINT," +
+                        " dow INTEGER," +
+                        " duration INTEGER," +
+                        " time_from TIME," +
+                        " time_to TIME)");
+
+        /*exec("schedule",
+                "CREATE TABLE IF NOT EXISTS schedule " +
+                        "(schedule_id BIGINT PRIMARY KEY, " +
+                        " repeat_id BIGINT," +
+                        " client_id BIGINT," +
+                        " date_from DATE," +
+                        " duration INTEGER," +
+                        " title  VARCHAR2(4000)," +
+                        " height INTEGER," +
+                        " description CLOB," +
+                        " bitmap BLOB," +
+                        " owner_id BIGINT)");*/
+
     }
 
     /**

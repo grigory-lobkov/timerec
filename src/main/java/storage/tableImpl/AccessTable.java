@@ -1,7 +1,8 @@
 package storage.tableImpl;
 
+import storage.IConnect;
 import storage.ITable;
-import model.Access;
+import model.AccessRow;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,35 +11,35 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * JDBC storage access to {@code model.Access} objects
+ * JDBC storage access to {@code model.AccessRow} objects
  */
-public class AccessTable implements ITable<Access> {
+public class AccessTable implements ITable<AccessRow> {
 
     /**
      * Connection fast access variable
      */
-    Connection dbConn;
+    IConnect dbConn;
 
-    public AccessTable(Connection connection) {
+    public AccessTable(IConnect connection) {
         dbConn = connection;
     }
 
     /**
-     * Get {@code model.Access} object from storage by {@code access_id}
+     * Get {@code model.AccessRow} object from storage by {@code access_id}
      *
      * @param object_id object identifier
-     * @return {@code model.Access} object
+     * @return {@code model.AccessRow} object
      * @throws Exception on error accessing storage
      */
-    public Access select(long object_id) throws Exception {
-        PreparedStatement ps = dbConn.prepareStatement(
+    public AccessRow select(long object_id) throws Exception {
+        PreparedStatement ps = dbConn.connection().prepareStatement(
                 "SELECT * FROM access WHERE access_id = ?");
         ps.setLong(1, object_id);
         ResultSet rs = ps.executeQuery();
         try {
             if (!rs.next()) return null;
 
-            Access r = new Access();
+            AccessRow r = new AccessRow();
             r.access_id = rs.getLong("access_id");
             r.role_id = rs.getLong("role_id");
             r.object_name = rs.getString("object_name");
@@ -58,25 +59,25 @@ public class AccessTable implements ITable<Access> {
     }
 
     /**
-     * Get {@code model.Access} object from storage by {@code email}
+     * Get {@code model.AccessRow} object from storage by {@code email}
      *
      * @param filter object
-     * @return {@code model.Access} object
+     * @return {@code model.AccessRow} object
      * @throws Exception on error accessing storage
      */
-    public Access select(String filter) throws Exception {
+    public AccessRow select(String filter) throws Exception {
         return null;
     }
 
     /**
-     * Set {@code model.Access} object to storage by {@code access.access_id}
+     * Set {@code model.AccessRow} object to storage by {@code access.access_id}
      *
      * @param access updated object
      * @return {@code true} on success
      * @throws Exception on error accessing storage
      */
-    public boolean update(Access access) throws Exception {
-        PreparedStatement ps = dbConn.prepareStatement(
+    public boolean update(AccessRow access) throws Exception {
+        PreparedStatement ps = dbConn.connection().prepareStatement(
                 "UPDATE access SET role_id = ?, object_name = ?," +
                         " all_get = ?, all_put = ?, all_post = ?, all_delete = ?," +
                         " own_get = ?, own_put = ?, own_post = ?, own_delete = ?" +
@@ -102,16 +103,16 @@ public class AccessTable implements ITable<Access> {
     }
 
     /**
-     * Create new {@code model.Access} object in storage
+     * Create new {@code model.AccessRow} object in storage
      * {@code access.access_id} will be update to new value
      *
      * @param access new object
      * @return {@code true} on success
      * @throws Exception on error accessing storage
      */
-    public boolean insert(Access access) throws Exception {
+    public boolean insert(AccessRow access) throws Exception {
         String resultColumns[] = new String[]{"access_id"};
-        PreparedStatement ps = dbConn.prepareStatement(
+        PreparedStatement ps = dbConn.connection().prepareStatement(
                 "INSERT INTO access (access_id, role_id, object_name," +
                         " all_get, all_put, all_post, all_delete," +
                         " own_get, own_put, own_post, own_delete)" +
@@ -142,7 +143,7 @@ public class AccessTable implements ITable<Access> {
     }
 
     /**
-     * Delete {@code model.Access} object from storage by {@code access_id}
+     * Delete {@code model.AccessRow} object from storage by {@code access_id}
      *
      * @param object_id
      * @return {@code true} on success
@@ -150,7 +151,7 @@ public class AccessTable implements ITable<Access> {
      */
     @Override
     public boolean delete(long object_id) throws Exception {
-        PreparedStatement ps = dbConn.prepareStatement(
+        PreparedStatement ps = dbConn.connection().prepareStatement(
                 "DELETE FROM access WHERE access_id = ?");
         ps.setLong(1, object_id);
         try {
@@ -164,18 +165,18 @@ public class AccessTable implements ITable<Access> {
     /**
      * Reads all table
      *
-     * @return list of {@code model.Access} objects
+     * @return list of {@code model.AccessRow} objects
      * @throws Exception
      */
     @Override
-    public List<Access> selectAllQuick() throws Exception {
-        PreparedStatement ps = dbConn.prepareStatement(
+    public List<AccessRow> selectAllQuick() throws Exception {
+        PreparedStatement ps = dbConn.connection().prepareStatement(
                 "SELECT * FROM access");
         ResultSet rs = ps.executeQuery();
-        List<Access> list = new ArrayList<Access>();
+        List<AccessRow> list = new ArrayList<AccessRow>();
         try {
             while (rs.next()) {
-                Access r = new Access();
+                AccessRow r = new AccessRow();
                 r.access_id = rs.getLong("access_id");
                 r.role_id = rs.getLong("role_id");
                 r.object_name = rs.getString("object_name");

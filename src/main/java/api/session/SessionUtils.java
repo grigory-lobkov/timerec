@@ -1,9 +1,9 @@
 package api.session;
 
+import model.UserRow;
 import storage.ITable;
 import storage.Passwords;
 import storage.StorageFactory;
-import model.User;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -15,21 +15,21 @@ public class SessionUtils {
 
     static public final int COOKIE_SESSION_LIFETIME = 60 * 60 * 24 * 30; // set user and password cookies lifetime in milliseconds
 
-    static private ITable<User> storage = StorageFactory.getUserInstance();
+    static private ITable<UserRow> storage = StorageFactory.getUserInstance();
     static private boolean debugLog = true;
 
 
     /**
-     * Returns {@code model.User}, found by {@code email} and {@code password} or {@code null}
+     * Returns {@code model.UserRow}, found by {@code email} and {@code password} or {@code null}
      *
      * @param email    user email
      * @param password user password to check
-     * @return {@code model.User} if {@code email} and {@code password} is correct
+     * @return {@code model.UserRow} if {@code email} and {@code password} is correct
      */
-    static public User checkAndGetUser(String email, String password) {
+    static public UserRow checkAndGetUser(String email, String password) {
         if (debugLog) System.out.println("SessionUtils.checkAndGetUser()");
         try {
-            User dbUser = storage.select(email);
+            UserRow dbUser = storage.select(email);
             if (dbUser != null) {
                 String gotPass = Passwords.encrypt(password);
                 boolean success = password.equals(dbUser.password) || gotPass.equals(dbUser.password);
@@ -70,12 +70,12 @@ public class SessionUtils {
 
 
     /**
-     * Add {@code model.User} to {@code req} {@code HttpSession}
+     * Add {@code model.UserRow} to {@code req} {@code HttpSession}
      *
      * @param req  user request
      * @param user information to save in session
      */
-    static public void createUserSession(HttpServletRequest req, User user) {
+    static public void createUserSession(HttpServletRequest req, UserRow user) {
         if (debugLog) System.out.println("SessionUtils.createUserSession()");
         HttpSession session = req.getSession();
         session.setAttribute("user", user);
@@ -83,14 +83,14 @@ public class SessionUtils {
 
 
     /**
-     * Add {@code model.User} to {@code req} {@code HttpSession} if cookies contains valid {@code email} and {@code password}
+     * Add {@code model.UserRow} to {@code req} {@code HttpSession} if cookies contains valid {@code email} and {@code password}
      *
      * @param req user request
-     * @return authorized {@code model.User}
+     * @return authorized {@code model.UserRow}
      */
-    static public User createUserSessionCook(HttpServletRequest req) {
+    static public UserRow createUserSessionCook(HttpServletRequest req) {
         if (debugLog) System.out.println("SessionUtils.createUserSessionCook()");
-        User user = null;
+        UserRow user = null;
         Cookie[] cookies = req.getCookies();
         String email = null;
         String password = null;
@@ -134,16 +134,16 @@ public class SessionUtils {
 
 
     /**
-     * Gets {@code model.User} {@code user_id} from session
+     * Gets {@code model.UserRow} {@code user_id} from session
      *
      * @param req user request
-     * @return current session {@code model.User.user_id}
+     * @return current session {@code model.UserRow.user_id}
      */
     public static long getSessionUserId(HttpServletRequest req) {
 
         HttpSession session = req.getSession();
 
-        User user = (User) session.getAttribute("user");
+        UserRow user = (UserRow) session.getAttribute("user");
 
         return user == null ? -1 : user.user_id;
     }
