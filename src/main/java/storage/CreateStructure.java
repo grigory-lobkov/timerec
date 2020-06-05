@@ -17,7 +17,7 @@ public class CreateStructure implements ServletContextListener {
     boolean checkStructureNeedCreate() {
         boolean result = true;
         try {
-            DatabaseMetaData meta = StorageFactory.connection.getMetaData();
+            DatabaseMetaData meta = StorageFactory.dbConn.connection().getMetaData();
             ResultSet res = meta.getTables("", null, "REPEAT", new String[]{"TABLE"});
             while (res.next())
                 result = false;
@@ -105,7 +105,8 @@ class Updater {
      * @throws SQLException on storage problems
      */
     static void createStructures() throws SQLException {
-        statement = StorageFactory.connection.createStatement();
+        Connection conn = StorageFactory.dbConn.connection();
+        statement = conn.createStatement();
 
         exec("seq_image_id",
                 "CREATE SEQUENCE IF NOT EXISTS seq_image_id");
@@ -170,6 +171,7 @@ class Updater {
                         " owner_id BIGINT)");
 */
         statement.close();
+        conn.close();
     }
 
     /**
@@ -280,7 +282,7 @@ class Updater {
                         " name VARCHAR(1000)," +
                         " description CLOB," +
                         " image_id BIGINT," +
-                        " duration INT," +
+                        " duration INTEGER," +
                         " cost DECIMAL," +
                         " owner_id BIGINT)");
 
@@ -295,8 +297,8 @@ class Updater {
                         " service_id BIGINT," +
                         " dow INTEGER," +
                         " duration INTEGER," +
-                        " time_from TIME," +
-                        " time_to TIME)");
+                        " time_from INTEGER," +
+                        " time_to INTEGER)");
 
         /*exec("schedule",
                 "CREATE TABLE IF NOT EXISTS schedule " +

@@ -16,8 +16,8 @@ public class RepeatRow {
     // length in minutes
     public int duration;
 
-    // period of time in day
-    public Date timeFrom;
-    public Date timeTo;
+    // period of time in seconds
+    public int time_from;
+    public int time_to;
 
 }

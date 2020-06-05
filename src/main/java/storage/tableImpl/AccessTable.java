@@ -1,6 +1,6 @@
 package storage.tableImpl;
 
-import storage.IConnect;
+import storage.IConnectionPool;
 import storage.ITable;
 import model.AccessRow;
 
@@ -18,10 +18,10 @@ public class AccessTable implements ITable<AccessRow> {
     /**
      * Connection fast access variable
      */
-    IConnect dbConn;
+    IConnectionPool pool;
 
-    public AccessTable(IConnect connection) {
-        dbConn = connection;
+    public AccessTable(IConnectionPool connection) {
+        pool = connection;
     }
 
     /**
@@ -32,7 +32,8 @@ public class AccessTable implements ITable<AccessRow> {
      * @throws Exception on error accessing storage
      */
     public AccessRow select(long object_id) throws Exception {
-        PreparedStatement ps = dbConn.connection().prepareStatement(
+        Connection conn = pool.connection();
+        PreparedStatement ps = conn.prepareStatement(
                 "SELECT * FROM access WHERE access_id = ?");
         ps.setLong(1, object_id);
         ResultSet rs = ps.executeQuery();
@@ -55,6 +56,7 @@ public class AccessTable implements ITable<AccessRow> {
         } finally {
             rs.close();
             ps.close();
+            conn.close();
         }
     }
 
@@ -77,7 +79,8 @@ public class AccessTable implements ITable<AccessRow> {
      * @throws Exception on error accessing storage
      */
     public boolean update(AccessRow access) throws Exception {
-        PreparedStatement ps = dbConn.connection().prepareStatement(
+        Connection conn = pool.connection();
+        PreparedStatement ps = conn.prepareStatement(
                 "UPDATE access SET role_id = ?, object_name = ?," +
                         " all_get = ?, all_put = ?, all_post = ?, all_delete = ?," +
                         " own_get = ?, own_put = ?, own_post = ?, own_delete = ?" +
@@ -99,6 +102,7 @@ public class AccessTable implements ITable<AccessRow> {
             return affectedRows == 1;
         } finally {
             ps.close();
+            conn.close();
         }
     }
 
@@ -111,8 +115,9 @@ public class AccessTable implements ITable<AccessRow> {
      * @throws Exception on error accessing storage
      */
     public boolean insert(AccessRow access) throws Exception {
+        Connection conn = pool.connection();
         String resultColumns[] = new String[]{"access_id"};
-        PreparedStatement ps = dbConn.connection().prepareStatement(
+        PreparedStatement ps = conn.prepareStatement(
                 "INSERT INTO access (access_id, role_id, object_name," +
                         " all_get, all_put, all_post, all_delete," +
                         " own_get, own_put, own_post, own_delete)" +
@@ -139,6 +144,7 @@ public class AccessTable implements ITable<AccessRow> {
             return affectedRows == 1;
         } finally {
             ps.close();
+            conn.close();
         }
     }
 
@@ -151,7 +157,8 @@ public class AccessTable implements ITable<AccessRow> {
      */
     @Override
     public boolean delete(long object_id) throws Exception {
-        PreparedStatement ps = dbConn.connection().prepareStatement(
+        Connection conn = pool.connection();
+        PreparedStatement ps = conn.prepareStatement(
                 "DELETE FROM access WHERE access_id = ?");
         ps.setLong(1, object_id);
         try {
@@ -159,6 +166,7 @@ public class AccessTable implements ITable<AccessRow> {
             return affectedRows == 1;
         } finally {
             ps.close();
+            conn.close();
         }
     }
 
@@ -170,7 +178,8 @@ public class AccessTable implements ITable<AccessRow> {
      */
     @Override
     public List<AccessRow> selectAllQuick() throws Exception {
-        PreparedStatement ps = dbConn.connection().prepareStatement(
+        Connection conn = pool.connection();
+        PreparedStatement ps = conn.prepareStatement(
                 "SELECT * FROM access");
         ResultSet rs = ps.executeQuery();
         List<AccessRow> list = new ArrayList<AccessRow>();
@@ -193,6 +202,7 @@ public class AccessTable implements ITable<AccessRow> {
         } finally {
             rs.close();
             ps.close();
+            conn.close();
         }
         return list;
     }

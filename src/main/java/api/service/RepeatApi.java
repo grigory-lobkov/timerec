@@ -3,8 +3,12 @@ package api.service;
 import api.session.SessionUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+import controller.RepeatConvert;
 import model.RepeatRow;
 import model.ServiceRow;
+import model.UserRow;
+import storage.IMultiRowTable;
 import storage.ITable;
 import storage.StorageFactory;
 
@@ -13,37 +17,25 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.List;
 
 /**
- * Services actions
+ * Repeat actions
  *
  * RESTful: https://www.restapitutorial.com/lessons/httpmethods.html
  *
- * POST - Create
- * 201 (Created), 'Location' header with link to /customers/{id} containing new ID.
- * 404 (Not Found),
- * -409 (Conflict) if resource already exists.
- *
- * GET - Read
- * 200 (OK), single customer.
- * 404 (Not Found), if ID not found or invalid.
- *
- * PUT - Update/Replace
- * 200 (OK) or 204 (No Content).
- * 404 (Not Found), if ID not found or invalid.
- *
- * DELETE - Delete
- * 200 (OK).
- * 404 (Not Found), if ID not found or invalid.
  */
 
-@WebServlet(urlPatterns = "/api/repeat/*")
+@WebServlet(urlPatterns = "/api/service/*/repeat")
 public class RepeatApi extends HttpServlet {
 
-    private ITable<RepeatRow> storage = StorageFactory.getRepeatInstance();
+    private IMultiRowTable<RepeatRow> storage = StorageFactory.getRepeatInstance();
     private ITable<ServiceRow> serviceStorage = StorageFactory.getServiceInstance();
+    Type listType = new TypeToken<List<RepeatRow>>(){}.getType();
     private boolean debugLog = true;
 
     /**
@@ -58,7 +50,7 @@ public class RepeatApi extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (debugLog) System.out.println("ServiceApi.doGet()");
+        if (debugLog) System.out.println("RepeatApi.doGet("+req.getPathInfo()+")");
 
         String path = req.getPathInfo();
         if (path == null || path.length() < 2
@@ -72,7 +64,7 @@ public class RepeatApi extends HttpServlet {
 
         try {
             // query storage
-            RepeatRow data = storage.select(service_id);
+            List<RepeatRow> data = storage.select(service_id);
 
             if (data == null) {
                 if (debugLog) System.out.println("SC_NOT_FOUND");
@@ -110,7 +102,7 @@ public class RepeatApi extends HttpServlet {
      */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (debugLog) System.out.println("ServiceApi.doPost()");
+        if (debugLog) System.out.println("RepeatApi.doPost()");
 
         Gson gson = (new GsonBuilder()).create();
         BufferedReader br = req.getReader();
@@ -119,16 +111,25 @@ public class RepeatApi extends HttpServlet {
 
         while ((line = br.readLine()) != null) {
             if (debugLog) System.out.println("in: " + line);
-            RepeatRow data = gson.fromJson(line, RepeatRow.class);
-            if (data != null) {
+            List<RepeatRow> datas = gson.fromJson(line, listType);
+
+            HttpSession session = req.getSession();
+            UserRow user = (UserRow)session.getAttribute("user");
+            if(!RepeatConvert.checkInputList(datas, user)) {
+                if (debugLog) System.out.println("SC_NOT_ACCEPTABLE");
+                resp.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE);
+                return;
+            }
+            RepeatConvert.prepareInputList(datas, user);
+            if (datas != null && datas.size() > 0) {
                 try {
-                    if (debugLog) System.out.println("object: " + data);
+                    if (debugLog) System.out.println("object: " + datas + "("+datas.size()+")");
 
                     // update storage
-                    boolean done = storage.insert(data);
+                    int inserted = storage.insert(datas);
 
-                    if (done && data.service_id > 0) {
-                        String jsonStr = gson.toJson(data);
+                    if (inserted == datas.size()) {
+                        String jsonStr = gson.toJson(datas);
                         if (debugLog) System.out.println("out: " + jsonStr);
                         resp.setContentType("application/json; charset=UTF-8");
                         resp.setStatus(HttpServletResponse.SC_CREATED);
@@ -161,17 +162,25 @@ public class RepeatApi extends HttpServlet {
      */
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (debugLog) System.out.println("ServiceApi.doPut()");
+        if (debugLog) System.out.println("RepeatApi.doPut()");
 
         Gson gson = (new GsonBuilder()).create();
         BufferedReader rr = req.getReader();
         String line;
         boolean done1 = false;
 
-        while ((line = rr.readLine()) != null) {
+        if ((line = rr.readLine()) != null) {
             if (debugLog) System.out.println(line);
-            RepeatRow data = gson.fromJson(line, RepeatRow.class);
-            if (data != null) {
+            List<RepeatRow> datas = gson.fromJson(line, listType);
+
+/*            HttpSession session = req.getSession();
+            UserRow user = (UserRow)session.getAttribute("user");
+            if(!RepeatConvert.checkInputList(datas, user)) {
+                if (debugLog) System.out.println("SC_NOT_ACCEPTABLE");
+                resp.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE);
+                return;
+            }
+            if (datas != null) {
                 try {
                     // check owner rights
                     Long user_id = (Long) req.getAttribute("onlyIfOwner");
@@ -181,18 +190,15 @@ public class RepeatApi extends HttpServlet {
                             return;
                     }
                     // update storage
-                    boolean done = storage.update(data);
+                    done1 = storage.update(data);
 
-                    if (done) {
-                        done1 = true;
-                    }
                 } catch (Exception e) {
                     if (debugLog) System.out.println("SC_NO_CONTENT");
                     resp.sendError(HttpServletResponse.SC_NO_CONTENT);
                     done1 = true;
                     e.printStackTrace();
                 }
-            }
+            }*/
         }
         if (done1) {
             resp.setContentType("application/json; charset=UTF-8");
@@ -215,7 +221,7 @@ public class RepeatApi extends HttpServlet {
      */
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (debugLog) System.out.println("ServiceApi.doDelete()");
+        if (debugLog) System.out.println("RepeatApi.doDelete()");
 
         String path = req.getPathInfo();
         if (path == null) return;
@@ -224,7 +230,7 @@ public class RepeatApi extends HttpServlet {
 
         long service_id = Long.valueOf(path.substring(1));
 
-        if (service_id > 0)
+/*        if (service_id > 0)
             try {
                 // check owner rights
                 Long user_id = (Long) req.getAttribute("onlyIfOwner");
@@ -241,7 +247,7 @@ public class RepeatApi extends HttpServlet {
                 resp.sendError(HttpServletResponse.SC_NO_CONTENT);
                 done1 = true;
                 e.printStackTrace();
-            }
+            }*/
         if (done1) {
             resp.setContentType("application/json; charset=UTF-8");
             resp.getWriter().println("{}");

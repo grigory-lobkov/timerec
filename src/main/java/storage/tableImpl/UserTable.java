@@ -1,10 +1,9 @@
 package storage.tableImpl;
 
 import model.UserRow;
-import storage.IConnect;
+import storage.IConnectionPool;
 import storage.ITable;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -18,9 +17,9 @@ public class UserTable implements ITable<UserRow> {
     /**
      * Connection fast access variable
      */
-    IConnect dbConn;
+    IConnectionPool dbConn;
 
-    public UserTable(IConnect connection) {
+    public UserTable(IConnectionPool connection) {
         dbConn = connection;
     }
 

@@ -3,18 +3,16 @@ package storage;
 import model.AccessRow;
 import model.RepeatRow;
 import model.ServiceRow;
+import storage.connectImpl.H2ConnectionPool;
 import storage.tableImpl.*;
-import storage.connectImpl.H2Connect;
 import model.UserRow;
-
-import java.sql.Connection;
 
 /**
  * Storage Singleton factory
  */
 public class StorageFactory {
 
-    public static IConnect dbConn = new H2Connect();
+    public static IConnectionPool dbConn = new H2ConnectionPool();
 
 
     static private volatile ITable<ServiceRow> serviceInstance = null;
@@ -71,14 +69,14 @@ public class StorageFactory {
     }
 
 
-    static private volatile ITable<RepeatRow> repeatInstance = null;
+    static private volatile IMultiRowTable<RepeatRow> repeatInstance = null;
 
     /**
      * Generate Access storage actions
      *
      * @return singleton instance
      */
-    public static ITable<RepeatRow> getRepeatInstance() {
+    public static IMultiRowTable<RepeatRow> getRepeatInstance() {
         if (repeatInstance == null)
             synchronized (StorageFactory.class) {
                 if (repeatInstance == null) {

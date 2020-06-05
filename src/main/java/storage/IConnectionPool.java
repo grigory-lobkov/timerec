@@ -5,15 +5,15 @@ import java.sql.Connection;
 /**
  * Interface for class, returning one JDBC connection
  */
-public interface IConnect {
+public interface IConnectionPool {
 
     /**
-     * Connection to JDBC
+     * Get one JDBC connection
      */
     Connection connection();
 
     /**
-     * Close connection
+     * Close pool
      *
      * If not - Tomcat will not update WebServlet automatically.
      */

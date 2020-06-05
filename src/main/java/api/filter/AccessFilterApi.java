@@ -20,7 +20,7 @@ import java.util.*;
 public class AccessFilterApi implements Filter {
 
     private ITable<AccessRow> storage = StorageFactory.getAccessInstance();
-    private boolean debugLog = true;
+    private boolean debugLog = false;
     /**
      * Map for fast right access
      * Long = role_id - user role

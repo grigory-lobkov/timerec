@@ -1,7 +1,7 @@
 package storage.tableImpl;
 
 import model.ServiceRow;
-import storage.IConnect;
+import storage.IConnectionPool;
 import storage.ITable;
 
 import java.sql.Connection;
@@ -18,11 +18,11 @@ public class ServiceTable implements ITable<ServiceRow> {
     /**
      * Connection fast access variable
      */
-    IConnect dbConn;
+    IConnectionPool pool;
 
 
-    public ServiceTable(IConnect connection) {
-        dbConn = connection;
+    public ServiceTable(IConnectionPool connection) {
+        pool = connection;
     }
 
 
@@ -34,7 +34,8 @@ public class ServiceTable implements ITable<ServiceRow> {
      * @throws Exception on error accessing storage
      */
     public ServiceRow select(long object_id) throws Exception {
-        PreparedStatement ps = dbConn.connection().prepareStatement(
+        Connection conn = pool.connection();
+        PreparedStatement ps = conn.prepareStatement(
                 "SELECT * FROM service WHERE service_id = ?");
         ps.setLong(1, object_id);
         ResultSet rs = ps.executeQuery();
@@ -53,6 +54,7 @@ public class ServiceTable implements ITable<ServiceRow> {
         } finally {
             rs.close();
             ps.close();
+            conn.close();
         }
     }
 
@@ -77,7 +79,8 @@ public class ServiceTable implements ITable<ServiceRow> {
      * @throws Exception on error accessing storage
      */
     public boolean update(ServiceRow service) throws Exception {
-        PreparedStatement ps = dbConn.connection().prepareStatement(
+        Connection conn = pool.connection();
+        PreparedStatement ps = conn.prepareStatement(
                 "UPDATE service SET name = ?, description = ?, image_id = ?, duration = ?, cost = ?, owner_id = ?" +
                         " WHERE service_id = ?");
         try {
@@ -93,6 +96,7 @@ public class ServiceTable implements ITable<ServiceRow> {
             return affectedRows == 1;
         } finally {
             ps.close();
+            conn.close();
         }
     }
 
@@ -106,8 +110,9 @@ public class ServiceTable implements ITable<ServiceRow> {
      * @throws Exception on error accessing storage
      */
     public boolean insert(ServiceRow service) throws Exception {
+        Connection conn = pool.connection();
         String resultColumns[] = new String[]{"service_id"};
-        PreparedStatement ps = dbConn.connection().prepareStatement(
+        PreparedStatement ps = conn.prepareStatement(
                 "INSERT INTO service (service_id, name, description, image_id, duration, cost, owner_id)" +
                         "VALUES (seq_service_id.nextval, ?, ?, ?, ?, ?, ?)", resultColumns);
         try {
@@ -128,6 +133,7 @@ public class ServiceTable implements ITable<ServiceRow> {
             return affectedRows == 1;
         } finally {
             ps.close();
+            conn.close();
         }
     }
 
@@ -141,7 +147,8 @@ public class ServiceTable implements ITable<ServiceRow> {
      */
     @Override
     public boolean delete(long object_id) throws Exception {
-        PreparedStatement ps = dbConn.connection().prepareStatement(
+        Connection conn = pool.connection();
+        PreparedStatement ps = conn.prepareStatement(
                 "DELETE FROM service WHERE service_id = ?");
         ps.setLong(1, object_id);
         try {
@@ -149,6 +156,7 @@ public class ServiceTable implements ITable<ServiceRow> {
             return affectedRows == 1;
         } finally {
             ps.close();
+            conn.close();
         }
     }
 
@@ -161,7 +169,8 @@ public class ServiceTable implements ITable<ServiceRow> {
      */
     @Override
     public List<ServiceRow> selectAllQuick() throws Exception {
-        PreparedStatement ps = dbConn.connection().prepareStatement(
+        Connection conn = pool.connection();
+        PreparedStatement ps = conn.prepareStatement(
                 "SELECT service_id, name FROM service ORDER BY name");
         ResultSet rs = ps.executeQuery();
         List<ServiceRow> list = new ArrayList<ServiceRow>();
@@ -175,6 +184,7 @@ public class ServiceTable implements ITable<ServiceRow> {
         } finally {
             rs.close();
             ps.close();
+            conn.close();
         }
         return list;
     }
@@ -189,7 +199,8 @@ public class ServiceTable implements ITable<ServiceRow> {
 
     @Override
     public boolean checkIsOwner(long object_id, long user_id) throws SQLException {
-        PreparedStatement ps = connectImpl.prepareStatement(
+        Connection conn = pool.connection();
+        PreparedStatement ps = conn.prepareStatement(
                 "SELECT * FROM service WHERE service_id = ? AND owner_id = ?");
         ps.setLong(1, object_id);
         ps.setLong(2, user_id);
@@ -199,6 +210,7 @@ public class ServiceTable implements ITable<ServiceRow> {
         } finally {
             rs.close();
             ps.close();
+            conn.close();
         }
     }*/
 
