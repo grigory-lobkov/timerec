@@ -75,7 +75,7 @@ function fillMenu(data) {
 			'</a>'+
 			'<div class="dropdown-menu" aria-labelledby="navbarDropdownU">'+
 			'<a class="dropdown-item'+(isUser?' disabled':'')+'" href="login.html">Log in</a>'+
-			'<a class="dropdown-item'+(!isUser?' disabled':'')+'" href="profile.html">Profile</a>'+
+			'<a class="dropdown-item'+(!isUser?' disabled':'')+'" href="user.html">Profile</a>'+
 			'<a class="dropdown-item'+(!isUser?' disabled':'')+'" href="settings.html">Settings</a>'+
 			'<div class="dropdown-divider"></div>'+
 			'<a class="dropdown-item'+(isUser?' disabled':'')+'" href="#">Log out</a>'+

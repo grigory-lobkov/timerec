@@ -86,6 +86,30 @@ public class SessionUtils {
 
 
     /**
+     * Deletes session and cookies info
+     *
+     * @param req servlet request
+     * @param resp servlet responce
+     * @return
+     */
+    static public void deleteUserSessionCook(HttpServletRequest req, HttpServletResponse resp) {
+        HttpSession session = req.getSession(false);
+        if(session!=null) {
+            Cookie[] cookies = req.getCookies();
+            for (Cookie c : cookies) {
+                String n = c.getName();
+                if (n.equals("email") || n.equals("password") || n.equals("JSESSIONID")) {
+                    c.setValue("");
+                    c.setPath("/");
+                    c.setMaxAge(0);
+                    resp.addCookie(c);
+                }
+            }
+            session.invalidate();
+        }
+    }
+
+    /**
      * Add {@code model.UserRow} to {@code req} {@code HttpSession} if cookies contains valid {@code email} and {@code password}
      *
      * @param req user request

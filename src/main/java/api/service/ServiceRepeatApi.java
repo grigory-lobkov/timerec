@@ -31,7 +31,7 @@ import java.util.List;
  */
 
 @WebServlet(urlPatterns = "/api/service/*/repeat")
-public class RepeatApi extends HttpServlet {
+public class ServiceRepeatApi extends HttpServlet {
 
     private IMultiRowTable<RepeatRow> storage = StorageFactory.getRepeatInstance();
     private ITable<ServiceRow> serviceStorage = StorageFactory.getServiceInstance();
@@ -51,7 +51,7 @@ public class RepeatApi extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (debugLog) System.out.println("RepeatApi.doGet("+req.getPathInfo()+")");
+        if (debugLog) System.out.println("ServiceRepeatApi.doGet("+req.getPathInfo()+")");
 
         String path = req.getPathInfo();
         if (path == null || path.length() < 2
@@ -103,7 +103,7 @@ public class RepeatApi extends HttpServlet {
      */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (debugLog) System.out.println("RepeatApi.doPost()");
+        if (debugLog) System.out.println("ServiceRepeatApi.doPost()");
 
         Gson gson = (new GsonBuilder()).create();
         BufferedReader br = req.getReader();
@@ -163,7 +163,7 @@ public class RepeatApi extends HttpServlet {
      */
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (debugLog) System.out.println("RepeatApi.doPut()");
+        if (debugLog) System.out.println("ServiceRepeatApi.doPut()");
 
         Gson gson = (new GsonBuilder()).create();
         BufferedReader rr = req.getReader();
@@ -222,7 +222,7 @@ public class RepeatApi extends HttpServlet {
      */
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (debugLog) System.out.println("RepeatApi.doDelete()");
+        if (debugLog) System.out.println("ServiceRepeatApi.doDelete()");
 
         String path = req.getPathInfo();
         if (path == null) return;
