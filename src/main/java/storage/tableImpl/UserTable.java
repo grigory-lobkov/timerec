@@ -4,6 +4,7 @@ import model.UserRow;
 import storage.IConnectionPool;
 import storage.ITable;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -17,10 +18,10 @@ public class UserTable implements ITable<UserRow> {
     /**
      * Connection fast access variable
      */
-    IConnectionPool dbConn;
+    IConnectionPool pool;
 
     public UserTable(IConnectionPool connection) {
-        dbConn = connection;
+        pool = connection;
     }
 
 
@@ -32,7 +33,8 @@ public class UserTable implements ITable<UserRow> {
      * @throws Exception on error accessing storage
      */
     public UserRow select(long object_id) throws Exception {
-        PreparedStatement ps = dbConn.connection().prepareStatement(
+        Connection conn = pool.connection();
+        PreparedStatement ps = conn.prepareStatement(
                 "SELECT * FROM user WHERE user_id = ?");
         ps.setLong(1, object_id);
         ResultSet rs = ps.executeQuery();
@@ -52,6 +54,7 @@ public class UserTable implements ITable<UserRow> {
         } finally {
             rs.close();
             ps.close();
+            conn.close();
         }
     }
 
@@ -64,7 +67,8 @@ public class UserTable implements ITable<UserRow> {
      * @throws Exception on error accessing storage
      */
     public UserRow select(String filter) throws Exception {
-        PreparedStatement ps = dbConn.connection().prepareStatement(
+        Connection conn = pool.connection();
+        PreparedStatement ps = conn.prepareStatement(
                 "SELECT * FROM user WHERE email = ?");
         ps.setString(1, filter);
         ResultSet rs = ps.executeQuery();
@@ -84,6 +88,7 @@ public class UserTable implements ITable<UserRow> {
         } finally {
             rs.close();
             ps.close();
+            conn.close();
         }
     }
 
@@ -96,7 +101,8 @@ public class UserTable implements ITable<UserRow> {
      * @throws Exception on error accessing storage
      */
     public boolean update(UserRow user) throws Exception {
-        PreparedStatement ps = dbConn.connection().prepareStatement(
+        Connection conn = pool.connection();
+        PreparedStatement ps = conn.prepareStatement(
                 "UPDATE user SET role_id = ?, name = ?, tz_id = ?, email = ?, password = ?, image_id = ?, owner_id = ?" +
                         " WHERE user_id = ?");
         try {
@@ -113,6 +119,7 @@ public class UserTable implements ITable<UserRow> {
             return affectedRows == 1;
         } finally {
             ps.close();
+            conn.close();
         }
     }
 
@@ -126,8 +133,9 @@ public class UserTable implements ITable<UserRow> {
      * @throws Exception on error accessing storage
      */
     public boolean insert(UserRow user) throws Exception {
+        Connection conn = pool.connection();
         String resultColumns[] = new String[]{"user_id"};
-        PreparedStatement ps = dbConn.connection().prepareStatement(
+        PreparedStatement ps = conn.prepareStatement(
                 "INSERT INTO user (user_id, role_id, name, tz_id, email, password, image_id, owner_id)" +
                         "VALUES (seq_user_id.nextval, ?, ?, ?, ?, ?, ?, ?)", resultColumns);
         try {
@@ -149,6 +157,7 @@ public class UserTable implements ITable<UserRow> {
             return affectedRows == 1;
         } finally {
             ps.close();
+            conn.close();
         }
     }
 
@@ -161,7 +170,8 @@ public class UserTable implements ITable<UserRow> {
      */
     @Override
     public boolean delete(long object_id) throws Exception {
-        PreparedStatement ps = dbConn.connection().prepareStatement(
+        Connection conn = pool.connection();
+        PreparedStatement ps = conn.prepareStatement(
                 "DELETE FROM user WHERE user_id = ?");
         ps.setLong(1, object_id);
         try {
@@ -169,6 +179,7 @@ public class UserTable implements ITable<UserRow> {
             return affectedRows == 1;
         } finally {
             ps.close();
+            conn.close();
         }
     }
 
@@ -180,8 +191,9 @@ public class UserTable implements ITable<UserRow> {
      * @throws Exception
      */
     @Override
-    public List<UserRow> selectAllQuick() throws Exception {
-        PreparedStatement ps = dbConn.connection().prepareStatement(
+    public List<UserRow> select() throws Exception {
+        Connection conn = pool.connection();
+        PreparedStatement ps = conn.prepareStatement(
                 "SELECT user_id, name FROM user ORDER BY name");
         ResultSet rs = ps.executeQuery();
         List<UserRow> list = new ArrayList<UserRow>();
@@ -195,6 +207,7 @@ public class UserTable implements ITable<UserRow> {
         } finally {
             rs.close();
             ps.close();
+            conn.close();
         }
         return list;
     }

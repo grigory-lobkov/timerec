@@ -5,9 +5,11 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 
+import model.UserRow;
 import storage.ITable;
 import storage.StorageFactory;
 import model.ServiceRow;
@@ -27,22 +29,29 @@ public class MenuApi extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String jsonUser = "{\"user_id\":\"1\",\"name\":\"Валерий\"}";
+        HttpSession session = req.getSession();
+        UserRow user = (UserRow) session.getAttribute("user");
 
-        String jsonServices = "";
-        try {
-            // query storage
-            List<ServiceRow> services = serviceStorage.selectAllQuick();
+        // anonymous set
+        String jsonUser = "{\"user_id\":\"-1\",\"name\":\"\"}";
+        StringBuilder jsonServices = new StringBuilder();
+        if(user!=null) {
+            // authorized user
+            jsonUser = "{\"user_id\":\"" + user.user_id + "\",\"name\":\"" + user.name + "\"}";
+            try {
+                // query storage
+                List<ServiceRow> services = serviceStorage.select();
 
-            // self generate simple json
-            StringBuilder sb = new StringBuilder();
-            for (ServiceRow s : services) {
-                if (sb.length() > 0) sb.append(',');
-                sb.append("{\"service_id\":\"" + s.service_id + "\",\"name\":\"" + s.name.replace("\\", "\\\\") + "\"}");
+                // self generate simple json
+                //StringBuilder jsonServices = new StringBuilder();
+                for (ServiceRow s : services) {
+                    if (jsonServices.length() > 0) jsonServices.append(',');
+                    jsonServices.append("{\"service_id\":\"" + s.service_id + "\",\"name\":\"" + s.name.replace("\\", "\\\\") + "\"}");
+                }
+                //jsonServices = jsonServices.toString();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            jsonServices = sb.toString();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
 
         resp.setContentType("application/json; charset=UTF-8");

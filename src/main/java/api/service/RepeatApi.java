@@ -36,6 +36,7 @@ public class RepeatApi extends HttpServlet {
     private IMultiRowTable<RepeatRow> storage = StorageFactory.getRepeatInstance();
     private ITable<ServiceRow> serviceStorage = StorageFactory.getServiceInstance();
     Type listType = new TypeToken<List<RepeatRow>>(){}.getType();
+
     private boolean debugLog = true;
 
     /**

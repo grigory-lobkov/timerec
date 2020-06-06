@@ -16,7 +16,7 @@ import java.util.*;
 
 //@WebFilter(urlPatterns={"/service/*","/repeat/*","/schedule/*"})
 //@WebFilter
-@WebFilter(urlPatterns="/api/**")
+@WebFilter(urlPatterns="/api/*")
 public class AccessFilterApi implements Filter {
 
     private ITable<AccessRow> storage = StorageFactory.getAccessInstance();
@@ -52,9 +52,9 @@ public class AccessFilterApi implements Filter {
         accTable = new Hashtable<>();
         List<AccessRow> list;
         try {
-            list = storage.selectAllQuick();
+            list = storage.select();
             for (AccessRow a:list) {
-                System.out.println("role_id="+a.role_id+" object="+a.object_name);
+                if(debugLog) System.out.println("role_id="+a.role_id+" object="+a.object_name);
                 Map<String, AccessRow> tbl = accTable.get(a.role_id);
                 if(tbl==null) {
                     tbl = new Hashtable<>();

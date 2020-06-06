@@ -16,7 +16,8 @@ public class SessionUtils {
     static public final int COOKIE_SESSION_LIFETIME = 60 * 60 * 24 * 30; // set user and password cookies lifetime in milliseconds
 
     static private ITable<UserRow> storage = StorageFactory.getUserInstance();
-    static private boolean debugLog = true;
+
+    static private boolean debugLog = false;
 
 
     /**
@@ -62,9 +63,11 @@ public class SessionUtils {
         if (debugLog) System.out.println("SessionUtils.setResponceCookies()");
         Cookie cookie = new Cookie("email", email);
         cookie.setMaxAge(COOKIE_SESSION_LIFETIME);
+        cookie.setPath("/");
         resp.addCookie(cookie);
         cookie = new Cookie("password", password);
         cookie.setMaxAge(COOKIE_SESSION_LIFETIME);
+        cookie.setPath("/");
         resp.addCookie(cookie);
     }
 

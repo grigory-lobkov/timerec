@@ -67,17 +67,18 @@ function fillMenu(data) {
 	}
 	// https://getbootstrap.com/docs/4.5/components/navbar/
 	// user menu
+	var isUser = data.user.user_id > 0;
 	var uMenu =
 		'<li class="nav-item dropdown">'+
 			'<a class="nav-link dropdown-toggle" href="#" id="navbarDropdownU" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+
 			data.user.name+
 			'</a>'+
 			'<div class="dropdown-menu" aria-labelledby="navbarDropdownU">'+
-			'<a class="dropdown-item" href="login.html">Log in</a>'+
-			'<a class="dropdown-item" href="profile.html">Profile</a>'+
-			'<a class="dropdown-item" href="settings.html">Settings</a>'+
+			'<a class="dropdown-item'+(isUser?' disabled':'')+'" href="login.html">Log in</a>'+
+			'<a class="dropdown-item'+(!isUser?' disabled':'')+'" href="profile.html">Profile</a>'+
+			'<a class="dropdown-item'+(!isUser?' disabled':'')+'" href="settings.html">Settings</a>'+
 			'<div class="dropdown-divider"></div>'+
-			'<a class="dropdown-item disabled" href="#">Log out</a>'+
+			'<a class="dropdown-item'+(isUser?' disabled':'')+'" href="#">Log out</a>'+
 			'</div>'+
 		'</li>';
 	// services list
@@ -120,7 +121,7 @@ function fillMenu(data) {
 		'<ul class="navbar-nav mr-auto">'+mMenu+'</ul>'+
 		'<!-- /SERVICE MENU -->'+
 		'<!-- USER MENU -->'+
-		'<ul class="navbar-nav mr-right">'+uMenu+'</ul>'+
+		'<ul class="navbar-nav mr-right" style="min-width: 150px;">'+uMenu+'</ul>'+
 		'<!-- /USER MENU -->'+
 		'</div>';
 	

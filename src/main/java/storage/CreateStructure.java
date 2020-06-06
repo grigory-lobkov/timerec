@@ -16,8 +16,8 @@ public class CreateStructure implements ServletContextListener {
      */
     boolean checkStructureNeedCreate() {
         boolean result = true;
-        try {
-            DatabaseMetaData meta = StorageFactory.dbConn.connection().getMetaData();
+        try (Connection conn = StorageFactory.dbConn.connection()) {
+            DatabaseMetaData meta = conn.getMetaData();
             ResultSet res = meta.getTables("", null, "REPEAT", new String[]{"TABLE"});
             while (res.next())
                 result = false;

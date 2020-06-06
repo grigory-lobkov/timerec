@@ -16,7 +16,7 @@ import java.io.IOException;
 public class LoginApi extends HttpServlet {
 
     //private ITable<UserRow> storage = StorageFactory.getUserInstance();
-    private boolean debugLog = true;
+    private boolean debugLog = false;
 
     /**
      * Login attempt

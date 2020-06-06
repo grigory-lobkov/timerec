@@ -58,7 +58,7 @@ public interface ITable<T> {
      * @return list
      * @throws Exception on error accessing storage
      */
-    List<T> selectAllQuick() throws Exception;
+    List<T> select() throws Exception;
 
     /*
      * Check model.* object {@code object_id} is owned by {@code user_id}

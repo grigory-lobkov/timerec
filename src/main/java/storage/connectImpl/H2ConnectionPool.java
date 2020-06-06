@@ -15,7 +15,9 @@ public class H2ConnectionPool implements IConnectionPool {
     static private final String JDBC_DRIVER = "org.h2.Driver";
     static private final String JDBC_URL = "jdbc:h2:~/data/test";
     // JDBC maximum concurrent connections
-    static private final int JDBC_MAX_POOL_SIZE = 5;
+    static private final int JDBC_MAX_POOL_SIZE = 1;
+    // JDBC timeout (seconds) to acquire new connection from the pool
+    static private final int JDBC_CONNECTION_TIMEOUT = 1;
 
     //  Database credentials
     static private final String DB_USER = "sa";
@@ -39,6 +41,7 @@ public class H2ConnectionPool implements IConnectionPool {
             // Open a connection
             pool = JdbcConnectionPool.create(JDBC_URL, DB_USER, DB_PASSWORD);
             pool.setMaxConnections(JDBC_MAX_POOL_SIZE);
+            pool.setLoginTimeout(JDBC_CONNECTION_TIMEOUT);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }

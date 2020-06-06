@@ -41,7 +41,7 @@ import api.session.SessionUtils;
 public class ServiceApi extends HttpServlet {
 
     private ITable<ServiceRow> storage = StorageFactory.getServiceInstance();
-    private boolean debugLog = true;
+    private boolean debugLog = false;
 
     /**
      * GET - Read

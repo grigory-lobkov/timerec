@@ -168,7 +168,7 @@ public class ServiceTable implements ITable<ServiceRow> {
      * @throws Exception
      */
     @Override
-    public List<ServiceRow> selectAllQuick() throws Exception {
+    public List<ServiceRow> select() throws Exception {
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
                 "SELECT service_id, name FROM service ORDER BY name");

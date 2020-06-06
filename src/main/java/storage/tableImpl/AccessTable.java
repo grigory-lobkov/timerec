@@ -177,7 +177,7 @@ public class AccessTable implements ITable<AccessRow> {
      * @throws Exception
      */
     @Override
-    public List<AccessRow> selectAllQuick() throws Exception {
+    public List<AccessRow> select() throws Exception {
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
                 "SELECT * FROM access");
