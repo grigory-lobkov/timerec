@@ -20,4 +20,13 @@ public class RepeatRow {
     public int time_from;
     public int time_to;
 
+    @Override
+    public String toString() {
+        return "RepeatRow{" +
+                "dow=" + dow +
+                ", " + time_from +
+                " - " + time_to +
+                ", duration=" + duration +
+                '}';
+    }
 }
