@@ -138,6 +138,7 @@ public class RepeatServiceApi extends HttpServlet {
         while ((line = rr.readLine()) != null) {
             if (debugLog) System.out.println("in: " + line);
             List<RepeatRow> datas = gson.fromJson(line, listType);
+            setServiceId(datas, service_id);
 
             UserRow user = getSessionUser(req);
             if (!RepeatConvert.checkInputList(datas, user)) {
@@ -176,6 +177,11 @@ public class RepeatServiceApi extends HttpServlet {
             if (debugLog) System.out.println("SC_NOT_FOUND");
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
+    }
+
+    private void setServiceId(List<RepeatRow> datas, long service_id) {
+        for (RepeatRow r : datas)
+            r.service_id = service_id;
     }
 
     /**
