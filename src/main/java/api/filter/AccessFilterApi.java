@@ -87,8 +87,8 @@ public class AccessFilterApi implements Filter {
         if(granted) {
             filterChain.doFilter(servletRequest, servletResponse);
         } else {
-            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-            if(debugLog) System.out.println("AccessFilterApi.doFilter("+user+") UNAUTHORIZED");
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            if(debugLog) System.out.println("AccessFilterApi.doFilter("+user+") SC_FORBIDDEN");
         }
     }
 

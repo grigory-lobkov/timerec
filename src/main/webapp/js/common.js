@@ -170,7 +170,7 @@ function getAjaxJson( _ ) {
 		dataType: "json",
 		data: _.data,
 		statusCode: {
-			401: function() {
+			403: function() {
 				msg = "Sorry, you have no access for this action";
 				alertMessage( msg );
 				alert( msg );
