@@ -7,9 +7,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
+
+import api.setting.SettingUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import model.ServiceRow;
+import model.ServiceSettingRow;
 import storage.ITable;
 import storage.StorageFactory;
 import api.session.SessionUtils;
@@ -43,6 +46,11 @@ public class ServiceApi extends HttpServlet {
     private ITable<ServiceRow> storage = StorageFactory.getServiceInstance();
     private boolean debugLog = false;
 
+    static class Transport {
+        ServiceRow service;
+        ServiceSettingRow setting;
+    }
+
     /**
      * GET - Read
      * 200 (OK), single customer.
@@ -70,6 +78,7 @@ public class ServiceApi extends HttpServlet {
         try {
             // query storage
             ServiceRow data = storage.select(service_id);
+            ServiceSettingRow setting = SettingUtils.getServiceSetting(service_id);
 
             if (data == null) {
                 if (debugLog) System.out.println("SC_NOT_FOUND");
@@ -81,7 +90,7 @@ public class ServiceApi extends HttpServlet {
                     if (!SessionUtils.checkOwner(resp, user_id, data.owner_id))
                         return;
                 }
-                String jsonStr = gson.toJson(data);
+                String jsonStr = "{\"service\":" + gson.toJson(data) + ",\"setting\":"+gson.toJson(setting)+"}";
                 if (debugLog) System.out.println(jsonStr);
                 resp.setContentType("application/json; charset=UTF-8");
                 resp.getWriter().println(jsonStr);
@@ -115,16 +124,17 @@ public class ServiceApi extends HttpServlet {
 
         while ((line = br.readLine()) != null) {
             if (debugLog) System.out.println("in: " + line);
-            ServiceRow data = gson.fromJson(line, ServiceRow.class);
+            Transport data = gson.fromJson(line, Transport.class);
             if (data != null) {
                 try {
                     if (debugLog) System.out.println("object: " + data);
-                    data.owner_id = SessionUtils.getSessionUserId(req);
+                    data.service.owner_id = SessionUtils.getSessionUserId(req);
 
                     // update storage
-                    boolean done = storage.insert(data);
+                    boolean done = storage.insert(data.service);
 
-                    if (done && data.service_id > 0) {
+                    if (done && data.service.service_id > 0) {
+                        SettingUtils.setServiceSetting(data.service.service_id, data.setting);
                         String jsonStr = gson.toJson(data);
                         if (debugLog) System.out.println("out: " + jsonStr);
                         resp.setContentType("application/json; charset=UTF-8");
@@ -167,18 +177,19 @@ public class ServiceApi extends HttpServlet {
 
         while ((line = rr.readLine()) != null) {
             if (debugLog) System.out.println(line);
-            ServiceRow data = gson.fromJson(line, ServiceRow.class);
+            Transport data = gson.fromJson(line, Transport.class);
             if (data != null) {
                 try {
                     // check owner rights
                     Long user_id = (Long) req.getAttribute("onlyIfOwner");
                     if (user_id != null) {
-                        ServiceRow dbData = storage.select(data.service_id);
+                        ServiceRow dbData = storage.select(data.service.service_id);
                         if (!SessionUtils.checkOwner(resp, user_id, dbData.owner_id))
                             return;
                     }
                     // update storage
-                    boolean done = storage.update(data);
+                    boolean done = storage.update(data.service);
+                    SettingUtils.setServiceSetting(data.service.service_id, data.setting);
 
                     if (done) {
                         done1 = true;
@@ -232,6 +243,7 @@ public class ServiceApi extends HttpServlet {
                 }
                 // update storage
                 done1 = storage.delete(service_id);
+                SettingUtils.setServiceSetting(service_id, new ServiceSettingRow());
 
             } catch (Exception e) {
                 if (debugLog) System.out.println("SC_NO_CONTENT");

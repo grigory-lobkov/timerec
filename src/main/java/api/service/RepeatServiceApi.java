@@ -37,7 +37,7 @@ public class RepeatServiceApi extends HttpServlet {
     Type listType = new TypeToken<List<RepeatRow>>() {
     }.getType();
 
-    private boolean debugLog = true;
+    private boolean debugLog = false;
 
     /**
      * GET - Read

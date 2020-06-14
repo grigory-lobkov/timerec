@@ -13,33 +13,33 @@ import java.util.Map;
 
 public class SettingUtils implements ServletContextListener {
 
-    private ITable<SettingRow> storage = StorageFactory.getSettingInstance();
-    private boolean debugLog = true;
+    private static ITable<SettingRow> storage = StorageFactory.getSettingInstance();
+    private static boolean debugLog = false;
     
-    private final String CLIENT_LIMIT_DAILY_ALIAS = "CLIENT_LIMIT_DAILY";
-    private final String CLIENT_LIMIT_WEEKLY_ALIAS = "CLIENT_LIMIT_WEEKLY";
-    private final String CLIENT_LIMIT_MONTHLY_ALIAS = "CLIENT_LIMIT_MONTHLY";
+    private static final String CLIENT_LIMIT_DAILY_ALIAS = "CLIENT_LIMIT_DAILY";
+    private static final String CLIENT_LIMIT_WEEKLY_ALIAS = "CLIENT_LIMIT_WEEKLY";
+    private static final String CLIENT_LIMIT_MONTHLY_ALIAS = "CLIENT_LIMIT_MONTHLY";
 
     /**
      * Quick service settings access
      * Key = service_id
      */
-    private Map<Long, ServiceSettingRow> serviceSettings;
+    private static Map<Long, ServiceSettingRow> serviceSettings;
 
     /**
      * Quick all settings access
      */
-    private ServiceSettingRow allSetting;
+    private static ServiceSettingRow allSetting;
 
     @Override
-    public void contextInitialized(ServletContextEvent servletContextEvent) {
+    public synchronized void contextInitialized(ServletContextEvent servletContextEvent) {
         if (debugLog) System.out.println("SettingUtils.contextInitialized()");
 
         readStorage();
     }
 
-    private void readStorage() {
-        Map<Long, ServiceSettingRow> serviceSettings = new Hashtable<>();
+    private static void readStorage() {
+        serviceSettings = new Hashtable<>();
         allSetting = new ServiceSettingRow();
 
         try {
@@ -78,7 +78,15 @@ public class SettingUtils implements ServletContextListener {
         }
     }
 
-    public ServiceSettingRow getServiceSetting(long service_id) {
+    private static Integer stringToInteger(String value) {
+        try {
+            return Integer.parseInt(value);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public static synchronized ServiceSettingRow getServiceSetting(long service_id) {
         ServiceSettingRow sSetting = serviceSettings.get(service_id);
         if (sSetting == null) {
             sSetting = new ServiceSettingRow();
@@ -87,7 +95,7 @@ public class SettingUtils implements ServletContextListener {
         return sSetting;
     }
 
-    public void updateServiceSetting(long service_id, ServiceSettingRow newSetting) {
+    public static synchronized void setServiceSetting(long service_id, ServiceSettingRow newSetting) {
         ServiceSettingRow mySetting = serviceSettings.get(service_id);
         if (mySetting == null) {
             mySetting = new ServiceSettingRow();
@@ -96,7 +104,16 @@ public class SettingUtils implements ServletContextListener {
         updateMySetting(service_id, mySetting, newSetting);
     }
 
-    private void updateMySetting(Long service_id, ServiceSettingRow mySetting, ServiceSettingRow newSetting) {
+    public static synchronized ServiceSettingRow getAllSetting() {
+        return allSetting;
+    }
+
+    public static synchronized void setAllSetting(ServiceSettingRow newSetting) {
+        updateMySetting(null, allSetting, newSetting);
+    }
+
+
+    private static void updateMySetting(Long service_id, ServiceSettingRow mySetting, ServiceSettingRow newSetting) {
         try {
             // DAILY
             if (mySetting.limitPerDay != newSetting.limitPerDay) {
@@ -168,22 +185,6 @@ public class SettingUtils implements ServletContextListener {
             mySetting.limitPerMonth = newSetting.limitPerMonth;
         } catch (Exception e) {
             e.printStackTrace();
-        }
-    }
-
-    public ServiceSettingRow getAllSetting() {
-        return allSetting;
-    }
-
-    public void updateAllSetting(ServiceSettingRow newSetting) {
-        updateMySetting(null, allSetting, newSetting);
-    }
-
-    private Integer stringToInteger(String value) {
-        try {
-            return Integer.parseInt(value);
-        } catch (Exception e) {
-            return null;
         }
     }
 

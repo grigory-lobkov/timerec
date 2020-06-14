@@ -18,9 +18,9 @@ public class SettingRow {
     public String value;
 
     // link to service
-    public Long service_id;
+    public long service_id;
 
     // owner user_id
-    public Long owner_id;
+    public long owner_id;
 
 }

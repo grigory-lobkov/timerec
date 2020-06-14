@@ -69,19 +69,19 @@
 		  <div class="form-group row">
 			<label class="col-lg-3 control-label">Limit per day</label>
 			<div class="col-lg-5">
-			  <input id="clientLimitDay" class="form-control" type="number" value="">
+			  <input id="limitPerDay" class="form-control" type="number" value="">
 			</div>
 		  </div>
 		  <div class="form-group row">
 			<label class="col-lg-3 control-label">Limit per week</label>
 			<div class="col-lg-5">
-			  <input id="clientLimitWeek" class="form-control" type="number" value="">
+			  <input id="limitPerWeek" class="form-control" type="number" value="">
 			</div>
 		  </div>
 		  <div class="form-group row">
 			<label class="col-lg-3 control-label">Limit per month</label>
 			<div class="col-lg-5">
-			  <input id="clientLimitMonth" class="form-control" type="number" value="">
+			  <input id="limitPerMonth" class="form-control" type="number" value="">
 			</div>
 		  </div>
 		  
@@ -149,11 +149,14 @@ function getData() {
 	getAjaxJson({
 		url: url,
 		done: function( data ) {
-			$( "#serviceId" ).val( data.service_id );
-			$( "#serviceName" ).val( data.name );
-			$( "#serviceCost" ).val( data.cost );
-			$( "#serviceDescription" ).val( data.description );
-			$( "#serviceDuration" ).val( data.duration );
+			$( "#serviceId" ).val( data.service.service_id );
+			$( "#serviceName" ).val( data.service.name );
+			$( "#serviceCost" ).val( data.service.cost );
+			$( "#serviceDescription" ).val( data.service.description );
+			$( "#serviceDuration" ).val( data.service.duration );
+			$( "#limitPerDay" ).val( data.setting.limitPerDay > 0 ? data.setting.limitPerDay : '' );
+			$( "#limitPerWeek" ).val( data.setting.limitPerWeek > 0 ? data.setting.limitPerWeek : '' );
+			$( "#limitPerMonth" ).val( data.setting.limitPerMonth > 0 ? data.setting.limitPerMonth : '' );
 			$( ".container" ).show();
 		}
 	});
@@ -207,11 +210,16 @@ function postData() {
 		method: SERVICE_ID == null ? "POST" : "PUT",
 		url: url,
 		data: JSON.stringify({
-			service_id: SERVICE_ID,
-			name: $( "#serviceName" ).val(),
-			cost: $( "#serviceCost" ).val(),
-			description: $("#serviceDescription").val(),
-			duration: $("#serviceDuration").val(),
+			service: {
+				service_id: SERVICE_ID,
+				name: $( "#serviceName" ).val(),
+				cost: $( "#serviceCost" ).val(),
+				description: $("#serviceDescription").val(),
+				duration: $("#serviceDuration").val()},
+			setting: {
+				limitPerDay: ($( "#limitPerDay" ).val()) ? $( "#limitPerDay" ).val() : 0,
+				limitPerWeek: ($( "#limitPerWeek" ).val()) ? $( "#limitPerWeek" ).val() : 0,
+				limitPerMonth: ($( "#limitPerMonth" ).val()) ? $( "#limitPerMonth" ).val() : 0},
 		}),
 		done: SERVICE_ID == null ? function( data ) {
 			$( "#serviceId" ).val( data.service_id );

@@ -142,7 +142,6 @@ public class SettingTable implements ITable<SettingRow> {
             ps.setString(4, object.value);
             ps.setLong(5, object.service_id);
             ps.setLong(6, object.owner_id);
-            ps.setLong(7, object.setting_id);
 
             int affectedRows = ps.executeUpdate();
             if (affectedRows == 1) {

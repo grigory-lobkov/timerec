@@ -39,12 +39,12 @@ public class RepeatConvert {
             r.time_from += delta;
             r.time_to += delta;
             if (r.time_from < 0) {
-                r.dow = (r.dow + 6) % 7; // decrease day of week
+                r.dow = (r.dow + 5) % 7 + 1; // decrease day of week
                 r.time_from += TIME_IN_DAY;
                 r.time_to += TIME_IN_DAY;
             }
-            if (r.time_from > 0) {
-                r.dow = (r.dow + 1) % 7; // increase day of week
+            if (r.time_from > TIME_IN_DAY) {
+                r.dow = r.dow % 7 + 1; // increase day of week
                 r.time_from -= TIME_IN_DAY;
                 r.time_to -= TIME_IN_DAY;
             }
