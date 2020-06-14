@@ -1,6 +1,6 @@
 package storage.tableImpl;
 
-import model.RepeatRow;
+import model.SettingRow;
 import storage.IConnectionPool;
 import storage.IMultiRowTable;
 
@@ -11,11 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * JDBC storage access to {@code model.RepeatRow} objects
+ * JDBC storage access to {@code model.SettingRow} objects
+ * Deprecated?
  *
  * Parent filter field = "service_id"
  */
-public class RepeatTable implements IMultiRowTable<RepeatRow> {
+public class SettingMTable implements IMultiRowTable<SettingRow> {
 
     /**
      * Connection pool fast access variable
@@ -23,20 +24,20 @@ public class RepeatTable implements IMultiRowTable<RepeatRow> {
     IConnectionPool pool;
 
 
-    public RepeatTable(IConnectionPool connection) {
+    public SettingMTable(IConnectionPool connection) {
         pool = connection;
     }
 
 
     /**
-     * Get {@code model.RepeatRow} object from storage by {@code repeat_id}
+     * Get {@code model.SettingRow} object from storage by {@code setting_id}
      *
      * @param ids object identifiers
-     * @return list of {@code model.RepeatRow} objects
+     * @return list of {@code model.SettingRow} objects
      * @throws Exception on error accessing storage
      */
     @Override
-    public List<RepeatRow> select(List<Long> ids) throws Exception {
+    public List<SettingRow> select(List<Long> ids) throws Exception {
         if (ids.size() == 0)
             return new ArrayList<>();
 
@@ -47,19 +48,20 @@ public class RepeatTable implements IMultiRowTable<RepeatRow> {
 
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
-                "SELECT * FROM repeat WHERE repeat_id IN (" + commaList + ")");
+                "SELECT * FROM setting WHERE setting_id IN (" + commaList + ")");
         ResultSet rs = ps.executeQuery();
 
-        List<RepeatRow> result = new ArrayList<>();
+        List<SettingRow> result = new ArrayList<>();
         try {
             while (rs.next()) {
-                RepeatRow r = new RepeatRow();
-                r.repeat_id = rs.getLong("repeat_id");
+                SettingRow r = new SettingRow();
+                r.setting_id = rs.getLong("setting_id");
+                r.alias = rs.getString("alias");
+                r.name = rs.getString("name");
+                r.description = rs.getString("description");
+                r.value = rs.getString("value");
                 r.service_id = rs.getLong("service_id");
-                r.dow = rs.getInt("dow");
-                r.duration = rs.getInt("duration");
-                r.time_from = rs.getInt("time_from");
-                r.time_to = rs.getInt("time_to");
+                r.owner_id = rs.getLong("owner_id");
                 result.add(r);
             }
             return result;
@@ -72,30 +74,31 @@ public class RepeatTable implements IMultiRowTable<RepeatRow> {
 
 
     /**
-     * Get {@code model.RepeatRow} object from storage by {@code repeat_id}
+     * Get {@code model.SettingRow} object from storage by {@code setting_id}
      *
      * @param parent_id object identifier
-     * @return {@code model.RepeatRow} object
+     * @return {@code model.SettingRow} object
      * @throws Exception on error accessing storage
      */
     @Override
-    public List<RepeatRow> select(long parent_id) throws Exception {
+    public List<SettingRow> select(long parent_id) throws Exception {
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
-                "SELECT * FROM repeat WHERE service_id = ?");
+                "SELECT * FROM setting WHERE service_id = ?");
         ps.setLong(1, parent_id);
         ResultSet rs = ps.executeQuery();
 
-        List<RepeatRow> result = new ArrayList<RepeatRow>();
+        List<SettingRow> result = new ArrayList<SettingRow>();
         try {
             while (rs.next()) {
-                RepeatRow r = new RepeatRow();
-                r.repeat_id = rs.getLong("repeat_id");
+                SettingRow r = new SettingRow();
+                r.setting_id = rs.getLong("setting_id");
+                r.alias = rs.getString("alias");
+                r.name = rs.getString("name");
+                r.description = rs.getString("description");
+                r.value = rs.getString("value");
                 r.service_id = rs.getLong("service_id");
-                r.dow = rs.getInt("dow");
-                r.duration = rs.getInt("duration");
-                r.time_from = rs.getInt("time_from");
-                r.time_to = rs.getInt("time_to");
+                r.owner_id = rs.getLong("owner_id");
                 result.add(r);
             }
             return result;
@@ -108,28 +111,29 @@ public class RepeatTable implements IMultiRowTable<RepeatRow> {
 
 
     /**
-     * Set {@code model.RepeatRow} object to storage by {@code repeat.repeat_id}
+     * Set {@code model.SettingRow} object to storage by {@code setting.setting_id}
      *
      * @param objects updated objects
      * @return {@code true} on success
      * @throws Exception on error accessing storage
      */
     @Override
-    public int update(List<RepeatRow> objects) throws Exception {
+    public int update(List<SettingRow> objects) throws Exception {
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
-                "UPDATE repeat SET service_id = ?, dow = ?, duration = ?, time_from = ?, time_to = ?" +
-                        " WHERE repeat_id = ?");
+                "UPDATE setting SET alias = ?, name = ?, description = ?, value = ?, service_id = ?, owner_id = ?" +
+                        " WHERE setting_id = ?");
 
         int affectedRows = 0;
         try {
-            for (RepeatRow object : objects) {
-                ps.setLong(1, object.service_id);
-                ps.setInt(2, object.dow);
-                ps.setInt(3, object.duration);
-                ps.setInt(4, object.time_from);
-                ps.setInt(5, object.time_to);
-                ps.setLong(6, object.repeat_id);
+            for (SettingRow object : objects) {
+                ps.setString(1, object.alias);
+                ps.setString(2, object.name);
+                ps.setString(3, object.description);
+                ps.setString(4, object.value);
+                ps.setLong(5, object.service_id);
+                ps.setLong(6, object.owner_id);
+                ps.setLong(7, object.setting_id);
 
                 affectedRows += ps.executeUpdate();
             }
@@ -142,35 +146,36 @@ public class RepeatTable implements IMultiRowTable<RepeatRow> {
 
 
     /**
-     * Create new {@code model.RepeatRow} object in storage
-     * {@code repeat.repeat_id} will be update to new value
+     * Create new {@code model.SettingRow} object in storage
+     * {@code setting.setting_id} will be update to new value
      *
      * @param objects new objects list
      * @return {@code true} on success
      * @throws Exception on error accessing storage
      */
     @Override
-    public int insert(List<RepeatRow> objects) throws Exception {
+    public int insert(List<SettingRow> objects) throws Exception {
         Connection conn = pool.connection();
-        String resultColumns[] = new String[]{"repeat_id"};
+        String resultColumns[] = new String[]{"setting_id"};
         PreparedStatement ps = conn.prepareStatement(
-                "INSERT INTO repeat (repeat_id, service_id, dow, duration, time_from, time_to)" +
-                        "VALUES (seq_repeat_id.nextval, ?, ?, ?, ?, ?)", resultColumns);
+                "INSERT INTO setting (setting_id, alias, name, description, value, service_id, owner_id)" +
+                        "VALUES (seq_setting_id.nextval, ?, ?, ?, ?, ?, ?)", resultColumns);
 
         int affectedRows = 0;
         try {
-            for (RepeatRow object : objects) {
-                ps.setLong(1, object.service_id);
-                ps.setInt(2, object.dow);
-                ps.setInt(3, object.duration);
-                ps.setInt(4, object.time_from);
-                ps.setInt(5, object.time_to);
+            for (SettingRow object : objects) {
+                ps.setString(1, object.alias);
+                ps.setString(2, object.name);
+                ps.setString(3, object.description);
+                ps.setString(4, object.value);
+                ps.setLong(5, object.service_id);
+                ps.setLong(6, object.owner_id);
 
                 if (ps.executeUpdate() == 1) {
                     affectedRows++;
                     ResultSet generatedKeys = ps.getGeneratedKeys();
                     if (generatedKeys.next()) {
-                        object.repeat_id = generatedKeys.getLong(1);
+                        object.setting_id = generatedKeys.getLong(1);
                     }
                 }
             }
@@ -183,7 +188,7 @@ public class RepeatTable implements IMultiRowTable<RepeatRow> {
 
 
     /**
-     * Delete {@code model.RepeatRow} object from storage by {@code parent_id}
+     * Delete {@code model.SettingRow} object from storage by {@code parent_id}
      *
      * @param parent_id filter field
      * @return {@code true} on success
@@ -193,7 +198,7 @@ public class RepeatTable implements IMultiRowTable<RepeatRow> {
     public int delete(long parent_id) throws Exception {
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
-                "DELETE FROM repeat WHERE service_id = ?");
+                "DELETE FROM setting WHERE service_id = ?");
         ps.setLong(1, parent_id);
         try {
             int affectedRows = ps.executeUpdate();
@@ -206,7 +211,7 @@ public class RepeatTable implements IMultiRowTable<RepeatRow> {
 
 
     /**
-     * Delete {@code model.RepeatRow} object from storage by {@code ids}
+     * Delete {@code model.SettingRow} object from storage by {@code ids}
      *
      * @param ids object identifiers
      * @return true on success
@@ -223,7 +228,7 @@ public class RepeatTable implements IMultiRowTable<RepeatRow> {
         }
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
-                "DELETE FROM repeat WHERE repeat_id IN (" + commaList + ")");
+                "DELETE FROM setting WHERE setting_id IN (" + commaList + ")");
         try {
             int affectedRows = ps.executeUpdate();
             return affectedRows;

@@ -16,9 +16,9 @@ public class CreateStructure implements ServletContextListener {
      */
     boolean checkStructureNeedCreate() {
         boolean result = true;
-        try (Connection conn = StorageFactory.dbConn.connection()) {
+        try (Connection conn = StorageFactory.dbPool.connection()) {
             DatabaseMetaData meta = conn.getMetaData();
-            ResultSet res = meta.getTables("", null, "REPEAT", new String[]{"TABLE"});
+            ResultSet res = meta.getTables("", null, "SETTING1", new String[]{"TABLE"});
             while (res.next())
                 result = false;
             res.close();
@@ -68,7 +68,7 @@ public class CreateStructure implements ServletContextListener {
     @Override
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
         if (debugLog) System.out.println("CreateStructure.contextDestroyed()");
-        StorageFactory.dbConn.close();
+        StorageFactory.dbPool.close();
     }
 
 }
@@ -80,6 +80,10 @@ class Updater {
     static final String ADMIN_NAME = "Admin";
     static final String ADMIN_EMAIL = "admin@timerec.ru";
     static final String ADMIN_PASSWORD = "admin";
+
+    static final String CLIENT_LIMIT_DAILY = "2";
+    static final String CLIENT_LIMIT_WEEKLY = "4";
+    static final String CLIENT_LIMIT_MONTHLY = "10";
 
     /**
      * One statement for all scripts, executed here
@@ -105,7 +109,7 @@ class Updater {
      * @throws SQLException on storage problems
      */
     static void createStructures() throws SQLException {
-        Connection conn = StorageFactory.dbConn.connection();
+        Connection conn = StorageFactory.dbPool.connection();
         statement = conn.createStatement();
 
         exec("seq_image_id",
@@ -158,18 +162,39 @@ class Updater {
                         " name VARCHAR2(1000)," +
                         " phone VARCHAR2(100)," +
                         " email VARCHAR2(100)," +
-                        " external_ref VARCHAR2(1000))");
+                        " external_ref VARCHAR2(1000)" +
+                        " tz_id BIGINT)");
+*/
+
+        exec("seq_setting_id",
+                "CREATE SEQUENCE IF NOT EXISTS seq_setting_id");
 
         exec("setting",
-                "CREATE TABLE IF NOT EXISTS setting " +
-                        "(setting_id BIGINT PRIMARY KEY, " +
-                        " alias VARCHAR2(64), " +
-                        " name VARCHAR2(1000), " +
-                        " description CLOB, " +
-                        " value VARCHAR2(4000), " +
+                "CREATE TABLE IF NOT EXISTS setting" +
+                        "(setting_id BIGINT PRIMARY KEY," +
+                        " alias VARCHAR2(64)," +
+                        " name VARCHAR2(1000)," +
+                        " description CLOB," +
+                        " value VARCHAR2(4000)," +
                         " service_id BIGINT," +
                         " owner_id BIGINT)");
-*/
+
+//        exec("setting_service_idx",
+//                "CREATE INDEX IF NOT EXISTS setting_service_idx ON setting (service_id)");
+//        exec("setting_alias_idx",
+//                "CREATE INDEX IF NOT EXISTS setting_alias_idx ON setting (alias)");
+
+        exec("setting_update_list",
+                "INSERT INTO setting (setting_id, alias, name, description, value)" +
+                        "SELECT seq_setting_id.nextval setting_id, alias, name, description, value FROM (" +
+                        "  SELECT 'ALL_SERVICES_CLIENT_LIMIT_DAILY' alias, '"+CLIENT_LIMIT_DAILY+"' value," +
+                        "         'All services usage limit per day' name, 'Client cannot take more than this count of services per day.' description FROM dual UNION ALL" +
+                        "  SELECT 'ALL_SERVICES_CLIENT_LIMIT_WEEKLY' alias, '"+CLIENT_LIMIT_WEEKLY+"' value," +
+                        "         'All services usage limit per week', 'Client cannot take more than this count of services per week.' FROM dual UNION ALL" +
+                        "  SELECT 'ALL_SERVICES_CLIENT_LIMIT_MONTHLY' alias, '"+CLIENT_LIMIT_MONTHLY+"' value," +
+                        "         'All services usage limit per month', 'Client cannot take more than this count of services per month.' FROM dual" +
+                        ")WHERE (alias) NOT IN (SELECT alias FROM setting)");
+
         statement.close();
         conn.close();
     }
@@ -181,15 +206,18 @@ class Updater {
      */
     private static void userAndRights() throws SQLException {
 
-        exec("seq_role_id drop", "DROP SEQUENCE IF EXISTS seq_role_id");
-        exec("role drop", "DROP TABLE IF EXISTS role");
+        //exec("seq_role_id drop", "DROP SEQUENCE IF EXISTS seq_role_id");
+        //exec("role drop", "DROP TABLE IF EXISTS role");
+
         exec("seq_role_id",
                 "CREATE SEQUENCE IF NOT EXISTS seq_role_id");
+
         exec("role",
                 "CREATE TABLE IF NOT EXISTS role " +
                         "(role_id BIGINT PRIMARY KEY," +
                         " name VARCHAR2(1000)," +
                         " owner_id BIGINT)");
+
         exec("role_update_list",
                 "INSERT INTO role (role_id, name)" +
                         "SELECT seq_role_id.nextval role_id, name FROM (" +
@@ -197,10 +225,12 @@ class Updater {
                         " SELECT '"+ROLE_OPER+"' name FROM dual" +
                         ")WHERE (name) NOT IN (SELECT name FROM role)");
 
-        exec("seq_access_id drop", "DROP SEQUENCE IF EXISTS seq_access_id");
-        exec("access drop", "DROP TABLE IF EXISTS access");
+        //exec("seq_access_id drop", "DROP SEQUENCE IF EXISTS seq_access_id");
+        //exec("access drop", "DROP TABLE IF EXISTS access");
+
         exec("seq_access_id",
                 "CREATE SEQUENCE IF NOT EXISTS seq_access_id");
+
         exec("access",
                 "CREATE TABLE IF NOT EXISTS access " +
                         "(access_id BIGINT PRIMARY KEY," +
@@ -216,10 +246,13 @@ class Updater {
                         " own_delete BOOLEAN,)");
 
 
-        exec("seq_user_id drop", "DROP SEQUENCE IF EXISTS seq_user_id");
-        exec("user drop", "DROP TABLE IF EXISTS user");
+        //exec("seq_user_id drop", "DROP SEQUENCE IF EXISTS seq_user_id");
+        //exec("user_email_idx drop", "DROP INDEX IF EXISTS user_email_idx");
+        //exec("user drop", "DROP TABLE IF EXISTS user");
+
         exec("seq_user_id",
                 "CREATE SEQUENCE IF NOT EXISTS seq_user_id");
+
         exec("user",
                 "CREATE TABLE IF NOT EXISTS user " +
                         "(user_id BIGINT PRIMARY KEY," +
@@ -271,8 +304,9 @@ class Updater {
      */
     private static void serviceSchedule() throws SQLException {
 
-        exec("seq_service_id drop", "DROP SEQUENCE IF EXISTS seq_service_id");
-        exec("service drop", "DROP TABLE IF EXISTS service");
+        //exec("seq_service_id drop", "DROP SEQUENCE IF EXISTS seq_service_id");
+        //exec("service drop", "DROP TABLE IF EXISTS service");
+
         exec("seq_service_id",
                 "CREATE SEQUENCE IF NOT EXISTS seq_service_id");
 
@@ -286,8 +320,10 @@ class Updater {
                         " cost DECIMAL," +
                         " owner_id BIGINT)");
 
-        exec("seq_repeat_id drop", "DROP SEQUENCE IF EXISTS seq_repeat_id");
-        exec("repeat drop", "DROP TABLE IF EXISTS repeat");
+        //exec("seq_repeat_id drop", "DROP SEQUENCE IF EXISTS seq_repeat_id");
+        //exec("repeat_service_idx drop", "DROP INDEX IF EXISTS repeat_service_idx");
+        //exec("repeat drop", "DROP TABLE IF EXISTS repeat");
+
         exec("seq_repeat_id",
                 "CREATE SEQUENCE IF NOT EXISTS seq_repeat_id");
 
@@ -299,6 +335,9 @@ class Updater {
                         " duration INTEGER," +
                         " time_from INTEGER," +
                         " time_to INTEGER)");
+
+        exec("repeat_service_idx",
+                "CREATE INDEX IF NOT EXISTS repeat_service_idx ON repeat (service_id)");
 
         /*exec("schedule",
                 "CREATE TABLE IF NOT EXISTS schedule " +

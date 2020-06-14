@@ -1,18 +1,15 @@
 package storage;
 
-import model.AccessRow;
-import model.RepeatRow;
-import model.ServiceRow;
+import model.*;
 import storage.connectImpl.H2ConnectionPool;
 import storage.tableImpl.*;
-import model.UserRow;
 
 /**
  * Storage Singleton factory
  */
 public class StorageFactory {
 
-    public static IConnectionPool dbConn = new H2ConnectionPool();
+    public static IConnectionPool dbPool = new H2ConnectionPool();
 
 
     static private volatile ITable<ServiceRow> serviceInstance = null;
@@ -26,7 +23,7 @@ public class StorageFactory {
         if (serviceInstance == null)
             synchronized (StorageFactory.class) {
                 if (serviceInstance == null) {
-                    serviceInstance = new ServiceTable(dbConn);
+                    serviceInstance = new ServiceTable(dbPool);
                 }
             }
         return serviceInstance;
@@ -44,7 +41,7 @@ public class StorageFactory {
         if (userInstance == null)
             synchronized (StorageFactory.class) {
                 if (userInstance == null) {
-                    userInstance = new UserTable(dbConn);
+                    userInstance = new UserTable(dbPool);
                 }
             }
         return userInstance;
@@ -62,7 +59,7 @@ public class StorageFactory {
         if (accessInstance == null)
             synchronized (StorageFactory.class) {
                 if (accessInstance == null) {
-                    accessInstance = new AccessTable(dbConn);
+                    accessInstance = new AccessTable(dbPool);
                 }
             }
         return accessInstance;
@@ -80,25 +77,44 @@ public class StorageFactory {
         if (repeatInstance == null)
             synchronized (StorageFactory.class) {
                 if (repeatInstance == null) {
-                    repeatInstance = new RepeatTable(dbConn);
+                    repeatInstance = new RepeatTable(dbPool);
                 }
             }
         return repeatInstance;
     }
 
+
+    static private volatile ITable<SettingRow> settingInstance = null;
+
+    /**
+     * Generate Settings storage actions
+     *
+     * @return singleton instance
+     */
+    public static ITable<SettingRow> getSettingInstance() {
+        if (settingInstance == null)
+            synchronized (StorageFactory.class) {
+                if (settingInstance == null) {
+                    settingInstance = new SettingTable(dbPool);
+                }
+            }
+        return settingInstance;
+    }
+
     /**
      * Generate parameter-based storage {@code ITable} object
+     * Used to determine owner inside AccessFilterApi. Deprecated.
      *
      * @param object name of object
      * @return singleton instance
      */
-    public static ITable getInstance(String object) {
-        switch(object) {
-            case "service": return getServiceInstance();
-            case "user": return getUserInstance();
-            case "access": return getAccessInstance();
-        }
-        return null;
-    }
+//    public static ITable getInstance(String object) {
+//        switch(object) {
+//            case "service": return getServiceInstance();
+//            case "user": return getUserInstance();
+//            case "access": return getAccessInstance();
+//        }
+//        return null;
+//    }
 
 }
