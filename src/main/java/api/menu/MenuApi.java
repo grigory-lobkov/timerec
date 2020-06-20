@@ -62,8 +62,9 @@ public class MenuApi extends HttpServlet {
     public void init() throws ServletException {
         servicePages = new HashSet<>(Arrays.asList("service", "repeat", "schedule"));
         //userPages = new HashSet<>(Arrays.asList("login", "register", "profile", "setting", "user"));
-        otherPages = new HashSet<>(Arrays.asList("register", "service", "setting", "rec", "recs"));
+        otherPages = new HashSet<>(Arrays.asList("login", "register", "service", "setting", "rec", "recs"));
         pageNames = new Hashtable<>();
+        pageNames.put("login", "Login");
         pageNames.put("service", "Service");
         pageNames.put("repeat", "Repeat");
         pageNames.put("schedule", "Schedule");
@@ -71,6 +72,7 @@ public class MenuApi extends HttpServlet {
         pageNames.put("setting", "Settings");
         pageNames.put("rec", "Record");
         pageNames.put("recs", "Record list");
+
         roleMenu = new Hashtable<>();
         List<AccessRow> list;
         try {
@@ -131,14 +133,15 @@ public class MenuApi extends HttpServlet {
         String jsonServices = "";
         List<ServiceRow> services = null;
         String jsonPages = "";
-        try {
-            // query storage
-            services = serviceStorage.select();
-            // services list
-            jsonServices = genServicesJson(services);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        if(user.user_id > 0)
+            try {
+                // query storage
+                services = serviceStorage.select();
+                // services list
+                jsonServices = genServicesJson(services);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         //if (service_id <= 0 && services.size() > 0) service_id = services.get(0).service_id;
         jsonPages = genPagesJson(user, service_id);
 
@@ -196,14 +199,12 @@ public class MenuApi extends HttpServlet {
     }
 
     public static long getServiceId(HttpServletRequest req, HttpServletResponse resp) {
-//        String path = req.getPathInfo();
-//        if (path == null || path.length() < 2) return 0;
-//
-//        path = path.substring(1);
-//        if (!path.matches("[0-9]*")) return 0;
         String path = req.getParameter("service_id");
-
-        return Long.valueOf(path);
+        try {
+            return Long.valueOf(path);
+        } finally {
+            return 0;
+        }
     }
 
 }

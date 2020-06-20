@@ -93,15 +93,21 @@ public class SessionUtils {
      * @return
      */
     static public void deleteUserSessionCook(HttpServletRequest req, HttpServletResponse resp) {
+        if (debugLog) System.out.println("SessionUtils.deleteUserSessionCook()");
         HttpSession session = req.getSession(false);
         if(session!=null) {
+            session.setAttribute("user", null);
             Cookie[] cookies = req.getCookies();
             for (Cookie c : cookies) {
                 String n = c.getName();
                 if (n.equals("email") || n.equals("password") || n.equals("JSESSIONID")) {
+                    if (debugLog) System.out.println("SessionUtils.deleteUserSessionCook() " + n);
                     c.setValue("");
-                    c.setPath("/");
                     c.setMaxAge(0);
+                    resp.addCookie(c);
+                    c = new Cookie(n, "");
+                    c.setMaxAge(0);
+                    c.setPath("/");
                     resp.addCookie(c);
                 }
             }
@@ -123,6 +129,7 @@ public class SessionUtils {
         String password = null;
         for (Cookie c : cookies) {
             String n = c.getName();
+            if (debugLog) System.out.println("SessionUtils.createUserSessionCook() Cook '"+n+"'='"+c.getValue()+"'");
             if (n.equals("email")) email = c.getValue();
             else if (n.equals("password")) password = c.getValue();
         }

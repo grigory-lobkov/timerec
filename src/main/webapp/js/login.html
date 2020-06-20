@@ -133,7 +133,7 @@ function postData() {
 		statusCode: {
 			201: function( data ) {
 				alertMessage( "Login sucessfull. Welcome!" );
-				window.location.replace( "service.html" );
+				window.location.replace( "index.html" );
 			},
 			204: function() {
 				alertMessage( "User name or password is wrong" );
@@ -145,7 +145,7 @@ function postData() {
 			
 			if( result=="1" ) {
 				alertMessage( "Login sucessfull. Welcome!" );
-				window.location.replace( "service.html" );
+				window.location.replace( "index.html" );
 			} else if( xhr.status = 204 ) {
 				alertMessage( "User name or password is wrong" );
 			} else {

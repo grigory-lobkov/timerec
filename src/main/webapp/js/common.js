@@ -77,10 +77,9 @@ function fillMenu(data) {
 			'</a>'+
 			'<div class="dropdown-menu" aria-labelledby="navbarDropdownU">'+
 			'<a class="dropdown-item'+(isUser?' disabled':'')+'" href="login.html">Log in</a>'+
-			'<a class="dropdown-item'+(!isUser?' disabled':'')+'" href="user.html">Profile</a>'+
-			'<a class="dropdown-item'+(!isUser?' disabled':'')+'" href="settings.html">Settings</a>'+
+			'<a class="dropdown-item'+(!isUser?' disabled':'')+'" href="profile.html">Profile</a>'+
 			'<div class="dropdown-divider"></div>'+
-			'<a class="dropdown-item'+(isUser?' disabled':'')+'" href="#">Log out</a>'+
+			'<a class="dropdown-item'+(!isUser?' disabled':'')+'" href="logout.html">Log out</a>'+
 			'</div>'+
 		'</li>';
 
@@ -89,9 +88,6 @@ function fillMenu(data) {
 	var serviceId = getUrlVars()["service_id"];
 	var serviceName = '(service list)'
 	var path = window.location.pathname;
-	var pages = /(service.html|repeat.html|schedule.html)/;
-	if(!path.match(pages))
-		path = "service.html"
 	var ss = data.services
     for (var i = 0, len = ss.length; i < len; i++) {
 		if(serviceId==ss[i].service_id) {
@@ -117,10 +113,13 @@ function fillMenu(data) {
 
     var mMenu = "";
 	var ps = data.pages;
+	var isService = false;
     for (var i = 0, len = ps.length; i < len; i++) {
 		mMenu += addMenuElement(ps[i].name, ps[i].item+'.html', ps[i].param==""?"":"?"+ps[i].param);
+		if( ps[i].name == 'service' )
+		    isService = true;
     }
-    if(sMenu) {
+    if(sMenu && isService) {
 		mMenu += '<li class="nav-item dropdown">'+
     			'<a class="nav-link dropdown-toggle" href="#" id="navbarDropdownS" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+
     				serviceName+

@@ -7,7 +7,7 @@ import java.sql.*;
 
 public class CreateStructure implements ServletContextListener {
 
-    private boolean debugLog = true;
+    private boolean debugLog = false;
 
     /**
      * Check, if we need to create table structure
@@ -216,9 +216,9 @@ class Updater {
      */
     private static void user() throws SQLException {
 
-        //exec("seq_user_id drop", "DROP SEQUENCE IF EXISTS seq_user_id");
-        //exec("user_email_idx drop", "DROP INDEX IF EXISTS user_email_idx");
-        //exec("user drop", "DROP TABLE IF EXISTS user");
+        exec("seq_user_id drop", "DROP SEQUENCE IF EXISTS seq_user_id");
+        exec("user_email_idx drop", "DROP INDEX IF EXISTS user_email_idx");
+        exec("user drop", "DROP TABLE IF EXISTS user");
 
         exec("seq_user_id",
                 "CREATE SEQUENCE IF NOT EXISTS seq_user_id");
@@ -291,8 +291,8 @@ class Updater {
      */
     private static void userAccess() throws SQLException {
 
-        //exec("seq_access_id drop", "DROP SEQUENCE IF EXISTS seq_access_id");
-        //exec("access drop", "DROP TABLE IF EXISTS access");
+        exec("seq_access_id drop", "DROP SEQUENCE IF EXISTS seq_access_id");
+        exec("access drop", "DROP TABLE IF EXISTS access");
 
         exec("seq_access_id",
                 "CREATE SEQUENCE IF NOT EXISTS seq_access_id");
@@ -316,7 +316,7 @@ class Updater {
                         " all_get, all_put, all_post, all_delete, own_get, own_put, own_post, own_delete)" +
                         "SELECT seq_access_id.nextval, role_id, page.name, true, true, true, true, true, true, true, true " +
                         "FROM role, (" +
-                        " SELECT 'menu' FROM dual UNION ALL" +
+                        " SELECT 'menu' name FROM dual UNION ALL" +
                         " SELECT 'setting' FROM dual UNION ALL" +
                         " SELECT 'user' FROM dual UNION ALL" +
                         " SELECT 'profile' FROM dual UNION ALL" +
@@ -329,20 +329,20 @@ class Updater {
                         " SELECT 'tz' FROM dual UNION ALL" +
                         " SELECT 'logout' FROM dual" +
                         ") page " +
-                        "WHERE name = '" + ROLE_ADMIN + "'");
+                        "WHERE role.name = '" + ROLE_ADMIN + "'");
 
         exec("access_insert_role_client",
                 "INSERT INTO access (access_id, role_id, object_name," +
                         " all_get, all_put, all_post, all_delete, own_get, own_put, own_post, own_delete)" +
                         "SELECT seq_access_id.nextval, role_id, page.name, true, true, true, true, true, true, true, true " +
                         "FROM role, (" +
-                        " SELECT 'menu' FROM dual UNION ALL" +
+                        " SELECT 'menu' name FROM dual UNION ALL" +
                         " SELECT 'profile' FROM dual UNION ALL" +
                         " SELECT 'rec' FROM dual UNION ALL" +
                         " SELECT 'recs' FROM dual UNION ALL" +
                         " SELECT 'logout' FROM dual" +
                         ") page " +
-                        "WHERE name = '" + ROLE_CLIENT + "'");
+                        "WHERE role.name = '" + ROLE_CLIENT + "'");
 
         exec("access_insert_role_public",
                 "INSERT INTO access (access_id, role_id, object_name," +
@@ -352,7 +352,7 @@ class Updater {
                         " SELECT 'login' name FROM dual UNION ALL" +
                         " SELECT 'register' FROM dual" +
                         ") page " +
-                        "WHERE name = '" + ROLE_PUBLIC + "'");
+                        "WHERE role.name = '" + ROLE_PUBLIC + "'");
     }
 
     /**
