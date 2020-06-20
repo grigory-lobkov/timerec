@@ -158,16 +158,14 @@ public class MenuApi extends HttpServlet {
      * @return
      */
     private String genPagesJson(UserRow user, long service_id) {
-        System.out.println("genPagesJson(service_id="+service_id+")");
+        //System.out.println("genPagesJson(service_id="+service_id+")");
         StringBuilder result = new StringBuilder();
         boolean showService = service_id > 0;
         String serviceParam = showService ? "service_id=" + service_id : "";
 
         List<Page> pages = roleMenu.get(user.role_id);
         for (Page p : pages) {
-            System.out.println(p);
             if (p.isOther || showService) {
-                System.out.println("SHOW!");
                 if (result.length() > 0)
                     result.append(',');
                 result.append("{\"item\":\"" + p.item +
