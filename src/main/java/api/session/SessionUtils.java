@@ -175,4 +175,16 @@ public class SessionUtils {
         return user == null ? -1 : user.user_id;
     }
 
+    /**
+     * Default user, when user is not logged in
+     *
+     * @return
+     */
+    public static UserRow getPublicUser() {
+        UserRow u = new UserRow();
+        u.role_id = 1; // CreateStructure.Updater.userRole() MUST set public role_id = 1
+        u.name = "";
+        u.user_id = -1;
+        return u;
+    }
 }

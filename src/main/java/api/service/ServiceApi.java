@@ -44,7 +44,7 @@ import api.session.SessionUtils;
 public class ServiceApi extends HttpServlet {
 
     private ITable<ServiceRow> storage = StorageFactory.getServiceInstance();
-    private boolean debugLog = false;
+    private static boolean debugLog = false;
 
     static class Transport {
         ServiceRow service;
@@ -65,15 +65,8 @@ public class ServiceApi extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         if (debugLog) System.out.println("ServiceApi.doGet()");
 
-        String path = req.getPathInfo();
-        if (path == null || path.length() < 2
-                || !path.substring(1).matches("[0-9]*"))
-            return;
-
         Gson gson = (new GsonBuilder()).create();
-        if (debugLog) System.out.println("service_id=" + path.substring(1));
-
-        long service_id = Long.valueOf(path.substring(1));
+        long service_id = getServiceId(req, resp);
 
         try {
             // query storage
@@ -100,6 +93,20 @@ public class ServiceApi extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_NO_CONTENT);
             e.printStackTrace();
         }
+    }
+
+    public static long getServiceId(HttpServletRequest req, HttpServletResponse resp) {
+        String path = req.getPathInfo();
+        if (path == null || path.length() < 2)
+            throw new RuntimeException("Identifier is not set");
+
+        path = path.substring(1);
+        if (!path.matches("[0-9]*"))
+            throw new RuntimeException("Identifier must be numeric");
+
+        if (debugLog) System.out.println("parent_id=" + path);
+
+        return Long.valueOf(path);
     }
 
     /**
@@ -225,12 +232,8 @@ public class ServiceApi extends HttpServlet {
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         if (debugLog) System.out.println("ServiceApi.doDelete()");
 
-        String path = req.getPathInfo();
-        if (path == null) return;
         boolean done1 = false;
-        if (debugLog) System.out.println("service_id=" + path.substring(1));
-
-        long service_id = Long.valueOf(path.substring(1));
+        long service_id = getServiceId(req, resp);
 
         if (service_id > 0)
             try {

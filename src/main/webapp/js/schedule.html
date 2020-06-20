@@ -30,9 +30,31 @@
 <script src='fullcalendar-4.4.0/packages/list/main.js'></script>
 
 <style>
+
 /* disable all-day row */
-.fc-timeGridWeek-view .fc-row.fc-week.fc-widget-content{display:none}
+
+.fc-timeGridWeek-view .fc-row.fc-week.fc-widget-content, .fc-timeGridDay-view .fc-day-grid{
+	display:none
+}
+
+/* mouse change on hover for modal window */
+
+tr.fc-list-item:hover, a.fc-event:hover {
+    cursor: pointer;
+}
+
+/* font size */
+
+.fc-event {
+    font-size: 0.9em;
+    line-height: 1.1em;
+}
+.fc-day-grid-event .fc-time {
+    font-weight: unset;
+}
+
 /* color scheme */
+
 .fc-button {
     color: #b8d9f1;
 }
@@ -55,18 +77,24 @@
     background-color: #b8d9f1;
 }
 .fc-event {
-    border: 1px solid #b8d9f1;
+    /*border: 1px solid #b8d9f1;*/
+    border: none;
 }
 </style>
 
 <div class="container">
   <form role="form" class="sSchedule">
-    <h1>Repeat of service</h1>
+    <h1>Schedule of service</h1>
   	<div id="calendar"></div>
   </form>
 </div>
 <script>
+
+API_URL = API_SERVER_URI + "schedule/service/";
+SERVICE_ID = null;
+
   document.addEventListener('DOMContentLoaded', function() {
+    SERVICE_ID = getUrlVars()["service_id"];
     var initialLocaleCode = 'en';
     //var initialLocaleCode = window.navigator.language;
     var calendarEl = document.getElementById('calendar');
@@ -78,16 +106,72 @@
         center: 'title',
         right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
       },
+      /*header: {
+        center: 'addEventButton'
+      },
+      customButtons: {
+        addEventButton: {
+          text: 'Add event',
+          click: function() {
+            var dateStr = prompt('Enter a date in YYYY-MM-DD format');
+            var date = new Date(dateStr + 'T00:00:00'); // will be in local time
+
+            if (!isNaN(date.valueOf())) { // valid?
+              calendar.addEvent({
+                title: 'dynamic event',
+                start: date,
+                allDay: true
+              });
+              alert('Great. Now, update your database...');
+            } else {
+              alert('Invalid date.');
+            }
+          }
+        }
+      }*/
 	  locale: initialLocaleCode, // locale of texts
 	  columnHeaderText: function(arg) { n=arg.toLocaleString(initialLocaleCode,{weekday: 'long'}); return n.charAt(0).toUpperCase() + n.slice(1) }, // Full week name
       weekNumberCalculation: 'ISO', // start day is Monday
-	  
-	  defaultView: 'timeGridWeek', // default view is "Week"
-      defaultDate: '2020-02-12',
+
+	  defaultView: 'dayGridMonth', // default view is "Week"
+      //defaultDate: '2020-02-12',
       navLinks: true, // can click day/week names to navigate views
       editable: false,
       eventLimit: true, // allow "more" link when too many events
-      events: [
+
+      /*selectable: true,
+      select: function(arg) {
+        var title = prompt('Event Title:');
+        if (title) {
+          calendar.addEvent({
+            title: title,
+            start: arg.start,
+            end: arg.end,
+            allDay: arg.allDay
+          })
+        }
+        calendar.unselect()
+      },*/
+
+	  eventClick: function( info ) {
+		modal = $( '#modalCenter' );
+		e = info.event;
+		ep = e.extendedProps;
+		bdy = htmlEntities( info.event.extendedProps.description ) + '<br>' +
+			'<small><br><b>Client</b>: ' + htmlEntities( ep.client_name ) +
+			'<br><b>Start</b>: ' + e.start +
+			'<br><b>End</b>: ' + e.end +
+			'<br><b>Duration</b>: ' + ep.duration + ' minutes' +
+			'</small>';
+		modal.find( '.modal-title' ).text( ep.title );
+		modal.find( '.modal-body' ).html( bdy );
+		modal.modal( 'show' );
+	  },
+
+      events: API_URL + SERVICE_ID,
+      eventBorderColor: "#fff",
+
+      /*events: [
         {
           groupId: 999,
           title: 'Repeating Event',
@@ -128,12 +212,33 @@
           url: 'http://google.com/',
           start: '2020-02-28'
         }
-      ]
+      ]*/
     });
 
     calendar.render();
   });
 </script>
+
+<!-- Modal -->
+<div class="modal fade" id="modalCenter" tabindex="-1" role="dialog" aria-labelledby="modalCenterTitle" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title"></h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				...
+			</div>
+			<div class="modal-footer">
+				<!--<button type="button" class="btn btn-primary">Cancel record</button>-->
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
 <!-- /CONTENT -->
 
 	<hr>

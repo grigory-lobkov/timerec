@@ -171,6 +171,7 @@ public class AccessFilterApi implements Filter {
     public void destroy() {
         if(debugLog) System.out.println("AccessFilterApi.destroy()");
         accTable = null;
+        accAlways = null;
     }
 
 }

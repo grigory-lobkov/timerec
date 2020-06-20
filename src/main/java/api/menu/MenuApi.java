@@ -7,8 +7,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.List;
+import java.util.*;
 
+import api.session.SessionUtils;
+import model.AccessRow;
 import model.UserRow;
 import storage.ITable;
 import storage.StorageFactory;
@@ -18,6 +20,96 @@ import model.ServiceRow;
 public class MenuApi extends HttpServlet {
 
     private ITable<ServiceRow> serviceStorage = StorageFactory.getServiceInstance();
+    private ITable<AccessRow> accessStorage = StorageFactory.getAccessInstance();
+
+    private Set<String> servicePages; // pages to add known service_id
+    //private Set<String> userPages; // user menu pages
+    private Set<String> otherPages; // pages without parameters
+
+    private Map<Long, List<Page>> roleMenu;
+    private Map<String, String> pageNames; // user menu pages
+
+    class Page {
+        String item;
+        String name;
+        boolean isService;
+        boolean isOther;
+        //boolean isUser;
+        AccessRow access;
+
+        @Override
+        public String toString() {
+            return "Page{" +
+                    "item='" + item + '\'' +
+                    ", name='" + name + '\'' +
+                    ", isService=" + isService +
+                    ", isOther=" + isOther +
+                    ", access=" + access +
+                    '}';
+        }
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        roleMenu = null;
+        otherPages = null;
+        //userPages = null;
+        servicePages = null;
+    }
+
+    @Override
+    public void init() throws ServletException {
+        servicePages = new HashSet<>(Arrays.asList("service", "repeat", "schedule"));
+        //userPages = new HashSet<>(Arrays.asList("login", "register", "profile", "setting", "user"));
+        otherPages = new HashSet<>(Arrays.asList("register", "service", "setting", "rec", "recs"));
+        pageNames = new Hashtable<>();
+        pageNames.put("service", "Service");
+        pageNames.put("repeat", "Repeat");
+        pageNames.put("schedule", "Schedule");
+        pageNames.put("register", "Register");
+        pageNames.put("setting", "Settings");
+        pageNames.put("rec", "Record");
+        pageNames.put("recs", "Record list");
+        roleMenu = new Hashtable<>();
+        List<AccessRow> list;
+        try {
+            list = accessStorage.select();
+            for (AccessRow a : list) {
+                List<Page> tbl = roleMenu.get(a.role_id);
+                if (tbl == null) {
+                    tbl = new ArrayList<>();
+                    roleMenu.put(a.role_id, tbl);
+                }
+                Page t = genMenuItem(a);
+                if (t != null)
+                    tbl.add(t);
+            }
+        } catch (Exception e) {
+            System.out.println("MenuApi.init(): Critical error! cannot access storage. " + e.getMessage());
+            e.printStackTrace();
+        }
+        super.init();
+    }
+
+    private Page genMenuItem(AccessRow a) {
+        Page t = null;
+        Boolean isS = servicePages.contains(a.object_name);
+        Boolean isO = otherPages.contains(a.object_name);
+        //Boolean isU = otherPages.contains(a.object_name);
+        if (isS || isO) {
+            t = new Page();
+            t.item = a.object_name;
+            t.name = pageNames.get(a.object_name);
+            if (t.name == null || t.name.isEmpty())
+                t.name = a.object_name;
+            t.isService = isS;
+            t.isOther = isO;
+            //t.isUser = isU;
+            t.access = a;
+        }
+        return t;
+    }
 
     /**
      * Returns data to fill user interface main menu
@@ -25,38 +117,95 @@ public class MenuApi extends HttpServlet {
      * @param req  api request
      * @param resp our responce
      * @throws ServletException
-     * @throws IOException storage access exception
+     * @throws IOException      storage access exception
      */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession();
+        long service_id = getServiceId(req, resp);
         UserRow user = (UserRow) session.getAttribute("user");
+        if (user == null)
+            user = SessionUtils.getPublicUser();
 
-        // anonymous set
-        String jsonUser = "{\"user_id\":\"-1\",\"name\":\"\"}";
-        StringBuilder jsonServices = new StringBuilder();
-        if(user!=null) {
-            // authorized user
-            jsonUser = "{\"user_id\":\"" + user.user_id + "\",\"name\":\"" + user.name + "\"}";
-            try {
-                // query storage
-                List<ServiceRow> services = serviceStorage.select();
-
-                // self generate simple json
-                //StringBuilder jsonServices = new StringBuilder();
-                for (ServiceRow s : services) {
-                    if (jsonServices.length() > 0) jsonServices.append(',');
-                    jsonServices.append("{\"service_id\":\"" + s.service_id + "\",\"name\":\"" + s.name.replace("\\", "\\\\") + "\"}");
-                }
-                //jsonServices = jsonServices.toString();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        String jsonUser = "{\"user_id\":\"" + user.user_id + "\",\"name\":\"" + user.name + "\"}";
+        String jsonServices = "";
+        List<ServiceRow> services = null;
+        String jsonPages = "";
+        try {
+            // query storage
+            services = serviceStorage.select();
+            // services list
+            jsonServices = genServicesJson(services);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        //if (service_id <= 0 && services.size() > 0) service_id = services.get(0).service_id;
+        jsonPages = genPagesJson(user, service_id);
 
         resp.setContentType("application/json; charset=UTF-8");
         resp.addHeader("Cache-Control", "max-age=300");
-        resp.getWriter().println("{\"user\":" + jsonUser + ",\"services\":[" + jsonServices + "]}");
+        resp.getWriter().println("{\"user\":" + jsonUser +
+                ",\"services\":[" + jsonServices + "]" +
+                ",\"pages\":[" + jsonPages + "]" +
+                "}");
+    }
+
+    /**
+     * Generate json PAGES
+     *
+     * @param user
+     * @param service_id
+     * @return
+     */
+    private String genPagesJson(UserRow user, long service_id) {
+        System.out.println("genPagesJson(service_id="+service_id+")");
+        StringBuilder result = new StringBuilder();
+        boolean showService = service_id > 0;
+        String serviceParam = showService ? "service_id=" + service_id : "";
+
+        List<Page> pages = roleMenu.get(user.role_id);
+        for (Page p : pages) {
+            System.out.println(p);
+            if (p.isOther || showService) {
+                System.out.println("SHOW!");
+                if (result.length() > 0)
+                    result.append(',');
+                result.append("{\"item\":\"" + p.item +
+                        "\",\"name\":\"" + p.name +
+                        "\",\"param\":\"" + (p.isService ? serviceParam : "") +
+                        "\"}");
+            }
+        }
+        return result.toString();
+    }
+
+    /**
+     * Generate json SERVICES
+     *
+     * @param services
+     * @return
+     */
+    private String genServicesJson(List<ServiceRow> services) {
+        StringBuilder result = new StringBuilder();
+        for (ServiceRow s : services) {
+            if (result.length() > 0)
+                result.append(',');
+            result.append("{\"service_id\":\"" + s.service_id +
+                    "\",\"name\":\"" + s.name.replace("\\", "\\\\") +
+                    "\"}");
+        }
+        return result.toString();
+    }
+
+    public static long getServiceId(HttpServletRequest req, HttpServletResponse resp) {
+//        String path = req.getPathInfo();
+//        if (path == null || path.length() < 2) return 0;
+//
+//        path = path.substring(1);
+//        if (!path.matches("[0-9]*")) return 0;
+        String path = req.getParameter("service_id");
+
+        return Long.valueOf(path);
     }
 
 }

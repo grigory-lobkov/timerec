@@ -53,7 +53,7 @@ public class RepeatServiceApi extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         if (debugLog) System.out.println("RepeatServiceApi.doGet(" + req.getPathInfo() + ")");
 
-        long service_id = getServiceId(req, resp);
+        long service_id = ServiceApi.getServiceId(req, resp);
         Gson gson = (new GsonBuilder()).create();
 
         try {
@@ -81,20 +81,6 @@ public class RepeatServiceApi extends HttpServlet {
     private UserRow getSessionUser(HttpServletRequest req) {
         HttpSession session = req.getSession();
         return (UserRow) session.getAttribute("user");
-    }
-
-    private long getServiceId(HttpServletRequest req, HttpServletResponse resp) {
-        String path = req.getPathInfo();
-        if (path == null || path.length() < 2)
-            throw new RuntimeException("Identifier is not set");
-
-        path = path.substring(1);
-        if (!path.matches("[0-9]*"))
-            throw new RuntimeException("Identifier must be numeric");
-
-        if (debugLog) System.out.println("parent_id=" + path);
-
-        return Long.valueOf(path);
     }
 
     /**
@@ -129,7 +115,7 @@ public class RepeatServiceApi extends HttpServlet {
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         if (debugLog) System.out.println("RepeatServiceApi.doPut()");
 
-        long service_id = getServiceId(req, resp);
+        long service_id = ServiceApi.getServiceId(req, resp);
         Gson gson = (new GsonBuilder()).create();
         BufferedReader rr = req.getReader();
         String line;

@@ -44,8 +44,9 @@ function getMenu(cache=true) {
 	}).fail(function( jqXHR, textStatus ) {
 		alert( "Menu Get failed: " + textStatus );
 	});*/
+	var serviceId = getUrlVars()["service_id"];
 	getAjaxJson({
-		url: API_SERVER_URI + "menu",
+		url: API_SERVER_URI + "menu" + (serviceId ? "?service_id=" + serviceId : ""),
 		cache: cache,
 		done: function( data ) {
 			fillMenu(data);
@@ -65,6 +66,7 @@ function fillMenu(data) {
 			return '<li class="nav-item"><a class="nav-link" href="'+page+params+'">'+name+'</a></li>';
 		}
 	}
+
 	// https://getbootstrap.com/docs/4.5/components/navbar/
 	// user menu
 	var isUser = data.user.user_id > 0;
@@ -81,6 +83,7 @@ function fillMenu(data) {
 			'<a class="dropdown-item'+(isUser?' disabled':'')+'" href="#">Log out</a>'+
 			'</div>'+
 		'</li>';
+
 	// services list
 	var sMenu = '';
 	var serviceId = getUrlVars()["service_id"];
@@ -100,8 +103,9 @@ function fillMenu(data) {
 		}
     }
 	var urlParams = serviceId==null?"":"?service_id=" + serviceId;
+
 	// services menu
-	var mMenu = addMenuElement('Service', 'service.html', urlParams) +
+	/*var mMenu = addMenuElement('Service', 'service.html', urlParams) +
 		addMenuElement('Repeat', 'repeat.html', urlParams) +
 		addMenuElement('Schedule', 'schedule.html', urlParams) +
 		'<li class="nav-item dropdown">'+
@@ -109,7 +113,22 @@ function fillMenu(data) {
 				serviceName+
 			'</a>'+
 			'<div class="dropdown-menu" aria-labelledby="navbarDropdownS">'+sMenu+'</div>'+
-		'</li>';
+		'</li>';*/
+
+    var mMenu = "";
+	var ps = data.pages;
+    for (var i = 0, len = ps.length; i < len; i++) {
+		mMenu += addMenuElement(ps[i].name, ps[i].item+'.html', ps[i].param==""?"":"?"+ps[i].param);
+    }
+    if(sMenu) {
+		mMenu += '<li class="nav-item dropdown">'+
+    			'<a class="nav-link dropdown-toggle" href="#" id="navbarDropdownS" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+
+    				serviceName+
+    			'</a>'+
+    			'<div class="dropdown-menu" aria-labelledby="navbarDropdownS">'+sMenu+'</div>'+
+    		'</li>';
+    }
+
 	// menu
 	var menu =
 		'<a class="navbar-brand" href="#">TimeRec</a>'+
@@ -185,6 +204,15 @@ function getAjaxJson( _ ) {
 		.fail( _.fail === undefined ? function( jqXHR, textStatus ) {
 			alertMessage( _.url, "Request failed: " + textStatus );
 		} : _.fail );
+}
+
+function htmlEntities(str) {
+    var buf = [];
+    for (var i=str.length-1;i>=0;i--) {
+        c = str[i].charCodeAt();
+        buf.unshift( c == 13 ? '<br>' : [ '&#', c, ';' ].join( '' ) );
+    }
+    return buf.join( '' );
 }
 
 document.addEventListener( 'DOMContentLoaded', function() { getMenu() } );
