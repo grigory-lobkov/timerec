@@ -89,8 +89,8 @@ public class AccessFilterApi implements Filter {
             filterChain.doFilter(servletRequest, servletResponse);
         } else {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-            if (debugLog)
-                System.out.println("AccessFilterApi.doFilter(" + ((HttpServletRequest) servletRequest).getServletPath() + ") SC_FORBIDDEN for " + user);
+            //if (debugLog)
+                System.out.println("AccessFilterApi.doFilter(" + ((HttpServletRequest) servletRequest).getServletPath() + ") SC_FORBIDDEN for " + user.name + " (" + user.email + ")");
         }
     }
 
