@@ -16,38 +16,20 @@ import java.util.List;
 public class ScheduleController {
 
     private static IMultiRowTable<RepeatRow> storageRepeat = StorageFactory.getRepeatInstance();
-    private static ITable<ServiceRow> storageService = StorageFactory.getServiceInstance();
+    //private static ITable<ServiceRow> storageService = StorageFactory.getServiceInstance();
 
     public static List<ScheduleRow> getSchedule(long service_id, ZonedDateTime dateStart, ZonedDateTime dateEnd, UserRow user) {
         List<ScheduleRow> list = new ArrayList<>();
         int deltaSec = UserController.getTzOffsetSeconds(user);
 
-//        ScheduleRow row = new ScheduleRow();
-//        row.date_from = new java.sql.Timestamp((new java.util.Date()).getTime());
-//        row.duration = 15;
-//        row.title = "ExTitle"+service_id;
-//        row.client_name = "ExClientName"+service_id;
-//        row.description = "Example of description of service_id="+service_id;
-//        list.add(row);
-//
-//        row = new ScheduleRow();
-//        row.date_from = new java.sql.Timestamp((new java.util.Date()).getTime()+ TimeUnit.MINUTES.toMillis(15));
-//        row.duration = 15;
-//        row.title = "Ex2Title"+service_id;
-//        row.client_name = "Ex2ClientName"+service_id;
-//        row.description = "Ex2ample of description of service_id="+service_id;
-//        list.add(row);
-
         try {
-            ServiceRow service = storageService.select(service_id);
+            //ServiceRow service = storageService.select(service_id);
             List<RepeatRow> repeats = storageRepeat.select(service_id);
             for (RepeatRow r : repeats) {
                 r.time_from += deltaSec;
                 r.time_to += deltaSec;
             }
             ZonedDateTime dateNow = ZonedDateTime.now();
-//            long curToStart = ChronoUnit.DAYS.between(dateStart, dateNow); // dateStart to now difference
-//            long curToEnd = ChronoUnit.DAYS.between(dateEnd, dateNow); // dateEnd to now difference
             long dow = dateStart.getDayOfWeek().getValue();
             ZonedDateTime weekStart = dateStart.minusDays(dow).truncatedTo(ChronoUnit.DAYS);
             // weeks loop
@@ -67,7 +49,7 @@ public class ScheduleController {
                             s.duration = r.duration;
                             s.title = "";
                             s.client_name = "";
-                            s.description = service.name;
+                            s.description = "";//service.name;
                             list.add(s);
                         }
                         dayNow = dayNowTo;

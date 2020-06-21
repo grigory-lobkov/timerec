@@ -62,7 +62,7 @@ public class MenuApi extends HttpServlet {
     public void init() throws ServletException {
         servicePages = new HashSet<>(Arrays.asList("service", "repeat", "schedule"));
         //userPages = new HashSet<>(Arrays.asList("login", "register", "profile", "setting", "user"));
-        otherPages = new HashSet<>(Arrays.asList("login", "register", "service", "setting", "rec", "recs"));
+        otherPages = new HashSet<>(Arrays.asList("login", "register", "service", "setting", "record", "records"));
         pageNames = new Hashtable<>();
         pageNames.put("login", "Login");
         pageNames.put("service", "Service");
@@ -70,8 +70,8 @@ public class MenuApi extends HttpServlet {
         pageNames.put("schedule", "Schedule");
         pageNames.put("register", "Register");
         pageNames.put("setting", "Settings");
-        pageNames.put("rec", "Record");
-        pageNames.put("recs", "Record list");
+        pageNames.put("record", "Record");
+        pageNames.put("records", "Record list");
 
         roleMenu = new Hashtable<>();
         List<AccessRow> list;
