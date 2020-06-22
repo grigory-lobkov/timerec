@@ -9,6 +9,7 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.*;
 
+import api.service.RecordApi;
 import api.session.SessionUtils;
 import model.AccessRow;
 import model.UserRow;
@@ -123,20 +124,18 @@ public class MenuApi extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        HttpSession session = req.getSession();
-        long service_id = getServiceId(req, resp);
-        UserRow user = (UserRow) session.getAttribute("user");
+        long service_id = getServiceId(req);
+        UserRow user = SessionUtils.getSessionUser(req);
         if (user == null)
             user = SessionUtils.getPublicUser();
 
         String jsonUser = "{\"user_id\":\"" + user.user_id + "\",\"name\":\"" + user.name + "\"}";
         String jsonServices = "";
-        List<ServiceRow> services = null;
         String jsonPages = "";
         if(user.user_id > 0)
             try {
                 // query storage
-                services = serviceStorage.select();
+                List<ServiceRow> services = serviceStorage.select();
                 // services list
                 jsonServices = genServicesJson(services);
             } catch (Exception e) {
@@ -198,13 +197,13 @@ public class MenuApi extends HttpServlet {
         return result.toString();
     }
 
-    public static long getServiceId(HttpServletRequest req, HttpServletResponse resp) {
+    public static long getServiceId(HttpServletRequest req) {
         String path = req.getParameter("service_id");
-        try {
-            return Long.valueOf(path);
-        } finally {
-            return 0;
-        }
-    }
 
+        if (path == null || path.length() < 1) return 0;
+
+        if (!path.matches("[0-9]*")) return 0;
+
+        return Long.valueOf(path);
+    }
 }

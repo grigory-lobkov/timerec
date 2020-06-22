@@ -8,11 +8,12 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-import api.setting.SettingUtils;
+import controller.SettingController;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import model.ServiceRow;
 import model.ServiceSettingRow;
+import model.UserRow;
 import storage.ITable;
 import storage.StorageFactory;
 import api.session.SessionUtils;
@@ -66,12 +67,12 @@ public class ServiceApi extends HttpServlet {
         if (debugLog) System.out.println("ServiceApi.doGet()");
 
         Gson gson = (new GsonBuilder()).create();
-        long service_id = getServiceId(req, resp);
+        long service_id = getServiceId(req);
 
         try {
             // query storage
             ServiceRow data = storage.select(service_id);
-            ServiceSettingRow setting = SettingUtils.getServiceSetting(service_id);
+            ServiceSettingRow setting = SettingController.getServiceSetting(service_id);
 
             if (data == null) {
                 if (debugLog) System.out.println("SC_NOT_FOUND");
@@ -95,16 +96,16 @@ public class ServiceApi extends HttpServlet {
         }
     }
 
-    public static long getServiceId(HttpServletRequest req, HttpServletResponse resp) {
+    public static long getServiceId(HttpServletRequest req) {
         String path = req.getPathInfo();
         if (path == null || path.length() < 2)
-            throw new RuntimeException("Identifier is not set");
+            throw new RuntimeException("Identifier service_id is not set");
 
         path = path.substring(1);
         if (!path.matches("[0-9]*"))
-            throw new RuntimeException("Identifier must be numeric");
+            throw new RuntimeException("Identifier service_id must be numeric");
 
-        if (debugLog) System.out.println("parent_id=" + path);
+        if (debugLog) System.out.println("service_id=" + path);
 
         return Long.valueOf(path);
     }
@@ -125,6 +126,7 @@ public class ServiceApi extends HttpServlet {
         if (debugLog) System.out.println("ServiceApi.doPost()");
 
         Gson gson = (new GsonBuilder()).create();
+        UserRow user = SessionUtils.getSessionUser(req);
         BufferedReader br = req.getReader();
         String line;
         boolean done1 = false;
@@ -135,13 +137,13 @@ public class ServiceApi extends HttpServlet {
             if (data != null) {
                 try {
                     if (debugLog) System.out.println("object: " + data);
-                    data.service.owner_id = SessionUtils.getSessionUserId(req);
+                    data.service.owner_id = user.user_id;
 
                     // update storage
                     boolean done = storage.insert(data.service);
 
                     if (done && data.service.service_id > 0) {
-                        SettingUtils.setServiceSetting(data.service.service_id, data.setting);
+                        SettingController.setServiceSetting(data.service.service_id, data.setting);
                         String jsonStr = gson.toJson(data);
                         if (debugLog) System.out.println("out: " + jsonStr);
                         resp.setContentType("application/json; charset=UTF-8");
@@ -196,7 +198,7 @@ public class ServiceApi extends HttpServlet {
                     }
                     // update storage
                     boolean done = storage.update(data.service);
-                    SettingUtils.setServiceSetting(data.service.service_id, data.setting);
+                    SettingController.setServiceSetting(data.service.service_id, data.setting);
 
                     if (done) {
                         done1 = true;
@@ -233,7 +235,7 @@ public class ServiceApi extends HttpServlet {
         if (debugLog) System.out.println("ServiceApi.doDelete()");
 
         boolean done1 = false;
-        long service_id = getServiceId(req, resp);
+        long service_id = getServiceId(req);
 
         if (service_id > 0)
             try {
@@ -246,7 +248,7 @@ public class ServiceApi extends HttpServlet {
                 }
                 // update storage
                 done1 = storage.delete(service_id);
-                SettingUtils.setServiceSetting(service_id, new ServiceSettingRow());
+                SettingController.setServiceSetting(service_id, new ServiceSettingRow());
 
             } catch (Exception e) {
                 if (debugLog) System.out.println("SC_NO_CONTENT");

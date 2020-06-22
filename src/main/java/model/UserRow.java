@@ -26,4 +26,17 @@ public class UserRow {
     // owner user_id
     public long owner_id;
 
+    @Override
+    public String toString() {
+        return "UserRow{" +
+                "user_id=" + user_id +
+                ", role_id=" + role_id +
+                ", name='" + name + '\'' +
+                ", tz_id=" + tz_id +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", image_id=" + image_id +
+                ", owner_id=" + owner_id +
+                '}';
+    }
 }

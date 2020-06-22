@@ -22,6 +22,6 @@ public class ScheduleRow {
 
 
     // other table fields
-    public String client_name;
+    public String user_name;
 
 }

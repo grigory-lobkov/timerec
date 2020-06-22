@@ -18,7 +18,7 @@ public class CreateStructure implements ServletContextListener {
         boolean result = true;
         try (Connection conn = StorageFactory.dbPool.connection()) {
             DatabaseMetaData meta = conn.getMetaData();
-            ResultSet res = meta.getTables("", null, "SETTING", new String[]{"TABLE"});
+            ResultSet res = meta.getTables("", null, "SETTING1", new String[]{"TABLE"});
             while (res.next())
                 result = false;
             res.close();
@@ -192,7 +192,7 @@ class Updater {
                         " service_id BIGINT," +
                         " owner_id BIGINT)");
 
-//        no need indexes, cause of api.setting.SettingUtils stores it in memory
+//        no need indexes, cause of api.setting.SettingController stores it in memory
 //        exec("setting_service_idx",
 //                "CREATE INDEX IF NOT EXISTS setting_service_idx ON setting (service_id)");
 //        exec("setting_alias_idx",
@@ -216,9 +216,9 @@ class Updater {
      */
     private static void user() throws SQLException {
 
-        exec("seq_user_id drop", "DROP SEQUENCE IF EXISTS seq_user_id");
-        exec("user_email_idx drop", "DROP INDEX IF EXISTS user_email_idx");
-        exec("user drop", "DROP TABLE IF EXISTS user");
+        //exec("seq_user_id drop", "DROP SEQUENCE IF EXISTS seq_user_id");
+        //exec("user_email_idx drop", "DROP INDEX IF EXISTS user_email_idx");
+        //exec("user drop", "DROP TABLE IF EXISTS user");
 
         exec("seq_user_id",
                 "CREATE SEQUENCE IF NOT EXISTS seq_user_id");
@@ -309,7 +309,7 @@ class Updater {
                         " own_get BOOLEAN," +
                         " own_put BOOLEAN," +
                         " own_post BOOLEAN," +
-                        " own_delete BOOLEAN,)");
+                        " own_delete BOOLEAN)");
 
         exec("access_insert_role_admin",
                 "INSERT INTO access (access_id, role_id, object_name," +
@@ -329,7 +329,7 @@ class Updater {
                         " SELECT 'tz' FROM dual UNION ALL" +
                         " SELECT 'logout' FROM dual" +
                         ") page " +
-                        "WHERE role.name = '" + ROLE_ADMIN + "'");
+                        "WHERE role.name = '" + ROLE_ADMIN + "' AND NOT EXISTS (SELECT 1 FROM access WHERE role_id=role.role_id)");
 
         exec("access_insert_role_client",
                 "INSERT INTO access (access_id, role_id, object_name," +
@@ -338,11 +338,11 @@ class Updater {
                         "FROM role, (" +
                         " SELECT 'menu' name FROM dual UNION ALL" +
                         " SELECT 'profile' FROM dual UNION ALL" +
-                        " SELECT 'rec' FROM dual UNION ALL" +
-                        " SELECT 'recs' FROM dual UNION ALL" +
+                        " SELECT 'record' FROM dual UNION ALL" +
+                        " SELECT 'records' FROM dual UNION ALL" +
                         " SELECT 'logout' FROM dual" +
                         ") page " +
-                        "WHERE role.name = '" + ROLE_CLIENT + "'");
+                        "WHERE role.name = '" + ROLE_CLIENT + "' AND NOT EXISTS (SELECT 1 FROM access WHERE role_id=role.role_id)");
 
         exec("access_insert_role_public",
                 "INSERT INTO access (access_id, role_id, object_name," +
@@ -352,7 +352,7 @@ class Updater {
                         " SELECT 'login' name FROM dual UNION ALL" +
                         " SELECT 'register' FROM dual" +
                         ") page " +
-                        "WHERE role.name = '" + ROLE_PUBLIC + "'");
+                        "WHERE role.name = '" + ROLE_PUBLIC + "' AND NOT EXISTS (SELECT 1 FROM access WHERE role_id=role.role_id)");
     }
 
     /**
@@ -397,16 +397,26 @@ class Updater {
         exec("repeat_service_idx",
                 "CREATE INDEX IF NOT EXISTS repeat_service_idx ON repeat (service_id)");
 
+        //exec("schedule drop", "DROP TABLE IF EXISTS schedule");
+
+        exec("seq_schedule_id",
+                "CREATE SEQUENCE IF NOT EXISTS seq_schedule_id");
+
         exec("schedule",
                 "CREATE TABLE IF NOT EXISTS schedule " +
-                        "(schedule_id BIGINT PRIMARY KEY, " +
+                        "(schedule_id BIGINT PRIMARY KEY," +
                         " service_id BIGINT," +
                         " user_id BIGINT," +
                         " date_from TIMESTAMP WITHOUT TIME ZONE," +
                         " duration INTEGER," +
-                        " title  VARCHAR2(4000)," +
+                        " title VARCHAR2(4000)," +
                         " description CLOB)");
 
+        exec("schedule_service_date_idx",
+                "CREATE INDEX IF NOT EXISTS schedule_service_date_idx ON schedule (service_id, date_from)");
+
+        exec("schedule_user_date_idx",
+                "CREATE INDEX IF NOT EXISTS schedule_user_date_idx ON schedule (user_id, date_from)");
     }
 
     /**

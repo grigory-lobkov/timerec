@@ -127,12 +127,13 @@ public class SessionUtils {
         Cookie[] cookies = req.getCookies();
         String email = null;
         String password = null;
-        for (Cookie c : cookies) {
-            String n = c.getName();
-            if (debugLog) System.out.println("SessionUtils.createUserSessionCook() Cook '"+n+"'='"+c.getValue()+"'");
-            if (n.equals("email")) email = c.getValue();
-            else if (n.equals("password")) password = c.getValue();
-        }
+        if(cookies!=null)
+            for (Cookie c : cookies) {
+                String n = c.getName();
+                if (debugLog) System.out.println("SessionUtils.createUserSessionCook() Cook '"+n+"'='"+c.getValue()+"'");
+                if (n.equals("email")) email = c.getValue();
+                else if (n.equals("password")) password = c.getValue();
+            }
         if (email != null && password != null) {
             user = SessionUtils.checkAndGetUser(email, password);
             if (user != null)
@@ -168,21 +169,6 @@ public class SessionUtils {
 
 
     /**
-     * Gets {@code model.UserRow} {@code user_id} from session
-     *
-     * @param req user request
-     * @return current session {@code model.UserRow.user_id}
-     */
-    public static long getSessionUserId(HttpServletRequest req) {
-
-        HttpSession session = req.getSession();
-
-        UserRow user = (UserRow) session.getAttribute("user");
-
-        return user == null ? -1 : user.user_id;
-    }
-
-    /**
      * Default user, when user is not logged in
      *
      * @return
@@ -194,4 +180,20 @@ public class SessionUtils {
         u.user_id = -1;
         return u;
     }
+
+
+    /**
+     * Gets {@code model.UserRow} from session
+     *
+     * @param req user request
+     * @return current session user {@code model.UserRow}
+     */
+    public static UserRow getSessionUser(HttpServletRequest req) {
+        HttpSession session = req.getSession();
+        UserRow user = (UserRow) session.getAttribute("user");
+        return user;
+    }
+
+
+
 }

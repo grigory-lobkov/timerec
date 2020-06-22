@@ -1,5 +1,6 @@
 package api.service;
 
+import api.session.SessionUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import controller.ScheduleController;
@@ -11,9 +12,9 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,10 +51,10 @@ public class ScheduleServiceApi extends HttpServlet {
         //http://localhost:8081/timerec/api/schedule/service/1?start=2020-01-27T00%3A00%3A00%2B05%3A00&end=2020-03-09T00%3A00%3A00%2B05%3A00
         String paramStart = req.getParameter("start");
         String paramEnd = req.getParameter("end");
-        ZonedDateTime dateStart = ZonedDateTime.parse(paramStart);
-        ZonedDateTime dateEnd = ZonedDateTime.parse(paramEnd);
-        long service_id = ServiceApi.getServiceId(req, resp);
-        UserRow user = getSessionUser(req);
+        ZonedDateTime dateStart = ZonedDateTime.parse(unzone(paramStart));
+        ZonedDateTime dateEnd = ZonedDateTime.parse(unzone(paramEnd));
+        long service_id = ServiceApi.getServiceId(req);
+        UserRow user = SessionUtils.getSessionUser(req);
         List<ScheduleRow> list = ScheduleController.getSchedule(service_id, dateStart, dateEnd, user);
 
         List<Transport> datas = new ArrayList<>(list.size());
@@ -67,9 +68,15 @@ public class ScheduleServiceApi extends HttpServlet {
         resp.getWriter().println(jsonStr);
     }
 
+    private String unzone(String zonedTime) {
+        //2020-01-27T00:00:00+05:00
+        String unzonedTime = zonedTime.substring(0,19)+"Z";
+        return unzonedTime;
+    }
+
     private Transport convertFutureToTransport(ScheduleRow row) {
         ExtendedProps e = new ExtendedProps();
-        e.client_name = row.client_name;
+        e.client_name = row.user_name;
         e.title = row.title;
         e.description = row.description;
         e.duration = row.duration;
@@ -78,21 +85,16 @@ public class ScheduleServiceApi extends HttpServlet {
 
         Transport t = new Transport();
         t.id = row.schedule_id;
-        if (row.client_name.isEmpty() && row.title.isEmpty()) {
+        if (row.user_name.isEmpty() && row.title.isEmpty()) {
             t.title = "";
         } else {
-            t.title = row.client_name + " - " + row.title;
+            t.title = row.user_name + " - " + row.title;
         }
         t.start = row.date_from.toString();
         t.end = date_to.toString();
         //t.backgroundColor = "#ccc";
         t.extendedProps = e;
         return t;
-    }
-
-    private UserRow getSessionUser(HttpServletRequest req) {
-        HttpSession session = req.getSession();
-        return (UserRow) session.getAttribute("user");
     }
 
 }

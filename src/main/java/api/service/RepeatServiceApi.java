@@ -1,5 +1,6 @@
 package api.service;
 
+import api.session.SessionUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -53,7 +54,7 @@ public class RepeatServiceApi extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         if (debugLog) System.out.println("RepeatServiceApi.doGet(" + req.getPathInfo() + ")");
 
-        long service_id = ServiceApi.getServiceId(req, resp);
+        long service_id = ServiceApi.getServiceId(req);
         Gson gson = (new GsonBuilder()).create();
 
         try {
@@ -64,7 +65,7 @@ public class RepeatServiceApi extends HttpServlet {
                 if (debugLog) System.out.println("SC_NOT_FOUND");
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             } else {
-                UserRow user = getSessionUser(req);
+                UserRow user = SessionUtils.getSessionUser(req);
                 RepeatConvert.prepareOutputList(data, user);
                 String jsonStr = gson.toJson(data);
                 if (debugLog) System.out.println(jsonStr);
@@ -76,11 +77,6 @@ public class RepeatServiceApi extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_NO_CONTENT);
             e.printStackTrace();
         }
-    }
-
-    private UserRow getSessionUser(HttpServletRequest req) {
-        HttpSession session = req.getSession();
-        return (UserRow) session.getAttribute("user");
     }
 
     /**
@@ -115,7 +111,7 @@ public class RepeatServiceApi extends HttpServlet {
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         if (debugLog) System.out.println("RepeatServiceApi.doPut()");
 
-        long service_id = ServiceApi.getServiceId(req, resp);
+        long service_id = ServiceApi.getServiceId(req);
         Gson gson = (new GsonBuilder()).create();
         BufferedReader rr = req.getReader();
         String line;
@@ -126,7 +122,7 @@ public class RepeatServiceApi extends HttpServlet {
             List<RepeatRow> datas = gson.fromJson(line, listType);
             setServiceId(datas, service_id);
 
-            UserRow user = getSessionUser(req);
+            UserRow user = SessionUtils.getSessionUser(req);
             if (!RepeatConvert.checkInputList(datas, user)) {
                 if (debugLog) System.out.println("SC_NOT_ACCEPTABLE");
                 resp.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE);

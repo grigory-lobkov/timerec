@@ -25,8 +25,7 @@ public class ProfileApi extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        HttpSession session = req.getSession();
-        UserRow user = (UserRow) session.getAttribute("user");
+        UserRow user = SessionUtils.getSessionUser(req);
         Gson gson = (new GsonBuilder()).create();
 
         try {
@@ -55,8 +54,7 @@ public class ProfileApi extends HttpServlet {
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        HttpSession session = req.getSession();
-        UserRow user = (UserRow) session.getAttribute("user");
+        UserRow user = SessionUtils.getSessionUser(req);
         Gson gson = (new GsonBuilder()).create();
         BufferedReader rr = req.getReader();
         String line;
@@ -104,8 +102,7 @@ public class ProfileApi extends HttpServlet {
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        HttpSession session = req.getSession();
-        UserRow user = (UserRow) session.getAttribute("user");
+        UserRow user = SessionUtils.getSessionUser(req);
         boolean done1 = false;
 
         if (user != null && user.user_id > 0)

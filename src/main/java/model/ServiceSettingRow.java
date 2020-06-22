@@ -22,6 +22,14 @@ public class ServiceSettingRow {
     // setting table row for updates
     public transient SettingRow limitPerMonthRow = null;
 
+
+    // service alerts paths
+    public String alertPaths = "";
+
+    // setting table row for alerts
+    public transient SettingRow alertPathsRow = null;
+
+
     @Override
     protected Object clone() throws CloneNotSupportedException {
         return super.clone();

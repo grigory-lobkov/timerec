@@ -86,9 +86,9 @@ function fillMenu(data) {
 	// services list
 	var sMenu = '';
 	var serviceId = getUrlVars()["service_id"];
-	var serviceName = '(service list)'
+	var serviceName = '(service list)';
 	var path = window.location.pathname;
-	var ss = data.services
+	var ss = data.services;
     for (var i = 0, len = ss.length; i < len; i++) {
 		if(serviceId==ss[i].service_id) {
 			serviceName = ss[i].name;
@@ -116,8 +116,9 @@ function fillMenu(data) {
 	var isService = false;
     for (var i = 0, len = ps.length; i < len; i++) {
 		mMenu += addMenuElement(ps[i].name, ps[i].item+'.html', ps[i].param==""?"":"?"+ps[i].param);
-		if( ps[i].name == 'service' )
+		if( ps[i].item == 'service' ) {
 		    isService = true;
+		}
     }
     if(sMenu && isService) {
 		mMenu += '<li class="nav-item dropdown">'+
@@ -177,7 +178,14 @@ function getCookie( name ) {
         }
     }
     return decodeURI( dc.substring( begin + prefix.length, end ) );
-} 
+}
+
+function mergeObjects(obj1,obj2){
+    var obj3 = {};
+    for (var attrname in obj1) { obj3[attrname] = obj1[attrname]; }
+    for (var attrname in obj2) { obj3[attrname] = obj2[attrname]; }
+    return obj3;
+}
 
 function getAjaxJson( _ ) {
 	alertMessageHide();
@@ -187,16 +195,16 @@ function getAjaxJson( _ ) {
 		cache: false,
 		dataType: "json",
 		data: _.data,
-		statusCode: {
-			403: function() {
-				msg = "Sorry, you have no access for this action";
-				alertMessage( msg );
-				alert( msg );
-				if( getCookie( "password") == null )
-					window.location.replace( "login.html" );
-			},
-			..._.statusCode
-		},
+		statusCode: mergeObjects( {
+                403: function() {
+                    msg = "Sorry, you have no access for this action";
+                    alertMessage( msg );
+                    alert( msg );
+                    if( getCookie( "password") == null )
+                        window.location.replace( "login.html" );
+                }
+			}, _.statusCode )
+		,
 		timeout: 5000, // timeout, milliseconds
 	})
 		.done( _.done === undefined ? function() {} : _.done )

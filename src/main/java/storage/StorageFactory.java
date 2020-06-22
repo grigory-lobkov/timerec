@@ -101,6 +101,24 @@ public class StorageFactory {
         return settingInstance;
     }
 
+
+    static private volatile IScheduleTable<ScheduleRow> scheduleInstance = null;
+
+    /**
+     * Generate Schedule storage actions
+     *
+     * @return singleton instance
+     */
+    public static IScheduleTable<ScheduleRow> getScheduleInstance() {
+        if (scheduleInstance == null)
+            synchronized (StorageFactory.class) {
+                if (scheduleInstance == null) {
+                    scheduleInstance = new ScheduleTable(dbPool);
+                }
+            }
+        return scheduleInstance;
+    }
+
     /**
      * Generate parameter-based storage {@code ITable} object
      * Used to determine owner inside AccessFilterApi. Deprecated.

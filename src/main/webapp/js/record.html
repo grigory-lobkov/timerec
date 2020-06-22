@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
 
     <script src="common.js"></script>
+    <script src="record.js"></script>
 
     <title>TimeRec: Service repeat</title>
 </head>
@@ -17,6 +18,9 @@
 <nav id="navMenuContainer" style="background-color: #e3f2fd; display:block; height: 56px;"></nav>
 
 <!-- CONTENT -->
+<style>
+.btn { margin: 0.3em }
+</style>
 <div class="container">
     <form role="form" class="sRepeat">
         <hr>
@@ -26,25 +30,32 @@
                 <div id="alertMessage"></div>
 
                 <div class="form-group" id="servicePage" style="display:none">
-                    <h1>Choose service</h1>
+                    <h2>Choose service</h2>
                     <hr>
                     <div id="serviceList">...</div>
                 </div>
 
                 <div class="form-group" id="schedulePage" style="display:none">
-                    <div class="col-lg-8">
-                        <svg data-v-cf22f5d6="" data-v-02e405f8="" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" aria-labelledby="box" role="presentation"><title data-v-cf22f5d6="" id="box">box</title><g data-v-cf22f5d6="" fill="currentColor"><path data-v-02e405f8="" fill-rule="evenodd" clip-rule="evenodd" d="M17.815 6.962H3.747c-.003 0-.005-.005-.003-.005l5.307-5.1A1.078 1.078 0 1 0 7.555.301L.331 7.244a1.08 1.08 0 0 0 0 1.555l7.263 6.98a1.074 1.074 0 0 0 1.526-.029 1.08 1.08 0 0 0-.03-1.525l-5.306-5.1c-.003-.003 0-.005.002-.005H17.84a1.08 1.08 0 0 0 1.077-1.013c.037-.625-.476-1.145-1.101-1.145z" data-v-cf22f5d6=""></path></g></svg>
-                        <h1>Choose time</h1>
+                    <div class="row">
+                        <h2>
+                            <svg onClick="backToServices()" data-v-cf22f5d6="" data-v-02e405f8="" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" aria-labelledby="box" role="presentation"><title data-v-cf22f5d6="">back</title><g data-v-cf22f5d6="" fill="currentColor"><path data-v-02e405f8="" fill-rule="evenodd" clip-rule="evenodd" d="M17.815 6.962H3.747c-.003 0-.005-.005-.003-.005l5.307-5.1A1.078 1.078 0 1 0 7.555.301L.331 7.244a1.08 1.08 0 0 0 0 1.555l7.263 6.98a1.074 1.074 0 0 0 1.526-.029 1.08 1.08 0 0 0-.03-1.525l-5.306-5.1c-.003-.003 0-.005.002-.005H17.84a1.08 1.08 0 0 0 1.077-1.013c.037-.625-.476-1.145-1.101-1.145z" data-v-cf22f5d6=""></path></g></svg>
+                            Choose time
+                        </h2>
                         <hr>
                     </div>
-                    <div class="col-md-4" id="scheduleList">...</div>
-                    <div class="col-md-4">
-                        <h2 id="serviceName"></h2>
-                        <span id="serviceTime"></span>
-                        <textarea id="uDescription" class="form-control" rows="5"></textarea>
-                        <div class="col-lg-8" id="scheduleButtons">
-                            <span></span>
-                            <input type="button" class="btn btn-primary" value="Sign Up" onclick="postData(); return false;">
+                    <div class="row">
+                        <div class="col-md-6" id="scheduleList">...</div>
+                        <div class="col-md-5">
+                            <h3 id="serviceName"></h3>
+                            <div id="serviceTime"></div>
+                            <br>
+                            <div>Title</div>
+                            <input id="uTitle" type="text" class="form-control" value="" />
+                            <br>
+                            <div>Short description</div>
+                            <textarea id="uDescription" class="form-control" rows="5"></textarea>
+                            <br>
+                            <input id="serviceBtn" type="button" class="btn btn-primary" value="Check In" onclick="postData(); return false;">
                         </div>
                     </div>
                 </div>
@@ -52,119 +63,6 @@
         </div>
     </form>
 </div>
-<script>
-
-var API_URL = API_SERVER_URI + "record/";
-var SERVICES = [];
-var SERVICE_ID = 0;
-var SCHEDULE = [];
-var SCHEDULE_ID = 0;
-var DAYS = [];
-
-function getServiceHtml(s) {
-  return
-    '   <div class="row"> '  +
-    '     <div class="col-md-2"> <!--<img>--> </div>' +
-    '     <div class="col-md-8">' +
-    '       <h3>' + s.name + '</h3>' +
-    '       <div>' + 2 + '</div>' +
-    '       <div>' + 3 + '</div>' +
-    '       <input type="button" class="btn btn-primary" value="Check In" onclick="getSchedule(' + s.id + '); return false;">' +
-    '     </div>' +
-    '  </div>';
-}
-function showServices() {
-    var html = ""
-    if( SERVICES.length > 0 ) {
-        SERVICES.forEach( function( s ){
-            html += getServiceHtml( s );
-        });
-    }
-    $( "#serviceList" ).html( html );
-    $( "#schedulePage" ).hide();
-    $( "#servicePage" ).show();
-}
-function getServices() {
-    SERVICES = [];
-    SERVICE_ID = 0;
-    $( "#schedulePage" ).hide();
-    $( "#serviceList" ).html( '...' );
-    $( "#servicePage" ).show();
-	getAjaxJson({
-		url: url + "?data=services",
-		done: function( data ) {
-		    SERVICES = [];
-            data.forEach( function( s ){
-                SERVICES[s.service_id] = s;
-            });
-			showServices();
-		}
-	});
-}
-
-function showSchedule() {
-    $( "#scheduleList" ).text( SCHEDULE );
-}
-
-function getSchedule(s_id) {
-	SERVICE_ID = s_id;
-	SCHEDULE = [];
-	SCHEDULE_ID = 0;
-    $( "#servicePage" ).hide();
-    $( "#scheduleList" ).html( '...' );
-    $( "#serviceName" ).text( SERVICES[s_id].name );
-    $( "#serviceTime" ).text( '' );
-    $( "#schedulePage" ).show();
-	var url = API_URL + "?data=schedule&service_id=" + SERVICE_ID;
-	getAjaxJson({
-		url: url,
-		done: function( data ) {
-		    SCHEDULE = [];
-		    var virt_id = -1; // ID for planned schedule
-            data.forEach( function( s ){
-                if( !( s.schedule_id > 0 ) ) {
-                    s.schedule_id = virt_id--;
-                }
-                SCHEDULE[ s.schedule_id ] = s;
-                //DAYS[]=;
-            });
-			showSchedule();
-		}
-	});
-}
-
-function checkData() {
-	alertMessageHide();
-
-	return true;
-}
-
-function timeFromSeconds(seconds) {
-	var h = Math.trunc(seconds / 60 / 60);
-    var m = Math.trunc(seconds / 60) - h * 60;
-    hh = ( h < 10 ? '0' : '' ) + h;
-    mm = ( m < 10 ? '0' : '' ) + m;
-    return hh + ':' + mm;
-}
-
-function postData() {
-	if( !checkData() ) return false;
-	SERVICE_ID = getUrlVars()["service_id"];
-	var url = API_URL + SERVICE_ID;
-	getAjaxJson({
-		method: "PUT",
-		url: url,
-		data: JSON.stringify(
-		    SCHEDULE[ SCHEDULE_ID ]
-		),
-		done: function( data ) {
-			alertMessage( "You have recorded successfully" );
-		}
-	})
-}
-
-document.addEventListener( 'DOMContentLoaded', function(){ getData() } );
-</script>
 <!-- /CONTENT -->
 
 <hr>

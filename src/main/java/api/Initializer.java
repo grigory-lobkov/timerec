@@ -1,6 +1,6 @@
 package api;
 
-import api.setting.SettingUtils;
+import controller.SettingController;
 import storage.CreateStructure;
 
 import javax.servlet.ServletContextEvent;
@@ -12,7 +12,7 @@ import java.util.Date;
 public class Initializer implements ServletContextListener {
 
     ServletContextListener storageInit = new CreateStructure();
-    ServletContextListener settingInit = new SettingUtils();
+    ServletContextListener settingInit = new SettingController();
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {

@@ -78,7 +78,7 @@ public class AccessFilterApi implements Filter {
 
         HttpSession session = req.getSession();
 
-        UserRow user = (UserRow) session.getAttribute("user");
+        UserRow user = SessionUtils.getSessionUser(req);
         if (user == null) {
             user = SessionUtils.createUserSessionCook(req);
         }

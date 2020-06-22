@@ -1,4 +1,4 @@
-package api.setting;
+package controller;
 
 import model.ServiceSettingRow;
 import model.SettingRow;
@@ -11,7 +11,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-public class SettingUtils implements ServletContextListener {
+public class SettingController implements ServletContextListener {
 
     private static ITable<SettingRow> storage = StorageFactory.getSettingInstance();
     private static boolean debugLog = false;
@@ -19,6 +19,7 @@ public class SettingUtils implements ServletContextListener {
     private static final String CLIENT_LIMIT_DAILY_ALIAS = "CLIENT_LIMIT_DAILY";
     private static final String CLIENT_LIMIT_WEEKLY_ALIAS = "CLIENT_LIMIT_WEEKLY";
     private static final String CLIENT_LIMIT_MONTHLY_ALIAS = "CLIENT_LIMIT_MONTHLY";
+    private static final String ALERT_PATHS_ALIAS = "ALERT_PATHS";
 
     /**
      * Quick service settings access
@@ -31,32 +32,36 @@ public class SettingUtils implements ServletContextListener {
      */
     private static ServiceSettingRow allSetting;
 
+    private static Map<String, SettingRow> otherSettings;
+
     @Override
     public synchronized void contextInitialized(ServletContextEvent servletContextEvent) {
-        if (debugLog) System.out.println("SettingUtils.contextInitialized()");
+        if (debugLog) System.out.println("SettingController.contextInitialized()");
 
         readStorage();
     }
 
     private static void readStorage() {
         serviceSettings = new Hashtable<>();
+        otherSettings = new Hashtable<>();
         allSetting = new ServiceSettingRow();
 
         try {
             List<SettingRow> list = storage.select();
             for (SettingRow s : list) {
+                ServiceSettingRow sSetting;
+                if (s.service_id > 0) {
+                    sSetting = serviceSettings.get(s.service_id);
+                    if (sSetting == null) {
+                        sSetting = new ServiceSettingRow();
+                        serviceSettings.put(s.service_id, sSetting);
+                    }
+                } else {
+                    sSetting = allSetting;
+                    otherSettings.put(s.alias, s);
+                }
                 Integer intValue = stringToInteger(s.value);
                 if (intValue > 0) {
-                    ServiceSettingRow sSetting;
-                    if (s.service_id > 0) {
-                        sSetting = serviceSettings.get(s.service_id);
-                        if (sSetting == null) {
-                            sSetting = new ServiceSettingRow();
-                            serviceSettings.put(s.service_id, sSetting);
-                        }
-                    } else {
-                        sSetting = allSetting;
-                    }
                     switch (s.alias) {
                         case CLIENT_LIMIT_DAILY_ALIAS:
                             sSetting.limitPerDay = intValue;
@@ -69,6 +74,13 @@ public class SettingUtils implements ServletContextListener {
                         case CLIENT_LIMIT_MONTHLY_ALIAS:
                             sSetting.limitPerMonth = intValue;
                             sSetting.limitPerMonthRow = s;
+                            break;
+                    }
+                } else {
+                    switch (s.alias) {
+                        case ALERT_PATHS_ALIAS:
+                            sSetting.alertPaths = s.value;
+                            sSetting.alertPathsRow = s;
                             break;
                     }
                 }
@@ -102,6 +114,24 @@ public class SettingUtils implements ServletContextListener {
             serviceSettings.put(service_id, mySetting);
         }
         updateMySetting(service_id, mySetting, newSetting);
+    }
+
+    public static synchronized SettingRow getSetting(String alias) {
+        return otherSettings.get(alias);
+    }
+
+    public static synchronized void setSetting(SettingRow setting) {
+        SettingRow old = otherSettings.get(setting.alias);
+        try {
+            if (old != null) {
+                setting.setting_id = old.setting_id;
+                storage.update(setting);
+            } else {
+                storage.insert(setting);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static synchronized ServiceSettingRow getAllSetting() {
@@ -191,7 +221,7 @@ public class SettingUtils implements ServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
-        if (debugLog) System.out.println("SettingUtils.contextDestroyed()");
+        if (debugLog) System.out.println("SettingController.contextDestroyed()");
     }
 
 }
