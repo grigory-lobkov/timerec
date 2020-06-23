@@ -89,10 +89,10 @@ public class ScheduleServiceApi extends HttpServlet {
             t.title = "";
         } else {
             t.title = row.user_name + " - " + row.title;
+            t.backgroundColor = "#ccc";
         }
         t.start = row.date_from.toString();
         t.end = date_to.toString();
-        //t.backgroundColor = "#ccc";
         t.extendedProps = e;
         return t;
     }

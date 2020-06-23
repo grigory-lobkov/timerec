@@ -180,6 +180,7 @@ public class ServiceApi extends HttpServlet {
         if (debugLog) System.out.println("ServiceApi.doPut()");
 
         Gson gson = (new GsonBuilder()).create();
+        UserRow user = SessionUtils.getSessionUser(req);
         BufferedReader rr = req.getReader();
         String line;
         boolean done1 = false;
@@ -197,6 +198,7 @@ public class ServiceApi extends HttpServlet {
                             return;
                     }
                     // update storage
+                    data.service.owner_id = user.user_id;
                     boolean done = storage.update(data.service);
                     SettingController.setServiceSetting(data.service.service_id, data.setting);
 

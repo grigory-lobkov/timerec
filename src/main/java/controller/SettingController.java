@@ -61,7 +61,7 @@ public class SettingController implements ServletContextListener {
                     otherSettings.put(s.alias, s);
                 }
                 Integer intValue = stringToInteger(s.value);
-                if (intValue > 0) {
+                if (intValue!=null && intValue > 0) {
                     switch (s.alias) {
                         case CLIENT_LIMIT_DAILY_ALIAS:
                             sSetting.limitPerDay = intValue;

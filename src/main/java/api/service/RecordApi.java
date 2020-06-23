@@ -156,8 +156,10 @@ public class RecordApi extends HttpServlet {
         boolean done1 = false;
         Timestamp srch = Timestamp.valueOf(data.start.replace("T"," "));
         for (ScheduleRow row : list) {
-            if (row.date_from.equals(srch)) {
+            if (srch.equals(row.date_from)) {
                 try {
+                    row.title=data.title;
+                    row.description=data.description;
                     if (row.user_id > 0) {
                         resp.setContentType("application/json; charset=UTF-8");
                         resp.getWriter().println("{\"busy\":\"1\"}");

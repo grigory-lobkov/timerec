@@ -217,7 +217,7 @@ function htmlEntities(str) {
     var buf = [];
     for (var i=str.length-1;i>=0;i--) {
         c = str[i].charCodeAt();
-        buf.unshift( c == 13 ? '<br>' : [ '&#', c, ';' ].join( '' ) );
+        buf.unshift( c == 32 ? '&nbsp;' : (c == 13 || c == 10 ? '<br>' : [ '&#', c, ';' ].join( '' )) );
     }
     return buf.join( '' );
 }

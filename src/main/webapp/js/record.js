@@ -6,7 +6,7 @@ var SCHEDULE_TIME = "";
 var DAYS = [];
 
 const DAY_DATE_FORMAT = new Intl.DateTimeFormat(window.navigator.language, { weekday: 'long', month: 'long', day: 'numeric' });
-var TIME_CLASS_BUSY = "btn btn-outline-secondary";
+var TIME_CLASS_BUSY = "btn btn-secondary";
 var TIME_CLASS_FREE = "btn btn-outline-secondary";
 var TIME_CLASS_CHOOSEN = "btn btn-primary";
 
@@ -15,7 +15,7 @@ function getServiceHtml( s ) {
     '     <div class="col-md-4">' +
     '       <img width="256" height="256" src="img/service.png" class="avatar img-circle" alt="' + s.name + '">' +
     '     </div>' +
-    '     <div class="col-md-6">' +
+    '     <div class="col-md-8">' +
     '       <h3>' + s.name + '</h3>' +
     '       <br>' +
     '       <div>' + s.description + '</div>' +

@@ -161,7 +161,9 @@ public class ScheduleTable implements IScheduleTable<ScheduleRow> {
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
                 "SELECT s.*, u.name user_name" +
-                        " FROM schedule s, user u WHERE u.user_id = s.user_id AND s.service_id = ? AND s.date_from BETWEEN ? AND ?");
+                        " FROM schedule s, user u" +
+                        " WHERE u.user_id = s.user_id AND s.service_id = ? AND s.date_from BETWEEN ? AND ?" +
+                        " ORDER BY s.date_from");
         ps.setLong(1, service_id);
         ps.setTimestamp(2, date_from);
         ps.setTimestamp(3, date_to);
@@ -201,7 +203,9 @@ public class ScheduleTable implements IScheduleTable<ScheduleRow> {
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
                 "SELECT s.*, u.name user_name" +
-                        " FROM schedule s, user u WHERE u.user_id = s.user_id AND s.user_id = ? AND s.date_from BETWEEN ? AND ?");
+                        " FROM schedule s, user u" +
+                        " WHERE u.user_id = s.user_id AND s.user_id = ? AND s.date_from BETWEEN ? AND ?" +
+                        " ORDER BY s.date_from");
         ps.setLong(1, user_id);
         ps.setTimestamp(2, date_from);
         ps.setTimestamp(3, date_to);
