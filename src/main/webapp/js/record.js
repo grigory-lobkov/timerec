@@ -207,12 +207,28 @@ function postData() {
 		    description: $( "#uDescription" ).val(),
 		}),
 		done: function( data ) {
-			alertMessage( "You have recorded successfully" );
-            $( "#servicePage" ).hide();
-            $( "#schedulePage" ).hide();
-			setTimeout( function(){
-			    window.location.replace( "index.html" );
-			}, 5000 );
+		    if( data.success ) {
+                alertMessage( "You have recorded successfully" );
+                $( "#servicePage" ).hide();
+                $( "#schedulePage" ).hide();
+                setTimeout( function(){
+                    window.open( "index.html" );
+                }, 10000 );
+			} else if( data.busy ) {
+			    busy_msg = "This time is already busy, sorry";
+                alertMessage( busy_msg );
+                setTimeout( function(){
+                    getSchedule(SERVICE_ID);
+                    if( $( '#alertMessage' ).text() == "" ) {
+                        alertMessage( busy_msg );
+                    }
+                }, 3000 );
+                setTimeout( function(){
+                    alertMessageHide();
+                }, 10000 );
+			} else {
+			    alertMessage( "Record status is unknown. Please, try again later", JSON.stringify( data ) );
+			}
 		}
 	})
 }

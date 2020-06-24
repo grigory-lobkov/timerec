@@ -36,8 +36,10 @@ public class ScheduleTable implements IScheduleTable<ScheduleRow> {
     public ScheduleRow select(long object_id) throws Exception {
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
-                "SELECT s.*, u.name user_name" +
-                        " FROM schedule s, user u WHERE u.user_id = s.user_id AND s.schedule_id = ?");
+                "SELECT s.*, u.name user_name, e.name service_name" +
+                        " FROM schedule s, user u, service e" +
+                        " WHERE u.user_id = s.user_id AND e.service_id = s.service_id" +
+                        "   AND s.schedule_id = ?");
         ps.setLong(1, object_id);
         ResultSet rs = ps.executeQuery();
         try {
@@ -153,16 +155,17 @@ public class ScheduleTable implements IScheduleTable<ScheduleRow> {
     /**
      * Gets list of schedule by service_id
      *
-     * @return list of shortened {@code model.ScheduleRow} objects
+     * @return list of {@code model.ScheduleRow} objects
      * @throws Exception
      */
     @Override
     public List<ScheduleRow> selectByService(long service_id, Timestamp date_from, Timestamp date_to) throws Exception {
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
-                "SELECT s.*, u.name user_name" +
-                        " FROM schedule s, user u" +
-                        " WHERE u.user_id = s.user_id AND s.service_id = ? AND s.date_from BETWEEN ? AND ?" +
+                "SELECT s.*, u.name user_name, e.name service_name" +
+                        " FROM schedule s, user u, service e" +
+                        " WHERE u.user_id = s.user_id AND e.service_id = s.service_id" +
+                        "   AND s.service_id = ? AND s.date_from BETWEEN ? AND ?" +
                         " ORDER BY s.date_from");
         ps.setLong(1, service_id);
         ps.setTimestamp(2, date_from);
@@ -181,6 +184,7 @@ public class ScheduleTable implements IScheduleTable<ScheduleRow> {
                 r.title = rs.getString("title");
                 r.description = rs.getString("description");
                 r.user_name = rs.getString("user_name");
+                r.service_name = rs.getString("service_name");
                 list.add(r);
             }
         } finally {
@@ -195,16 +199,17 @@ public class ScheduleTable implements IScheduleTable<ScheduleRow> {
     /**
      * Gets list of schedule by user_id
      *
-     * @return list of shortened {@code model.ScheduleRow} objects
+     * @return list of {@code model.ScheduleRow} objects
      * @throws Exception
      */
     @Override
     public List<ScheduleRow> selectByUser(long user_id, Timestamp date_from, Timestamp date_to) throws Exception {
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
-                "SELECT s.*, u.name user_name" +
-                        " FROM schedule s, user u" +
-                        " WHERE u.user_id = s.user_id AND s.user_id = ? AND s.date_from BETWEEN ? AND ?" +
+                "SELECT s.*, u.name user_name, e.name service_name" +
+                        " FROM schedule s, user u, service e" +
+                        " WHERE u.user_id = s.user_id AND e.service_id = s.service_id" +
+                        "   AND s.user_id = ? AND s.date_from BETWEEN ? AND ?" +
                         " ORDER BY s.date_from");
         ps.setLong(1, user_id);
         ps.setTimestamp(2, date_from);
@@ -223,6 +228,7 @@ public class ScheduleTable implements IScheduleTable<ScheduleRow> {
                 r.title = rs.getString("title");
                 r.description = rs.getString("description");
                 r.user_name = rs.getString("user_name");
+                r.service_name = rs.getString("service_name");
                 list.add(r);
             }
         } finally {
@@ -233,6 +239,48 @@ public class ScheduleTable implements IScheduleTable<ScheduleRow> {
         return list;
     }
 
+
+    /**
+     * Gets list of schedule by date
+     *
+     * @return list of {@code model.ScheduleRow} objects
+     * @throws Exception
+     */
+    @Override
+    public List<ScheduleRow> selectByDate(Timestamp date_from, Timestamp date_to) throws Exception {
+        Connection conn = pool.connection();
+        PreparedStatement ps = conn.prepareStatement(
+                "SELECT s.*, u.name user_name, e.name service_name" +
+                        " FROM schedule s, user u, service e" +
+                        " WHERE u.user_id = s.user_id AND e.service_id = s.service_id" +
+                        "   AND s.date_from BETWEEN ? AND ?" +
+                        " ORDER BY s.date_from");
+        ps.setTimestamp(1, date_from);
+        ps.setTimestamp(2, date_to);
+
+        ResultSet rs = ps.executeQuery();
+        List<ScheduleRow> list = new ArrayList<ScheduleRow>();
+        try {
+            while (rs.next()) {
+                ScheduleRow r = new ScheduleRow();
+                r.schedule_id = rs.getLong("schedule_id");
+                r.service_id = rs.getLong("service_id");
+                r.user_id = rs.getLong("user_id");
+                r.date_from = rs.getTimestamp("date_from");
+                r.duration = rs.getInt("duration");
+                r.title = rs.getString("title");
+                r.description = rs.getString("description");
+                r.user_name = rs.getString("user_name");
+                r.service_name = rs.getString("service_name");
+                list.add(r);
+            }
+        } finally {
+            rs.close();
+            ps.close();
+            conn.close();
+        }
+        return list;
+    }
 
     /*
      * Check model.ScheduleRow object {@code object_id} is owned by {@code schedule_id}

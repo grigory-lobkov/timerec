@@ -10,7 +10,7 @@
 
     <script src="common.js"></script>
 
-	<title>TimeRec: User profile</title>
+	<title>TimeRec: Register new user</title>
 </head>
 <body>
 
@@ -18,7 +18,7 @@
 
 <!-- CONTENT -->
 <div class="container">
-    <h1>Edit User Profile</h1>
+    <h1>Registration</h1>
   	<hr>
 	<div class="row">
       <!-- left column -->
@@ -83,11 +83,10 @@
             </div>
           </div>
           <div class="form-group">
-            <label class="col-md-3 control-label"></label>
             <div class="col-md-8">
-              <input type="button" class="btn btn-primary" value="Save Changes" onclick="postData(); return false;">
+              <input type="button" class="btn btn-primary" value="Register" onclick="postData(); return false;">
               <span></span>
-              <input type="reset" class="btn btn-default" value="Cancel" onclick="getData(); return false;">
+              <input type="reset" class="btn btn-default" value="Cancel" onclick="goLogin(); return false;">
             </div>
           </div>
         </form>
@@ -96,27 +95,15 @@
 </div>
 <script>
 
-API_URL = API_SERVER_URI + "profile/";
+API_URL = API_SERVER_URI + "register/";
 
 function validateEmail(email) {
   var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   return re.test(email);
 }
 
-function getData() {
-	var url = API_URL + "?_=" + (new Date()).getTime();
-	getAjaxJson({
-		url: url,
-		done: function( data ) {
-			$( "#uName" ).val( data.name );
-			$( "#uEmail" ).val( data.email );
-			$( "#uPassword1" ).val( "" );
-			$( "#uPassword2" ).val( "" );
-			$( "#uImageId" ).val( data.image_id );
-			$( "#uTzId" ).val( data.tz_id );
-			$( ".container" ).show();
-		}
-	});
+function goLogin() {
+	window.open( "login.html" );
 }
 
 function checkData() {
@@ -134,11 +121,15 @@ function checkData() {
 		alertMessage( "Minimum ''Name'' length is 3 symbols" );
 		return false;
 	}
-	if( !( pas1 == pas2 ) ) {
-		alertMessage( "''Passwords'' must be equal" );
+	if( !( pas1 ) ) {
+		alertMessage( "''Password'' must be set" );
 		return false;
 	}
-    if( !( pas1 == pas2 ) ) {
+	if( pas1.length < 6 ) {
+		alertMessage( "Minimum ''Password'' length is 6 symbols" );
+		return false;
+	}
+	if( !( pas1 == pas2 ) ) {
 		alertMessage( "''Passwords'' must be equal" );
 		return false;
 	}
@@ -153,22 +144,23 @@ function checkData() {
 function postData() {
 	if( !checkData() ) return false;
 	getAjaxJson({
-		method: "PUT",
+		method: "POST",
 		url: API_URL,
 		data: JSON.stringify({
 			name: $("#uName").val(),
 			email: $("#uEmail").val(),
 			password: $("#uPassword1").val(),
-			image_id: $("#uImageId").val(),
-			tz_id: $("#uTzId").val(),
+			//image_id: $("#uImageId").val(),
+			//tz_id: $("#uTzId").val(),
 		}),
 		done: function( data ) {
-			alertMessage( "Profile saved successfully" );
+			alertMessage( "Profile created successfully. You are logged in now!" );
+              setTimeout( function(){
+                  window.open( "index.html" );
+              }, 3000 );
 		}
 	})
 }
-
-document.addEventListener( 'DOMContentLoaded', function(){ getData() } );
 </script>
 <!-- /CONTENT -->
 

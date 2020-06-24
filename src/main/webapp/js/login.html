@@ -10,7 +10,7 @@
 	
 	<script src="common.js"></script>
 
-	<title>TimeRec: Service profile</title>
+	<title>TimeRec: Login</title>
 </head>
 <body>
 
@@ -55,7 +55,7 @@
 		<div class="col-md-3"></div>
 		<div class="col-md-6">
 			<form role="form" class="uLogin">
-				<h3>TimeRec admin login</h3>
+				<h3>TimeRec login</h3>
 				<br>
 				<div id="alertMessage"></div>
 				<div class="form-group">
@@ -65,6 +65,7 @@
 					<input id="password" type="password" class="form-control" placeholder="Your Password *" value="" />
 				</div>
 				<div class="form-group">
+					<div><a href="register.html">Registration form</a></div>
 					<input type="submit" class="btnSubmit" value="Login" onclick="postData(); return false;" />
 				</div>
 				<!--<div class="form-group">
@@ -114,7 +115,7 @@ function postData() {
 		statusCode: {
 			201: function( data ) {
 				alertMessage( "Login sucessfull. Welcome!" );
-				window.location.replace( "index.html" );
+				window.open( "index.html" );
 			},
 			204: function() {
 				alertMessage( "User name or password is wrong" );

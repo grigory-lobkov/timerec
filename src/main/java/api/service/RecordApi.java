@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import controller.ScheduleController;
+import integration.Integrator;
 import model.RepeatRow;
 import model.ScheduleRow;
 import model.ServiceRow;
@@ -21,8 +22,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -90,10 +89,10 @@ public class RecordApi extends HttpServlet {
             ZonedDateTime dateEnd = dateStart.plusDays(POSSIBLE_RECORD_INTERVAL);
             UserRow user = SessionUtils.getSessionUser(req);
             // get data
-            List<ScheduleRow> list = ScheduleController.getSchedule(service_id, dateStart, dateEnd, user);
+            List<ScheduleRow> list = ScheduleController.getScheduleByService(service_id, dateStart, dateEnd, user);
             List<TransportSchedule> data = new ArrayList<>(list.size());
             for (ScheduleRow row : list) {
-                data.add(convertFutureToTransport(row));
+                data.add(convertToTransport(row));
             }
             // send data
             String jsonStr = gson.toJson(data, scheduleTList);
@@ -102,7 +101,7 @@ public class RecordApi extends HttpServlet {
         }
     }
 
-    private TransportSchedule convertFutureToTransport(ScheduleRow row) {
+    private TransportSchedule convertToTransport(ScheduleRow row) {
         TransportSchedule t = new TransportSchedule();
 
         //t.start = row.date_from.toString();
@@ -128,6 +127,14 @@ public class RecordApi extends HttpServlet {
     }
 
 
+    /**
+     * Insert of new record (row in Schedule)
+     *
+     * @param req
+     * @param resp
+     * @throws ServletException
+     * @throws IOException
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Gson gson = (new GsonBuilder()).create();
@@ -150,7 +157,7 @@ public class RecordApi extends HttpServlet {
         ZonedDateTime dateStart = ZonedDateTime.parse(data.start + "Z").minusDays(1);
         UserRow user = SessionUtils.getSessionUser(req);
         // get schedule
-        List<ScheduleRow> list = ScheduleController.getSchedule(service_id, dateStart, dateStart.plusDays(2), user);
+        List<ScheduleRow> list = ScheduleController.getScheduleByService(service_id, dateStart, dateStart.plusDays(2), user);
 
         // search given parameters in schedule
         boolean done1 = false;
@@ -164,10 +171,13 @@ public class RecordApi extends HttpServlet {
                         resp.setContentType("application/json; charset=UTF-8");
                         resp.getWriter().println("{\"busy\":\"1\"}");
                         done1 = true;
-                    } else if (ScheduleController.makeRecord(row, user)) {
-                        resp.setContentType("application/json; charset=UTF-8");
-                        resp.getWriter().println("{\"success\":\"1\"}");
-                        done1 = true;
+                    } else {
+                        boolean allow = Integrator.getInstance().recordAllowRecord(user, row);
+                        if (allow && ScheduleController.makeRecord(row, user, user)) {
+                            resp.setContentType("application/json; charset=UTF-8");
+                            resp.getWriter().println("{\"success\":\"1\"}");
+                            done1 = true;
+                        }
                     }
                 } catch (Exception e) {
                     resp.sendError(HttpServletResponse.SC_NO_CONTENT);

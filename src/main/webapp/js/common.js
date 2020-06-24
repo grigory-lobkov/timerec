@@ -131,7 +131,7 @@ function fillMenu(data) {
 
 	// menu
 	var menu =
-		'<a class="navbar-brand" href="#">TimeRec</a>'+
+		'<a class="navbar-brand" href="index.html">TimeRec</a>'+
 		'<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">'+
 		'<span class="navbar-toggler-icon"></span>'+
 		'</button>'+
@@ -201,7 +201,7 @@ function getAjaxJson( _ ) {
                     alertMessage( msg );
                     alert( msg );
                     if( getCookie( "password") == null )
-                        window.location.replace( "login.html" );
+                        window.open( "login.html" );
                 }
 			}, _.statusCode )
 		,
@@ -215,10 +215,21 @@ function getAjaxJson( _ ) {
 
 function htmlEntities(str) {
     var buf = [];
-    for (var i=str.length-1;i>=0;i--) {
-        c = str[i].charCodeAt();
-        buf.unshift( c == 32 ? '&nbsp;' : (c == 13 || c == 10 ? '<br>' : [ '&#', c, ';' ].join( '' )) );
-    }
+    let s = 0;
+    if(str)
+        for (var i=str.length-1;i>=0;i--) {
+            c = str[i].charCodeAt();
+            if ( c == 32 ) {
+                buf.unshift( s % 2 == 1 ? '&nbsp' : ' ' );
+                s++;
+            } else if ( c == 13 || c == 10 ) {
+                buf.unshift( '<br>' );
+                s = 0;
+            } else {
+                buf.unshift( [ '&#', c, ';' ].join( '' ) );
+                s = 0;
+            }
+        }
     return buf.join( '' );
 }
 

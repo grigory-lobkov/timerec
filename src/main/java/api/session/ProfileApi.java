@@ -2,6 +2,7 @@ package api.session;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import integration.Integrator;
 import model.UserRow;
 import storage.ITable;
 import storage.Passwords;
@@ -68,6 +69,9 @@ public class ProfileApi extends HttpServlet {
                     data.user_id = user.user_id;
                     data.role_id = user.role_id;
                     data.owner_id = user.owner_id;
+                    data.name = data.name.trim();
+                    data.email = data.email.trim();
+                    boolean allow = Integrator.getInstance().profileAllowModification(user, data);
                     // password changed
                     if (data.password == null || data.password.isEmpty()) {
                         data.password = user.password;

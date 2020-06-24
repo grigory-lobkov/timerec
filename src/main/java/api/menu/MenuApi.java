@@ -5,11 +5,9 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.*;
 
-import api.service.RecordApi;
 import api.session.SessionUtils;
 import model.AccessRow;
 import model.UserRow;
@@ -19,6 +17,8 @@ import model.ServiceRow;
 
 @WebServlet(urlPatterns = "/api/menu")
 public class MenuApi extends HttpServlet {
+
+    private final int MAX_SERVICE_NAME_LENGTH = 25; // maximum length in dropdown menu
 
     private ITable<ServiceRow> serviceStorage = StorageFactory.getServiceInstance();
     private ITable<AccessRow> accessStorage = StorageFactory.getAccessInstance();
@@ -132,7 +132,7 @@ public class MenuApi extends HttpServlet {
         String jsonUser = "{\"user_id\":\"" + user.user_id + "\",\"name\":\"" + user.name + "\"}";
         String jsonServices = "";
         String jsonPages = "";
-        if(user.user_id > 0)
+        if (user.user_id > 0)
             try {
                 // query storage
                 List<ServiceRow> services = serviceStorage.select();
@@ -191,7 +191,7 @@ public class MenuApi extends HttpServlet {
             if (result.length() > 0)
                 result.append(',');
             result.append("{\"service_id\":\"" + s.service_id +
-                    "\",\"name\":\"" + s.name.replace("\\", "\\\\") +
+                    "\",\"name\":\"" + s.name.substring(0, MAX_SERVICE_NAME_LENGTH).replace("\\", "\\\\") +
                     "\"}");
         }
         return result.toString();

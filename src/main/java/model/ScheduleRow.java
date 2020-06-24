@@ -21,7 +21,9 @@ public class ScheduleRow {
     public String description;
 
 
-    // other table fields
+    // other fields
     public String user_name;
+    public String service_name;
+    public int is_passed = 1; // 1 - if passed, 0 - if in future (ScheduleController class sets it)
 
 }

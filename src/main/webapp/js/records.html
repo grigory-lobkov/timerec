@@ -10,7 +10,7 @@
 	
 	<script src="common.js"></script>
 
-	<title>TimeRec: Service schedule</title>
+	<title>TimeRec: Record list</title>
 
 </head>
 <body>
@@ -77,24 +77,21 @@ tr.fc-list-item:hover, a.fc-event:hover {
     background-color: #b8d9f1;
 }
 .fc-event {
-    /*border: 1px solid #b8d9f1;*/
     border: none;
 }
 </style>
 
 <div class="container">
   <div id="alertMessage"></div>
-  <form role="form" class="sSchedule">
+  <form role="form" class="uSchedule">
     <h1>Schedule of service</h1>
   	<div id="calendar"></div>
   </form>
 </div>
 <script>
 
-API_URL = API_SERVER_URI + "schedule/service/";
+API_URL = API_SERVER_URI + "schedule/records";
 SERVICE_ID = null;
-
-var CALENDAR = {};
 
   document.addEventListener('DOMContentLoaded', function() {
     SERVICE_ID = getUrlVars()["service_id"];
@@ -102,66 +99,28 @@ var CALENDAR = {};
     //var initialLocaleCode = window.navigator.language;
     var calendarEl = document.getElementById('calendar');
 
-    CALENDAR = new FullCalendar.Calendar(calendarEl, {
+    var calendar = new FullCalendar.Calendar(calendarEl, {
       plugins: [ 'dayGrid', 'timeGrid', 'list', 'interaction' ],
       header: {
-        left: 'prev,next today',
+        left: 'prev,next',
         center: 'title',
-        right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+        right: 'dayGridMonth,listMonth'
       },
-      /*header: {
-        center: 'addEventButton'
-      },
-      customButtons: {
-        addEventButton: {
-          text: 'Add event',
-          click: function() {
-            var dateStr = prompt('Enter a date in YYYY-MM-DD format');
-            var date = new Date(dateStr + 'T00:00:00'); // will be in local time
-
-            if (!isNaN(date.valueOf())) { // valid?
-              calendar.addEvent({
-                title: 'dynamic event',
-                start: date,
-                allDay: true
-              });
-              alert('Great. Now, update your database...');
-            } else {
-              alert('Invalid date.');
-            }
-          }
-        }
-      }*/
 	  locale: initialLocaleCode, // locale of texts
-	  columnHeaderText: function(arg) { n=arg.toLocaleString(initialLocaleCode,{weekday: 'long'}); return n.charAt(0).toUpperCase() + n.slice(1) }, // Full week name
+	  //columnHeaderText: function(arg) { n=arg.toLocaleString(initialLocaleCode,{weekday: 'long'}); return n.charAt(0).toUpperCase() + n.slice(1) }, // Full week name
       weekNumberCalculation: 'ISO', // start day is Monday
 
-	  defaultView: 'dayGridMonth', // default view is "Week"
-      //defaultDate: '2020-02-12',
+	  defaultView: 'listMonth', // default view is "Week"
       navLinks: true, // can click day/week names to navigate views
       editable: false,
       eventLimit: true, // allow "more" link when too many events
-
-      /*selectable: true,
-      select: function(arg) {
-        var title = prompt('Event Title:');
-        if (title) {
-          calendar.addEvent({
-            title: title,
-            start: arg.start,
-            end: arg.end,
-            allDay: arg.allDay
-          })
-        }
-        calendar.unselect()
-      },*/
 
 	  eventClick: function( info ) {
 		modal = $( '#modalCenter' );
 		e = info.event;
 		ep = e.extendedProps;
 		bdy = htmlEntities( info.event.extendedProps.description ) + '<br>' +
-			'<small><br><b>Client</b>: ' + htmlEntities( ep.client_name ) +
+			'<small><br><b>Service</b>: ' + htmlEntities( ep.service_name ) +
 			'<br><b>Start</b>: ' + e.start +
 			'<br><b>End</b>: ' + e.end +
 			'<br><b>Duration</b>: ' + ep.duration + ' minutes' +
@@ -172,83 +131,34 @@ var CALENDAR = {};
 
 		modalEvent = e;
 		removeBtn = $( '#modalDelete' );
-		if( ep.user_id > 0 ) {
+		if( ep.is_passed == 0 ) {
 			removeBtn.show();
 		} else {
 			removeBtn.hide();
 		}
 	  },
 
-      events: API_URL + SERVICE_ID,
-      eventBorderColor: "#fff",
+      events: API_URL,
 
-      /*events: [
-        {
-          groupId: 999,
-          title: 'Repeating Event',
-          start: '2020-02-09T16:00:00'
-        },
-        {
-          groupId: 999,
-          title: 'Repeating Event',
-          start: '2020-02-16T16:00:00'
-        },
-        {
-          title: 'Meeting',
-          start: '2020-02-12T10:30:00',
-          end: '2020-02-12T12:30:00'
-        },
-        {
-          title: 'Lunch',
-          start: '2020-02-12T12:00:00'
-        },
-        {
-          title: 'Meeting',
-          start: '2020-02-12T14:30:00'
-        },
-        {
-          title: 'Happy Hour',
-          start: '2020-02-12T17:30:00'
-        },
-        {
-          title: 'Dinner',
-          start: '2020-02-12T20:00:00'
-        },
-        {
-          title: 'Birthday Party',
-          start: '2020-02-13T07:00:00'
-        },
-        {
-          title: 'Click for Google',
-          url: 'http://google.com/',
-          start: '2020-02-28'
-        }
-      ]*/
     });
 
-    CALENDAR.render();
+    calendar.render();
   });
+
+var modalEvent = {};
 
 function deleteRecord() {
 	if(confirm('Are you sure want to delete this record?')) {
 		var ev_tmp = modalEvent;
 		getAjaxJson({
 			method: "DELETE",
-			url: API_URL + SERVICE_ID,
+			url: API_URL,
 			data: JSON.stringify( modalEvent.extendedProps ),
 			done: function( data ) {
-				if( data.start ) {
+				if(data.success) {
 					ev_tmp.remove();
-					CALENDAR.addEvent( data );
 				} else {
 			    	alertMessage( "Delete status is unknown. Please, try again later", JSON.stringify( data ) );
-				}
-			},
-			statusCode: {
-				404: function() {
-					alertMessage( "Not found on server. Somebody deleted it." );
-					//ev_tmp.remove();
-					ev_tmp.background = "";
 				}
 			}
 		});
@@ -256,7 +166,6 @@ function deleteRecord() {
 		modal.modal( 'hide' );
 	}
 }
-
 </script>
 
 <!-- Modal -->

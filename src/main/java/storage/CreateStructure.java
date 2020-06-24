@@ -258,8 +258,8 @@ class Updater {
      */
     private static void userRole() throws SQLException {
 
-        //exec("seq_role_id drop", "DROP SEQUENCE IF EXISTS seq_role_id");
-        //exec("role drop", "DROP TABLE IF EXISTS role");
+        exec("seq_role_id drop", "DROP SEQUENCE IF EXISTS seq_role_id");
+        exec("role drop", "DROP TABLE IF EXISTS role");
 
         exec("seq_role_id",
                 "CREATE SEQUENCE IF NOT EXISTS seq_role_id");
@@ -268,19 +268,20 @@ class Updater {
                 "CREATE TABLE IF NOT EXISTS role " +
                         "(role_id BIGINT PRIMARY KEY," +
                         " name VARCHAR2(1000)," +
-                        " owner_id BIGINT)");
+                        " owner_id BIGINT," +
+                        " is_default BOOLEAN)");
 
         exec("role_update_list_public", // PUBLIC USER ROLE MUST HAVE role_id=1 ALWAYS, SessiotUtils.getPublicUser() LIMITATION
-                "INSERT INTO role (role_id, name)" +
-                        "SELECT seq_role_id.nextval role_id, name FROM (" +
+                "INSERT INTO role (role_id, name, is_default)" +
+                        "SELECT seq_role_id.nextval role_id, name, false FROM (" +
                         " SELECT '" + ROLE_PUBLIC + "' name FROM dual" +
                         ")WHERE (name) NOT IN (SELECT name FROM role)");
 
         exec("role_update_list",
-                "INSERT INTO role (role_id, name)" +
-                        "SELECT seq_role_id.nextval role_id, name FROM (" +
-                        " SELECT '" + ROLE_ADMIN + "' name FROM dual UNION ALL" +
-                        " SELECT '" + ROLE_CLIENT + "' name FROM dual" +
+                "INSERT INTO role (role_id, name, is_default)" +
+                        "SELECT seq_role_id.nextval role_id, name, def FROM (" +
+                        " SELECT '" + ROLE_ADMIN + "' name, false def FROM dual UNION ALL" +
+                        " SELECT '" + ROLE_CLIENT + "' name, true def FROM dual" +
                         ")WHERE (name) NOT IN (SELECT name FROM role)");
     }
 
@@ -417,6 +418,10 @@ class Updater {
 
         exec("schedule_user_date_idx",
                 "CREATE INDEX IF NOT EXISTS schedule_user_date_idx ON schedule (user_id, date_from)");
+
+        exec("schedule_date_idx",
+                "CREATE INDEX IF NOT EXISTS schedule_date_idx ON schedule (date_from)");
+
     }
 
     /**

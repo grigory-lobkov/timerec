@@ -41,8 +41,8 @@ public class AccessFilterApi implements Filter {
         accAlways = new HashSet<>();
         List<String> urls = Arrays.asList(
                 "menu", // top menu
-                "login", // manager login servlet
-                "tz" // list of time zones
+                "tz", // list of time zones
+                "image" // images
         );
         accAlways.addAll(urls);
     }
@@ -81,6 +81,9 @@ public class AccessFilterApi implements Filter {
         UserRow user = SessionUtils.getSessionUser(req);
         if (user == null) {
             user = SessionUtils.createUserSessionCook(req);
+            if (user == null) {
+                user = SessionUtils.getPublicUser();
+            }
         }
 
         boolean granted = checkRights(req, user);
@@ -90,7 +93,7 @@ public class AccessFilterApi implements Filter {
         } else {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
             //if (debugLog)
-                System.out.println("AccessFilterApi.doFilter(" + ((HttpServletRequest) servletRequest).getServletPath() + ") SC_FORBIDDEN for " + user.name + " (" + user.email + ")");
+            System.out.println("AccessFilterApi.doFilter(" + ((HttpServletRequest) servletRequest).getServletPath() + ") SC_FORBIDDEN for " + (user == null ? "UNKNOWN" : user.name + " (" + user.email + ")"));
         }
     }
 

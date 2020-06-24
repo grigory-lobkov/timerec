@@ -2,7 +2,12 @@ package api.session;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import controller.UserController;
+import integration.Integrator;
 import model.UserRow;
+import storage.ITable;
+import storage.Passwords;
+import storage.StorageFactory;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -15,7 +20,7 @@ import java.io.IOException;
 @WebServlet(urlPatterns = "/api/login/*")
 public class LoginApi extends HttpServlet {
 
-    //private ITable<UserRow> storage = StorageFactory.getUserInstance();
+    private ITable<UserRow> storage = StorageFactory.getUserInstance();
     private boolean debugLog = false;
 
     /**
@@ -41,18 +46,28 @@ public class LoginApi extends HttpServlet {
             if (data != null) {
                 try {
                     if (debugLog) System.out.println("LoginApi object: " + data);
+                    data.email = data.email.trim();
 
                     // look for storage
                     UserRow dbUser = SessionUtils.checkAndGetUser(data.email, data.password);
                     String jsonStr;
+                    if (dbUser == null) {
+                        dbUser = tryAutoRegister(data, req, resp);
+                    }
 
+                    jsonStr = "{\"success\":\"0\"}";
                     if (dbUser != null) {
-                        jsonStr = "{\"success\":\"1\",\"user\":" + gson.toJson(dbUser) + "}";
-                        resp.setStatus(HttpServletResponse.SC_CREATED);
-                        SessionUtils.setResponceCookies(resp, dbUser.email, dbUser.password);
-                        SessionUtils.createUserSession(req, dbUser);
+                        if(Integrator.getInstance().loginAllowRegistered(dbUser)) {
+                            jsonStr = "{\"success\":\"1\",\"user\":" + gson.toJson(dbUser) + "}";
+                            resp.setStatus(HttpServletResponse.SC_CREATED);
+                            SessionUtils.setResponceCookies(resp, dbUser.email, dbUser.password);
+                            SessionUtils.createUserSession(req, dbUser);
+                        } else {
+                            if (debugLog) System.out.println("LoginApi SC_FORBIDDEN");
+                            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                        }
                     } else {
-                        jsonStr = "{\"success\":\"0\"}";
+                        if (debugLog) System.out.println("LoginApi SC_NO_CONTENT");
                         resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
                     }
                     resp.getWriter().println(jsonStr);
@@ -72,5 +87,34 @@ public class LoginApi extends HttpServlet {
         }
     }
 
+    private UserRow tryAutoRegister(UserRow data, HttpServletRequest req, HttpServletResponse resp) {
+        data.owner_id = 0;
+        data.role_id = 0;
+        boolean autoReg = Integrator.getInstance().loginDenyAutoRegister(data);
+        if (autoReg) {
+            data.user_id = 0;
+            if (data.name.isEmpty()) {
+                String[] s = data.name.split("@");
+                data.name = s[0].substring(0, 1).toUpperCase() + s[0].substring(1);
+                data.name = data.name.trim();
+            }
+            if (data.role_id == 0) {
+                data.role_id = UserController.getDefaultRoleId();
+            }
+            String savePassword = data.password;
+            try {
+                data.password = Passwords.encrypt(data.password);
+                // update storage
+                if (storage.insert(data)) {
+                    return data;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                data.password = savePassword;
+            }
+        }
+        return null;
+    }
 
 }

@@ -52,4 +52,6 @@ public interface IScheduleTable<T> {
 
 
     List<ScheduleRow> selectByUser(long user_id, Timestamp date_from, Timestamp date_to) throws Exception;
+
+    List<ScheduleRow> selectByDate(Timestamp date_from, Timestamp date_to) throws Exception;
 }

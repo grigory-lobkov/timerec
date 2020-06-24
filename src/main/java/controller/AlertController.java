@@ -1,5 +1,7 @@
 package controller;
 
+import api.session.SessionUtils;
+import jdk.internal.joptsimple.internal.Strings;
 import model.*;
 import storage.ITable;
 import storage.StorageFactory;
@@ -13,35 +15,47 @@ public class AlertController {
 
     public static alert.IAlert mailAlert = new alert.MailAlert();
 
-    public static void alertNewSchedule(UserRow user, ScheduleRow row) {
+    public static void alertNewSchedule(UserRow client, ScheduleRow row, UserRow user) {
+        alertSchedule("Record", client, row, user, "");
+    }
+
+    public static void alertSchedule(String action, UserRow client, ScheduleRow row, UserRow user, String bodyStart) {
+        if(action==null)
+            action = Strings.EMPTY;
         ServiceRow service;
-        int userDeltaSec = UserController.getTzOffsetSeconds(user);
         try {
             service = storageService.select(row.service_id);
+            int userDeltaSec = client==null?0:UserController.getTzOffsetSeconds(client);
             UserRow owner = storageUser.select(service.owner_id);
             int ownerDeltaSec = UserController.getTzOffsetSeconds(owner);
-
-            String titleBeforeTime = service.name + " ";
-
-            String bodyBeforeTime = "<table>" +
-                    "<tr><td>Name</td><td>"+service.name+"</td></tr>" +
-                    "<tr><td>Description</td><td><small>"+service.description+"</small></td></tr>" +
-                    "<tr><td>Duration</td><td>"+row.duration+"</td></tr>" +
-                    "<tr><td>Start time</td><td><b>";
-            String bodyAfterTime = "</b></td></tr>" +
-                    "<tr><td>Title</td><td>"+row.title+"</td></tr>" +
-                    "<tr><td>Description</td><td>"+row.description+"</td></tr>" +
-                    "<tr><td>User name</td><td>"+user.name+"</td></tr>" +
-                    "<tr><td>User mail</td><td>"+user.email+"</td></tr>" +
-                    "</table>";
             String userTime = (new Timestamp(row.date_from.getTime() + userDeltaSec * 1000)).toString();
             String ownerTime = (new Timestamp(row.date_from.getTime() + ownerDeltaSec * 1000)).toString();
 
-            // send to user
-            mailAlert.sendAlert(user.email,
-                    titleBeforeTime + userTime,
-                    bodyBeforeTime + userTime + bodyAfterTime);
+            String titleBeforeTime = (action.isEmpty() ? "" : action + " ") + service.name + " ";
 
+            String bodyBeforeTime = bodyStart + "<table>" +
+                    (action.isEmpty() ? "" : "<tr><td>Action</td><td>"+action+"</td></tr>") +
+                    "<tr><td>Name</td><td>"+htmlEntites(service.name)+"</td></tr>" +
+                    "<tr><td>Description</td><td><small>"+htmlEntites(service.description)+"</small></td></tr>" +
+                    "<tr><td>Duration</td><td>"+row.duration+"</td></tr>" +
+                    "</table><br><table>" +
+                    "<tr><td>Start time</td><td><b>";
+            String bodyAfterTime = "</b></td></tr>" +
+                    "<tr><td>Title</td><td>"+htmlEntites(row.title)+"</td></tr>" +
+                    "<tr><td>Description</td><td>"+htmlEntites(row.description)+"</td></tr>" +
+                    (client==null ? "" :
+                            "<tr><td>User name</td><td>"+htmlEntites(client.name)+"</td></tr>" +
+                            "<tr><td>User mail</td><td>"+htmlEntites(client.email)+"</td></tr>") +
+                    (user==null ? "" : "</table><table>" +
+                            "<tr><td>Initiator</td><td>"+htmlEntites(user.name)+"</td></tr>") +
+                    "</table>";
+
+            // send to user
+            if(client!=null) {
+                mailAlert.sendAlert(client.email,
+                        titleBeforeTime + userTime,
+                        bodyBeforeTime + userTime + bodyAfterTime);
+            }
             // send to administrator
             ServiceSettingRow settings = SettingController.getServiceSetting(row.service_id);
             if(settings.alertPaths.isEmpty()) {
@@ -58,6 +72,17 @@ public class AlertController {
             e.printStackTrace();
         }
     }
+
+    private static String htmlEntites(String str) {
+        return str.replace("&","&amp;").replace(" ","\t&nbsp;")
+                .replace("<","&lt;").replace(">","&gt;")
+                .replace("\n","<br>");
+    }
+
+    public static void alertCancelSchedule(UserRow client, ScheduleRow row, UserRow user) {
+        alertSchedule("Cancelled", client, row, user, "");
+    }
+
 
     private static void alertByPaths(String alertPaths, String title, String htmlText) {
         String[] aPaths = alertPaths.split("[;,]");

@@ -1,5 +1,6 @@
 package api.session;
 
+import integration.Integrator;
 import model.UserRow;
 import storage.ITable;
 import storage.Passwords;
@@ -80,8 +81,12 @@ public class SessionUtils {
      */
     static public void createUserSession(HttpServletRequest req, UserRow user) {
         if (debugLog) System.out.println("SessionUtils.createUserSession()");
-        HttpSession session = req.getSession();
-        session.setAttribute("user", user);
+        if(Integrator.getInstance().sessionAllowUser(user)) {
+            HttpSession session = req.getSession();
+            session.setAttribute("user", user);
+        } else {
+            System.out.println("SessionUtils.createUserSession "+user.name+" ("+user.email+") denied by integrator!");
+        }
     }
 
 
