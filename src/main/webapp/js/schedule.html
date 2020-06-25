@@ -91,7 +91,7 @@ tr.fc-list-item:hover, a.fc-event:hover {
 </div>
 <script>
 
-API_URL = API_SERVER_URI + "schedule/service/";
+API_URL = "/timerec/api/" + "schedule/service/";
 SERVICE_ID = null;
 
 var CALENDAR = {};
@@ -161,7 +161,7 @@ var CALENDAR = {};
 		e = info.event;
 		ep = e.extendedProps;
 		bdy = htmlEntities( info.event.extendedProps.description ) + '<br>' +
-			'<small><br><b>Client</b>: ' + htmlEntities( ep.client_name ) +
+			'<small><br><b>Client</b>: ' + htmlEntities( ep.user_name ) +
 			'<br><b>Start</b>: ' + e.start +
 			'<br><b>End</b>: ' + e.end +
 			'<br><b>Duration</b>: ' + ep.duration + ' minutes' +

@@ -1,7 +1,5 @@
 package model;
 
-import java.sql.Date;
-
 public class RepeatRow {
 
     // identifier

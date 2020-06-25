@@ -1,4 +1,4 @@
-var API_URL = API_SERVER_URI + "record/";
+var API_URL = "/timerec/api/" + "record/";
 var SERVICES = [];
 var SERVICE_ID = 0;
 var SCHEDULE = [];
@@ -212,7 +212,7 @@ function postData() {
                 $( "#servicePage" ).hide();
                 $( "#schedulePage" ).hide();
                 setTimeout( function(){
-                    window.open( "index.html" );
+                    window.location.href = "index.html";
                 }, 10000 );
 			} else if( data.busy ) {
 			    busy_msg = "This time is already busy, sorry";

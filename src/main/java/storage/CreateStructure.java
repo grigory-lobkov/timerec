@@ -4,6 +4,8 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CreateStructure implements ServletContextListener {
 
@@ -328,6 +330,7 @@ class Updater {
                         " SELECT 'repeat' FROM dual UNION ALL" +
                         " SELECT 'schedule' FROM dual UNION ALL" +
                         " SELECT 'tz' FROM dual UNION ALL" +
+                        " SELECT 'login' name FROM dual UNION ALL" +
                         " SELECT 'logout' FROM dual" +
                         ") page " +
                         "WHERE role.name = '" + ROLE_ADMIN + "' AND NOT EXISTS (SELECT 1 FROM access WHERE role_id=role.role_id)");
@@ -341,6 +344,7 @@ class Updater {
                         " SELECT 'profile' FROM dual UNION ALL" +
                         " SELECT 'record' FROM dual UNION ALL" +
                         " SELECT 'records' FROM dual UNION ALL" +
+                        " SELECT 'login' name FROM dual UNION ALL" +
                         " SELECT 'logout' FROM dual" +
                         ") page " +
                         "WHERE role.name = '" + ROLE_CLIENT + "' AND NOT EXISTS (SELECT 1 FROM access WHERE role_id=role.role_id)");
@@ -432,6 +436,9 @@ class Updater {
      */
     public static void main(String[] args) throws SQLException {
         Updater.createStructures();
+        //int a = 123451234512345;
+        List list = new ArrayList();
+
     }
 
 }

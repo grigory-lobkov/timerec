@@ -1,8 +1,9 @@
 package controller;
 
-import api.session.SessionUtils;
-import jdk.internal.joptsimple.internal.Strings;
-import model.*;
+import model.ScheduleRow;
+import model.ServiceRow;
+import model.ServiceSettingRow;
+import model.UserRow;
 import storage.ITable;
 import storage.StorageFactory;
 
@@ -21,7 +22,7 @@ public class AlertController {
 
     public static void alertSchedule(String action, UserRow client, ScheduleRow row, UserRow user, String bodyStart) {
         if(action==null)
-            action = Strings.EMPTY;
+            action = "";
         ServiceRow service;
         try {
             service = storageService.select(row.service_id);

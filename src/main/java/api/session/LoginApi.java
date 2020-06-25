@@ -57,11 +57,12 @@ public class LoginApi extends HttpServlet {
 
                     jsonStr = "{\"success\":\"0\"}";
                     if (dbUser != null) {
-                        if(Integrator.getInstance().loginAllowRegistered(dbUser)) {
+                        if (Integrator.getInstance().loginAllowRegistered(dbUser)) {
                             jsonStr = "{\"success\":\"1\",\"user\":" + gson.toJson(dbUser) + "}";
                             resp.setStatus(HttpServletResponse.SC_CREATED);
                             SessionUtils.setResponceCookies(resp, dbUser.email, dbUser.password);
                             SessionUtils.createUserSession(req, dbUser);
+                            System.out.println("LoginApi logged in "+ dbUser.name+" ("+dbUser.email+")");
                         } else {
                             if (debugLog) System.out.println("LoginApi SC_FORBIDDEN");
                             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -87,14 +88,19 @@ public class LoginApi extends HttpServlet {
         }
     }
 
+    @Override
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        doPost(req, resp);
+    }
+
     private UserRow tryAutoRegister(UserRow data, HttpServletRequest req, HttpServletResponse resp) {
         data.owner_id = 0;
         data.role_id = 0;
         boolean autoReg = Integrator.getInstance().loginDenyAutoRegister(data);
-        if (autoReg) {
+        if (!autoReg) {
             data.user_id = 0;
-            if (data.name.isEmpty()) {
-                String[] s = data.name.split("@");
+            if (data.name == null || data.name.isEmpty()) {
+                String[] s = data.email.split("@");
                 data.name = s[0].substring(0, 1).toUpperCase() + s[0].substring(1);
                 data.name = data.name.trim();
             }

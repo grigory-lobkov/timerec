@@ -25,7 +25,7 @@
 </div>
 <script>
 
-API_URL = API_SERVER_URI + "logout";
+API_URL = "/timerec/api/" + "logout";
 
 function postData() {
 	getAjaxJson({
@@ -45,7 +45,7 @@ function postData() {
 //    document.cookie = name + '=; Max-Age=-99999999;';
 //}
 
-document.addEventListener( 'DOMContentLoaded', function(){ postData() } );
+document.addEventListener( 'DOMContentLoaded', function(){ postData(); } );
 </script>
 <!-- /CONTENT -->
 

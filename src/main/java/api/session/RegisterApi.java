@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import controller.UserController;
 import integration.Integrator;
-import model.RoleRow;
 import model.UserRow;
 import storage.ITable;
 import storage.Passwords;

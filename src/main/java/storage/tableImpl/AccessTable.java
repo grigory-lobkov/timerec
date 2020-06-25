@@ -1,8 +1,8 @@
 package storage.tableImpl;
 
+import model.AccessRow;
 import storage.IConnectionPool;
 import storage.ITable;
-import model.AccessRow;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

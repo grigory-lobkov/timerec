@@ -1,10 +1,10 @@
 package api.filter;
 
+import api.session.SessionUtils;
 import model.AccessRow;
 import model.UserRow;
 import storage.ITable;
 import storage.StorageFactory;
-import api.session.SessionUtils;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;

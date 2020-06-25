@@ -95,7 +95,7 @@
 </div>
 <script>
 
-API_URL = API_SERVER_URI + "register/";
+API_URL = "/timerec/api/" + "register/";
 
 function validateEmail(email) {
   var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -103,7 +103,7 @@ function validateEmail(email) {
 }
 
 function goLogin() {
-	window.open( "login.html" );
+	window.location.href = "login.html";
 }
 
 function checkData() {
@@ -156,7 +156,7 @@ function postData() {
 		done: function( data ) {
 			alertMessage( "Profile created successfully. You are logged in now!" );
               setTimeout( function(){
-                  window.open( "index.html" );
+                  window.location.href = "index.html";
               }, 3000 );
 		}
 	})

@@ -1,7 +1,7 @@
 
 //API_SERVER_URI = "http://gri.myqnapcloud.com:8081/timerec/api/";
 //API_SERVER_URI = "proxy.php?url=http://gri.myqnapcloud.com:8081/timerec/";
-API_SERVER_URI = "/timerec/api/";
+//API_SERVER_URI = "/timerec/api/";
 
 _GET = null;
 SERVICE_ID = null;
@@ -45,8 +45,9 @@ function getMenu(cache=true) {
 		alert( "Menu Get failed: " + textStatus );
 	});*/
 	var serviceId = getUrlVars()["service_id"];
+	var url = "/timerec/api/" + "menu" + (serviceId ? "?service_id=" + serviceId : "");
 	getAjaxJson({
-		url: API_SERVER_URI + "menu" + (serviceId ? "?service_id=" + serviceId : ""),
+		url: url,
 		cache: cache,
 		done: function( data ) {
 			fillMenu(data);
@@ -201,7 +202,7 @@ function getAjaxJson( _ ) {
                     alertMessage( msg );
                     alert( msg );
                     if( getCookie( "password") == null )
-                        window.open( "login.html" );
+                        window.location.href = "login.html";
                 }
 			}, _.statusCode )
 		,
