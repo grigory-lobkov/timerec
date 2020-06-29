@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 
 public class SessionUtils {
 
@@ -81,11 +82,14 @@ public class SessionUtils {
      */
     static public void createUserSession(HttpServletRequest req, UserRow user) {
         if (debugLog) System.out.println("SessionUtils.createUserSession()");
-        if(Integrator.getInstance().sessionAllowUser(user)) {
+        if (Integrator.getInstance().session_allowUser(user)) {
+            System.out.println(req.getRemoteAddr() + " " +
+                    (new SimpleDateFormat("HH:mm:ss")).format(new java.util.Date()) +
+                    " SessionUtils.createUserSession " + user.name + " (" + user.email + ")");
             HttpSession session = req.getSession();
             session.setAttribute("user", user);
         } else {
-            System.out.println("SessionUtils.createUserSession "+user.name+" ("+user.email+") denied by integrator!");
+            System.out.println("SessionUtils.createUserSession " + user.name + " (" + user.email + ") denied by integrator!");
         }
     }
 

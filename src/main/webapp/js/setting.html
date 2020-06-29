@@ -1,68 +1,21 @@
 <!doctype html>
 <html lang="en">
 <head>
-	<!-- Required meta tags -->
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-	<!-- Bootstrap CSS -->
-	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
 
-	<title>TimeRec: General settings</title>
+    <script src="common.js"></script>
+
+    <title>TimeRec: General settings</title>
 </head>
 <body>
 
 <!-- https://getbootstrap.com/docs/4.5/components/navbar/ -->
-<nav class="navbar navbar-expand-lg navbar-light" style="background-color: #e3f2fd;">
-  <a class="navbar-brand" href="#">TimeRec</a>
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-  <div class="collapse navbar-collapse" id="navbarSupportedContentS">
-
-<!-- SERVICE MENU -->
-    <ul class="navbar-nav mr-auto">
-      <li class="nav-item">
-        <a class="nav-link" href="service.html">Service</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="repeat.html">Repeat</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="schedule.html">Schedule</a>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownS" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          {service.name}
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdownS">
-          <a class="dropdown-item disabled" href="&id={service1.service_id}">{service1.name}</a>
-          <a class="dropdown-item disabled" href="&id={service2.service_id}">{service2.name}</a>
-          <a class="dropdown-item disabled" href="&id={service3.service_id}">{service3.name}</a>
-        </div>
-      </li>
-    </ul>
-<!-- /SERVICE MENU -->
-
-<!-- USER MENU -->
-	<ul class="navbar-nav mr-right">
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownU" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          {user.name}
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdownU">
-          <a class="dropdown-item disabled" href="#">Log in</a>
-          <a class="dropdown-item" href="profile.html">Profile</a>
-          <a class="dropdown-item active" href="settings.html">Settings <span class="sr-only">(current)</span></a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item disabled" href="#">Log out</a>
-        </div>
-      </li>
-    </ul>
-<!-- /USER MENU -->
-
-  </div>
-</nav>
+<nav id="navMenuContainer" style="background-color: #e3f2fd; display:block; height: 56px;"></nav>
 
 <!-- CONTENT -->
 <div class="container">
@@ -105,7 +58,7 @@
             </div>
           </div>
 		  
-          <h3>Client usage limit</h3>
+          <h3>Default usage limit</h3>
 		  
           <div class="form-group row">
             <label class="col-lg-4 control-label">All services per day</label>
@@ -159,7 +112,7 @@
 	<hr>
 	<!-- Optional JavaScript -->
 	<!-- jQuery first, then Popper.js, then Bootstrap JS -->
-	<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous"></script>
 	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
 </body>

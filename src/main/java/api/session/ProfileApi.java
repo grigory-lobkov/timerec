@@ -70,7 +70,7 @@ public class ProfileApi extends HttpServlet {
                     data.owner_id = user.owner_id;
                     data.name = data.name.trim();
                     data.email = data.email.trim();
-                    boolean allow = Integrator.getInstance().profileAllowModification(user, data);
+                    boolean allow = Integrator.getInstance().profile_allowModification(user, data);
                     // password changed
                     if (data.password == null || data.password.isEmpty()) {
                         data.password = user.password;

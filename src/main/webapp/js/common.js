@@ -116,7 +116,11 @@ function fillMenu(data) {
 	var ps = data.pages;
 	var isService = false;
     for (var i = 0, len = ps.length; i < len; i++) {
-		mMenu += addMenuElement(ps[i].name, ps[i].item+'.html', ps[i].param==""?"":"?"+ps[i].param);
+        if(isUser && ps[i].item == 'login') {
+            //skip
+        } else {
+		    mMenu += addMenuElement(ps[i].name, ps[i].item+'.html', ps[i].param ? '?' + ps[i].param : '');
+		}
 		if( ps[i].item == 'service' ) {
 		    isService = true;
 		}

@@ -30,10 +30,17 @@ public class MoodleIntegrator implements IIntegrator {
      *
      * {@code user.password} is not encrypted
      *
-     * @param user
+     * Событие возникает на странице "login". Определяет, разрешено ли
+     * пользователю зарегистрироваться при авторизации.
+     * {@code true} - не разрешено
+     * {@code false} - разрешено
+     * Инверсия "deny" делана для того, чтобы "не вникая" все методы
+     * интегратора по-умолчанию возвращали "true"
+     *
+     * @param user who is doing action
      * @return {@code true} to deny
      */
-    public boolean loginDenyAutoRegister(UserRow user){
+    public boolean login_denyAutoRegister(UserRow user){
         return true;
     }
 
@@ -44,10 +51,15 @@ public class MoodleIntegrator implements IIntegrator {
      *
      * {@code user.password} is encrypted
      *
-     * @param user
+     * Событие возникает на странице "login". Определяет, разрешено ли
+     * зарегистрированному пользователю выполнить авторизацию.
+     * {@code true} - разрешено
+     * {@code false} - запрещено
+     *
+     * @param user who is doing action
      * @return {@code true} to accept
      */
-    public boolean loginAllowRegistered(UserRow user){
+    public boolean login_allowRegistered(UserRow user){
         return true;
     }
 
@@ -58,10 +70,16 @@ public class MoodleIntegrator implements IIntegrator {
      *
      * {@code user.password} is not encrypted
      *
-     * @param user
+     * Событие возникает на странице "register". Определяет, разрешено ли
+     * данному пользователю пройти регистрацию (можно разрешить регистрацию
+     * только e-mail из списка).
+     * {@code true} - разрешено
+     * {@code false} - запрещено
+     *
+     * @param user who is doing action
      * @return {@code true} to accept
      */
-    public boolean registerAllowRegistration(UserRow user){
+    public boolean register_allowRegistration(UserRow user){
         return true;
     }
 
@@ -72,10 +90,15 @@ public class MoodleIntegrator implements IIntegrator {
      *
      * {@code user.password} is encrypted
      *
-     * @param user
+     * Определяет, может ли пользователь по сохраненным в кукис логину/паролю
+     * создать новую сессию и начать работать с системой
+     * {@code true} - может
+     * {@code false} - не может
+     *
+     * @param user who is doing action
      * @return {@code true} to accept
      */
-    public boolean sessionAllowUser(UserRow user){
+    public boolean session_allowUser(UserRow user){
         return true;
     }
 
@@ -85,11 +108,17 @@ public class MoodleIntegrator implements IIntegrator {
      *
      * {@code user.password} is encrypted
      *
-     * @param user
-     * @param schedule
+     * Событие возникает на странице "record", где пользователь делает запись
+     * в расписание. Метод определяет, может ли данный пользователь {@code user}
+     * сделать запись {@code schedule}.
+     * {@code true} - может
+     * {@code false} - не может
+     *
+     * @param user who is doing action
+     * @param schedule chosen time and other data inside
      * @return {@code true} to accept
      */
-    public boolean recordAllowRecord(UserRow user, ScheduleRow schedule){
+    public boolean record_allowRecord(UserRow user, ScheduleRow schedule){
         return true;
     }
 
@@ -101,11 +130,20 @@ public class MoodleIntegrator implements IIntegrator {
      *
      * If {@code newUser.password==""}, then password is not changed
      *
-     * @param oldUser
-     * @param newUser
+     * Событие возникает на странице "profile". Определяет, может ли пользователь
+     * внести данную правку в свой профиль.
+     * {@code true} - может
+     * {@code false} - не может
+     *
+     * Если {@code newUser.password} пустой, значит пользователь пароль не меняет.
+     * Если {@code oldUser.password} не равен {@code newUser.password}, значит
+     * {@code newUser.password} не зашифрован и хранит новый пароль пользователя.
+     *
+     * @param oldUser old user data
+     * @param newUser new user data
      * @return {@code true} to accept
      */
-    public boolean profileAllowModification(UserRow oldUser, UserRow newUser){
+    public boolean profile_allowModification(UserRow oldUser, UserRow newUser){
         return true;
     }
 

@@ -66,6 +66,7 @@ public class MenuApi extends HttpServlet {
         otherPages = new HashSet<>(Arrays.asList("login", "register", "service", "setting", "record", "records"));
         pageNames = new Hashtable<>();
         pageNames.put("login", "Login");
+        pageNames.put("service1", "New service"); // for duplicate menu
         pageNames.put("service", "Service");
         pageNames.put("repeat", "Repeat");
         pageNames.put("schedule", "Schedule");
@@ -85,8 +86,16 @@ public class MenuApi extends HttpServlet {
                     roleMenu.put(a.role_id, tbl);
                 }
                 Page t = genMenuItem(a);
-                if (t != null)
+                if (t != null) {
+                    if (t.item.equals("service")) { // maybe better is to add link while editing another service?...
+                        Page t1 = genMenuItem(a);
+                        t1.name = pageNames.get(a.object_name + "1");
+                        tbl.add(t1);
+                        t1.isService = false;
+                        t.isOther = false;
+                    }
                     tbl.add(t);
+                }
             }
         } catch (Exception e) {
             System.out.println("MenuApi.init(): Critical error! cannot access storage. " + e.getMessage());
@@ -167,16 +176,19 @@ public class MenuApi extends HttpServlet {
 
         List<Page> pages = roleMenu.get(user.role_id);
         for (Page p : pages) {
-            if (p.isOther || showService) {
-                if (result.length() > 0)
-                    result.append(',');
-                result.append("{\"item\":\"" + p.item +
+            if (p.isOther) {
+                result.append(",{\"item\":\"" + p.item +
                         "\",\"name\":\"" + p.name +
-                        "\",\"param\":\"" + (p.isService ? serviceParam : "") +
+                        "\"}");
+            }
+            if (p.isService && showService) {
+                result.append(",{\"item\":\"" + p.item +
+                        "\",\"name\":\"" + p.name +
+                        "\",\"param\":\"" + serviceParam +
                         "\"}");
             }
         }
-        return result.toString();
+        return result.substring(1);
     }
 
     /**
@@ -188,13 +200,14 @@ public class MenuApi extends HttpServlet {
     private String genServicesJson(List<ServiceRow> services) {
         StringBuilder result = new StringBuilder();
         for (ServiceRow s : services) {
-            if (result.length() > 0)
-                result.append(',');
-            result.append("{\"service_id\":\"" + s.service_id +
-                    "\",\"name\":\"" + s.name.substring(0, MAX_SERVICE_NAME_LENGTH).replace("\\", "\\\\") +
+            if (s.name.length() > MAX_SERVICE_NAME_LENGTH) {
+                s.name = s.name.substring(0, MAX_SERVICE_NAME_LENGTH - 2) + "...";
+            }
+            result.append(",{\"service_id\":\"" + s.service_id +
+                    "\",\"name\":\"" + s.name.replace("\\", "\\\\") +
                     "\"}");
         }
-        return result.toString();
+        return result.substring(1);
     }
 
     public static long getServiceId(HttpServletRequest req) {
@@ -206,4 +219,5 @@ public class MenuApi extends HttpServlet {
 
         return Long.valueOf(path);
     }
+
 }

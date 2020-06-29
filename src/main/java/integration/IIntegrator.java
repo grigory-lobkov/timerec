@@ -19,10 +19,17 @@ public interface IIntegrator {
      *
      * {@code user.password} is not encrypted
      *
-     * @param user
+     * Событие возникает на странице "login". Определяет, разрешено ли
+     * пользователю зарегистрироваться при авторизации.
+     * {@code true} - не разрешено
+     * {@code false} - разрешено
+     * Инверсия "deny" делана для того, чтобы "не вникая" все методы
+     * интегратора по-умолчанию возвращали "true"
+     *
+     * @param user who is doing action
      * @return {@code true} to deny
      */
-    boolean loginDenyAutoRegister(UserRow user);
+    boolean login_denyAutoRegister(UserRow user);
 
 
     /**
@@ -31,10 +38,15 @@ public interface IIntegrator {
      *
      * {@code user.password} is encrypted
      *
-     * @param user
+     * Событие возникает на странице "login". Определяет, разрешено ли
+     * зарегистрированному пользователю выполнить авторизацию.
+     * {@code true} - разрешено
+     * {@code false} - запрещено
+     *
+     * @param user who is doing action
      * @return {@code true} to accept
      */
-    boolean loginAllowRegistered(UserRow user);
+    boolean login_allowRegistered(UserRow user);
 
 
     /**
@@ -43,10 +55,16 @@ public interface IIntegrator {
      *
      * {@code user.password} is not encrypted
      *
-     * @param user
+     * Событие возникает на странице "register". Определяет, разрешено ли
+     * данному пользователю пройти регистрацию (можно разрешить регистрацию
+     * только e-mail из списка).
+     * {@code true} - разрешено
+     * {@code false} - запрещено
+     *
+     * @param user who is doing action
      * @return {@code true} to accept
      */
-    boolean registerAllowRegistration(UserRow user);
+    boolean register_allowRegistration(UserRow user);
 
 
     /**
@@ -55,10 +73,15 @@ public interface IIntegrator {
      *
      * {@code user.password} is encrypted
      *
-     * @param user
+     * Определяет, может ли пользователь по сохраненным в кукис логину/паролю
+     * создать новую сессию и начать работать с системой
+     * {@code true} - может
+     * {@code false} - не может
+     *
+     * @param user who is doing action
      * @return {@code true} to accept
      */
-    boolean sessionAllowUser(UserRow user);
+    boolean session_allowUser(UserRow user);
 
 
     /**
@@ -66,11 +89,17 @@ public interface IIntegrator {
      *
      * {@code user.password} is encrypted
      *
-     * @param user
-     * @param schedule
+     * Событие возникает на странице "record", где пользователь делает запись
+     * в расписание. Метод определяет, может ли данный пользователь {@code user}
+     * сделать запись {@code schedule}.
+     * {@code true} - может
+     * {@code false} - не может
+     *
+     * @param user who is doing action
+     * @param schedule chosen time and other data inside
      * @return {@code true} to accept
      */
-    boolean recordAllowRecord(UserRow user, ScheduleRow schedule);
+    boolean record_allowRecord(UserRow user, ScheduleRow schedule);
 
 
     /**
@@ -80,10 +109,19 @@ public interface IIntegrator {
      *
      * If {@code newUser.password==""}, then password is not changed
      *
-     * @param oldUser
-     * @param newUser
+     * Событие возникает на странице "profile". Определяет, может ли пользователь
+     * внести данную правку в свой профиль.
+     * {@code true} - может
+     * {@code false} - не может
+     *
+     * Если {@code newUser.password} пустой, значит пользователь пароль не меняет.
+     * Если {@code oldUser.password} не равен {@code newUser.password}, значит
+     * {@code newUser.password} не зашифрован и хранит новый пароль пользователя.
+     *
+     * @param oldUser old user data
+     * @param newUser new user data
      * @return {@code true} to accept
      */
-    boolean profileAllowModification(UserRow oldUser, UserRow newUser);
+    boolean profile_allowModification(UserRow oldUser, UserRow newUser);
 
 }
