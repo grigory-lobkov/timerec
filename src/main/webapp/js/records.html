@@ -95,8 +95,8 @@ SERVICE_ID = null;
 
   document.addEventListener('DOMContentLoaded', function() {
     SERVICE_ID = getUrlVars()["service_id"];
-    var initialLocaleCode = 'en';
-    //var initialLocaleCode = window.navigator.language;
+    //var initialLocaleCode = 'en';
+    var initialLocaleCode = window.navigator.language;
     var calendarEl = document.getElementById('calendar');
 
     var calendar = new FullCalendar.Calendar(calendarEl, {

@@ -36,7 +36,9 @@ public class ServiceTable implements ITable<ServiceRow> {
     public ServiceRow select(long object_id) throws Exception {
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
-                "SELECT * FROM service WHERE service_id = ?");
+                "SELECT s.*, (SELECT i.bitmap FROM image i WHERE i.image_id = s.image_id) bitmap" +
+                        " FROM service s" +
+                        " WHERE service_id = ?");
         ps.setLong(1, object_id);
         ResultSet rs = ps.executeQuery();
         try {
@@ -50,6 +52,7 @@ public class ServiceTable implements ITable<ServiceRow> {
             r.duration = rs.getInt("duration");
             r.cost = rs.getInt("cost");
             r.owner_id = rs.getLong("owner_id");
+            r.image_bitmap = rs.getString("bitmap");
             return r;
         } finally {
             rs.close();

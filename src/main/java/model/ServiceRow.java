@@ -23,4 +23,6 @@ public class ServiceRow {
     // owner user_id
     public long owner_id;
 
+    // other fields
+    public String image_bitmap;
 }

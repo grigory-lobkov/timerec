@@ -11,9 +11,10 @@ var TIME_CLASS_FREE = "btn btn-outline-secondary";
 var TIME_CLASS_CHOOSEN = "btn btn-primary";
 
 function getServiceHtml( s ) {
+  var imgSrc = s.image_bitmap ? s.image_bitmap : 'img/service.png';
   return '   <div class="row"> ' +
     '     <div class="col-md-4">' +
-    '       <img width="256" height="256" src="img/service.png" class="avatar img-circle" alt="' + s.name + '">' +
+    '       <img width="256" src="' + imgSrc + '" class="avatar img-circle" alt="' + s.name + '">' +
     '     </div>' +
     '     <div class="col-md-8">' +
     '       <h3>' + s.name + '</h3>' +

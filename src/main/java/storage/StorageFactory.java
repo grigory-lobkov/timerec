@@ -136,7 +136,25 @@ public class StorageFactory {
             }
         return roleInstance;
     }
-    
+
+
+    static private volatile ITable<ImageRow> imageInstance = null;
+
+    /**
+     * Generate Role storage actions
+     *
+     * @return singleton instance
+     */
+    public static ITable<ImageRow> getImageInstance() {
+        if (imageInstance == null)
+            synchronized (StorageFactory.class) {
+                if (imageInstance == null) {
+                    imageInstance = new ImageTable(dbPool);
+                }
+            }
+        return imageInstance;
+    }
+
     /**
      * Generate parameter-based storage {@code ITable} object
      * Used to determine owner inside AccessFilterApi. Deprecated.

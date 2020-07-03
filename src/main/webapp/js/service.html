@@ -25,19 +25,21 @@
       <!-- avatar column -->
       <div class="col-md-4">
         <div class="text-center">
-          <img width="256" height="256" src="img/service.png" class="avatar img-circle" alt="Imargine service">
+          <img id="image" width="256" src="img/service.png" class="avatar img-circle" alt="Imargine service">
 		  <br/><br/>
-          <input name="image" type="file" class="form-control">
+          <input id="selectImage" name="image" type="file" class="form-control">
         </div>
       </div>
       
       <!-- properties column -->
       <div class="col-md-8">
 		  <div id="alertMessage"></div>
-		
+
 		  <h3>Service info</h3>
-		  
-          <input id="serviceId" style="display:none" type="text" value="">
+
+		  <input id="serviceId" style="display:none" type="text" value="">
+		  <input id="imageId" style="display:none" type="text" value="">
+
 		  <div class="form-group">
 			<label class="col-lg-3 control-label">Name</label>
 			<div class="col-lg-8">
@@ -150,6 +152,8 @@ function getData() {
 		url: url,
 		done: function( data ) {
 			$( "#serviceId" ).val( data.service.service_id );
+			$( "#imageId" ).val( data.service.image_id );
+			$( "#image" ).attr( "src", data.service.image_bitmap );
 			$( "#serviceName" ).val( data.service.name );
 			$( "#serviceCost" ).val( data.service.cost );
 			$( "#serviceDescription" ).val( data.service.description );
@@ -206,12 +210,15 @@ function postData() {
 			alertMessage( "Service saved successfully" );
 		})
 		.fail(AJAX_FAIL_PRC);*/
+	var imgId = $( "#imageId" ).val();
 	getAjaxJson({
 		method: SERVICE_ID == null ? "POST" : "PUT",
 		url: url,
 		data: JSON.stringify({
 			service: {
 				service_id: SERVICE_ID,
+				image_id: imgId,
+				image_bitmap: imgId == 0 ? $( "#image" ).attr( "src" ) : "",
 				name: $( "#serviceName" ).val(),
 				cost: $( "#serviceCost" ).val(),
 				description: $("#serviceDescription").val(),
@@ -231,6 +238,27 @@ function postData() {
 		}
 	})
 }
+
+// IMAGE
+
+var MAX_IMAGE_FILE_KB = 256; // size in kilobytes
+
+document.getElementById('selectImage').onchange = function( evt ) {
+	if( this.files && this.files[0] ) {
+		var file = this.files[0];
+		alertMessageHide();
+		if( file.size > MAX_IMAGE_FILE_KB * 1024 ) {
+			alertMessage( "Image file size is too big. It must be less than " + MAX_IMAGE_FILE_SIZE_KB  + " KB" );
+			return false;
+		}
+		var reader = new FileReader();
+		reader.onload = function( e ) {
+			$( "#image" ).attr( "src", e.target.result );
+			$( "#imageId" ).val( 0 );
+		}
+		reader.readAsDataURL( file ); // convert to base64 string
+	}
+};
 
 document.addEventListener( 'DOMContentLoaded', function(){ getData() } );
 </script>

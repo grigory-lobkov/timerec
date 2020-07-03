@@ -122,6 +122,10 @@ class Updater {
         Connection conn = StorageFactory.dbPool.connection();
         statement = conn.createStatement();
 
+        //exec("image_filename_idx drop", "DROP INDEX IF EXISTS image_filename_idx");
+        //exec("image drop", "DROP TABLE IF EXISTS image");
+        //exec("seq_image_id drop", "DROP SEQUENCE IF EXISTS seq_image_id");
+
         exec("seq_image_id",
                 "CREATE SEQUENCE IF NOT EXISTS seq_image_id");
 
@@ -132,8 +136,10 @@ class Updater {
                         " altname VARCHAR2(1000)," +
                         " width INTEGER," +
                         " height INTEGER," +
-                        " bitmap BLOB," +
-                        " owner_id BIGINT)");
+                        " bitmap CLOB)");
+
+        exec("image_filename_idx",
+                "CREATE INDEX IF NOT EXISTS image_filename_idx ON image (filename)");
 
         exec("seq_tz_id",
                 "CREATE SEQUENCE IF NOT EXISTS seq_tz_id");

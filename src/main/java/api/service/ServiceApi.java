@@ -4,6 +4,7 @@ import api.session.SessionUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import controller.SettingController;
+import model.ImageRow;
 import model.ServiceRow;
 import model.ServiceSettingRow;
 import model.UserRow;
@@ -44,7 +45,8 @@ import java.io.IOException;
 @WebServlet(urlPatterns = "/api/service/*")
 public class ServiceApi extends HttpServlet {
 
-    private ITable<ServiceRow> storage = StorageFactory.getServiceInstance();
+    private ITable<ServiceRow> storageService = StorageFactory.getServiceInstance();
+    private ITable<ImageRow> storageImage = StorageFactory.getImageInstance();
     private static boolean debugLog = false;
 
     static class Transport {
@@ -71,7 +73,7 @@ public class ServiceApi extends HttpServlet {
 
         try {
             // query storage
-            ServiceRow data = storage.select(service_id);
+            ServiceRow data = storageService.select(service_id);
             ServiceSettingRow setting = SettingController.getServiceSetting(service_id);
 
             if (data == null) {
@@ -140,10 +142,20 @@ public class ServiceApi extends HttpServlet {
                     data.service.owner_id = user.user_id;
 
                     // update storage
-                    boolean done = storage.insert(data.service);
+                    boolean done = storageService.insert(data.service);
 
                     if (done && data.service.service_id > 0) {
+                        // update image
+                        if(data.service.image_id==0 && data.service.image_bitmap!=null && !data.service.image_bitmap.isEmpty()) {
+                            ImageRow image = new ImageRow();
+                            image.bitmap = data.service.image_bitmap;
+                            done = storageImage.insert(image);
+                            if(done)
+                                data.service.image_id = image.image_id;
+                        }
+                        // add settings
                         SettingController.setServiceSetting(data.service.service_id, data.setting);
+                        // generate answer
                         String jsonStr = gson.toJson(data);
                         if (debugLog) System.out.println("out: " + jsonStr);
                         resp.setContentType("application/json; charset=UTF-8");
@@ -183,37 +195,51 @@ public class ServiceApi extends HttpServlet {
         UserRow user = SessionUtils.getSessionUser(req);
         BufferedReader rr = req.getReader();
         String line;
-        boolean done1 = false;
+        boolean done = false;
 
         while ((line = rr.readLine()) != null) {
             if (debugLog) System.out.println(line);
             Transport data = gson.fromJson(line, Transport.class);
+            ServiceRow dbData = null;
             if (data != null) {
                 try {
                     // check owner rights
                     Long user_id = (Long) req.getAttribute("onlyIfOwner");
                     if (user_id != null) {
-                        ServiceRow dbData = storage.select(data.service.service_id);
+                        if(dbData==null)
+                            dbData = storageService.select(data.service.service_id);
                         if (!SessionUtils.checkOwner(resp, user_id, dbData.owner_id))
                             return;
                     }
+                    // update image
+                    if(data.service.image_id==0 && data.service.image_bitmap!=null && !data.service.image_bitmap.isEmpty()) {
+                        ImageRow image = new ImageRow();
+                        if(dbData==null)
+                            dbData = storageService.select(data.service.service_id);
+                        image.bitmap = data.service.image_bitmap;
+                        image.image_id = dbData.image_id;
+                        if(dbData.image_id>0)
+                            done = storageImage.update(image);
+                        else
+                            done = storageImage.insert(image);
+                        if(done)
+                            data.service.image_id = image.image_id;
+                    }
                     // update storage
                     data.service.owner_id = user.user_id;
-                    boolean done = storage.update(data.service);
+                    done = storageService.update(data.service);
+                    // update settings
                     SettingController.setServiceSetting(data.service.service_id, data.setting);
 
-                    if (done) {
-                        done1 = true;
-                    }
                 } catch (Exception e) {
                     if (debugLog) System.out.println("SC_NO_CONTENT");
                     resp.sendError(HttpServletResponse.SC_NO_CONTENT);
-                    done1 = true;
+                    done = true;
                     e.printStackTrace();
                 }
             }
         }
-        if (done1) {
+        if (done) {
             resp.setContentType("application/json; charset=UTF-8");
             resp.getWriter().println("{}");
         } else {
@@ -236,29 +262,33 @@ public class ServiceApi extends HttpServlet {
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         if (debugLog) System.out.println("ServiceApi.doDelete()");
 
-        boolean done1 = false;
+        boolean done = false;
         long service_id = getServiceId(req);
 
         if (service_id > 0)
             try {
+                ServiceRow dbData = storageService.select(service_id);
                 // check owner rights
                 Long user_id = (Long) req.getAttribute("onlyIfOwner");
                 if (user_id != null) {
-                    ServiceRow dbData = storage.select(service_id);
                     if (!SessionUtils.checkOwner(resp, user_id, dbData.owner_id))
                         return;
                 }
+                // update image
+                if(dbData.image_id>0)
+                    storageImage.delete(dbData.image_id);
                 // update storage
-                done1 = storage.delete(service_id);
+                done = storageService.delete(service_id);
+                // update settings
                 SettingController.setServiceSetting(service_id, new ServiceSettingRow());
 
             } catch (Exception e) {
                 if (debugLog) System.out.println("SC_NO_CONTENT");
                 resp.sendError(HttpServletResponse.SC_NO_CONTENT);
-                done1 = true;
+                done = true;
                 e.printStackTrace();
             }
-        if (done1) {
+        if (done) {
             resp.setContentType("application/json; charset=UTF-8");
             resp.getWriter().println("{}");
         } else {
