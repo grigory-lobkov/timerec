@@ -1,4 +1,3 @@
-var API_URL = "/timerec/api/" + "record/";
 var SERVICES = [];
 var SERVICE_ID = 0;
 var SCHEDULE = [];
@@ -233,5 +232,3 @@ function postData() {
 		}
 	})
 }
-
-document.addEventListener( 'DOMContentLoaded', function(){ getServices() } );

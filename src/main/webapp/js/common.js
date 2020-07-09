@@ -177,10 +177,10 @@ function getCookie( name ) {
         if (begin != 0) return null;
     } else {
         begin += 2;
-        var end = document.cookie.indexOf( ";", begin );
-        if( end == -1 ) {
-			end = dc.length;
-        }
+    }
+    var end = document.cookie.indexOf( ";", begin );
+    if( end == -1 ) {
+        end = dc.length;
     }
     return decodeURI( dc.substring( begin + prefix.length, end ) );
 }
@@ -238,4 +238,8 @@ function htmlEntities(str) {
     return buf.join( '' );
 }
 
-document.addEventListener( 'DOMContentLoaded', function() { getMenu() } );
+document.addEventListener( 'DOMContentLoaded', function() {
+    if($('#navMenuContainer').length) {
+        getMenu();
+    }
+} );

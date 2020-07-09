@@ -110,8 +110,19 @@ public class LoginApi extends HttpServlet {
             String savePassword = data.password;
             try {
                 data.password = Passwords.encrypt(data.password);
-                // update storage
-                if (storage.insert(data)) {
+                // check storage again
+                UserRow dbUser = SessionUtils.checkAndGetUser(data.email, data.password);
+                if (dbUser == null) {
+                    // update storage
+                    if (storage.insert(data)) {
+                        return data;
+                    }
+                } else {
+                    data.user_id = dbUser.user_id;
+                    if (!dbUser.name.equals(data.name) || dbUser.role_id != data.role_id) {
+                        // update storage
+                        storage.update(data);
+                    }
                     return data;
                 }
             } catch (Exception e) {

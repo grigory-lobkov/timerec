@@ -4,6 +4,13 @@ import integration.IIntegrator;
 import model.ScheduleRow;
 import model.UserRow;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 /**
  * MOODLE implementation of integration
  *
@@ -30,6 +37,9 @@ public class MoodleIntegrator implements IIntegrator {
      *
      * {@code user.password} is not encrypted
      *
+     * Integrator expects {@code email} is equals to "MoodleSession" and
+     * {@code password} have Moodle session cookie
+     *
      * Событие возникает на странице "login". Определяет, разрешено ли
      * пользователю зарегистрироваться при авторизации.
      * {@code true} - не разрешено
@@ -40,10 +50,73 @@ public class MoodleIntegrator implements IIntegrator {
      * @param user who is doing action
      * @return {@code true} to deny
      */
-    public boolean login_denyAutoRegister(UserRow user){
+    public boolean login_denyAutoRegister(UserRow user) {
+        //return true;
+        if (user.email != null && user.email.equals("MoodleSession") &&
+                user.password != null && user.password.length() > 10) {
+            try {
+                UserRow moodleUser = getUserBySessionCookie(user.password);
+                moodleUser.copyTo(user);
+                return false;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         return true;
     }
 
+    public static UserRow getUserBySessionCookie(String moodleSession) throws IOException {
+        URL url = new URL("http://lms.progwards.ru/moodle/user/edit.php");
+
+        HttpURLConnection con = (HttpURLConnection)url.openConnection();
+        con.setDoOutput(true);
+        con.setRequestProperty("Cookie", "MoodleSession=" + moodleSession);
+        con.connect();
+
+        UserRow user = new UserRow();
+        String id = "";
+        String firstName = "";
+        String lastName = "";
+        user.email = "";
+
+        if (con.getResponseCode() == 200) {
+            String idKey = "profile.php?id=";
+            String unKey = "value=\"";
+            BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            String strCurrentLine;
+            String strPrevLine = null;
+            while ((strCurrentLine = br.readLine()) != null) {
+                if (strCurrentLine.contains(idKey)){
+                    id = strCurrentLine.substring(strCurrentLine.indexOf(idKey) + idKey.length());
+                    id = id.substring(0, id.indexOf("\""));
+                }
+                else if (strCurrentLine.contains(unKey)) {
+                    String value = strCurrentLine.substring(strCurrentLine.indexOf(unKey) + unKey.length());
+                    value = value.substring(0, value.indexOf("\""));
+                    if(strPrevLine.contains("id=\"id_email\"")) {
+                        user.email = value;
+                    } else if(strPrevLine.contains("id=\"id_firstname\"")) {
+                        firstName = value;
+                    } else if(strPrevLine.contains("id=\"id_lastname\"")) {
+                        lastName = value;
+                    }
+                }
+                if (!user.email.isEmpty()) break;
+                strPrevLine = strCurrentLine;
+            }
+        }
+
+        if(id.isEmpty())
+            throw new RuntimeException("Cannot find USER_ID");
+
+        if(user.email.isEmpty())
+            throw new RuntimeException("Cannot find user ID="+id+" email!");
+
+        user.name = firstName + ' ' + lastName;
+        user.password = moodleSession;
+
+        return user;
+    }
 
     /**
      * Allow registered user to be logged in

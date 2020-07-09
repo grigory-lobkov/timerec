@@ -26,4 +26,15 @@ public class UserRow {
     // owner user_id
     public long owner_id;
 
+
+    public void copyTo(UserRow receiver) {
+        receiver.user_id = this.user_id;
+        receiver.role_id = this.role_id;
+        receiver.name = this.name;
+        receiver.tz_id = this.tz_id;
+        receiver.email = this.email;
+        receiver.password = this.password;
+        receiver.image_id = this.image_id;
+        receiver.owner_id = this.owner_id;
+    }
 }
