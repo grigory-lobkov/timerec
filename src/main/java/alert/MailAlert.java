@@ -32,14 +32,14 @@ public class MailAlert implements IAlert {
 
     {
         validSettings = true;
-        authServ = getSettingValue(SETTING_MAIL_SERV);
-        authUser = getSettingValue(SETTING_MAIL_USER);
-        authPass = getSettingValue(SETTING_MAIL_PASS);
-        emailFrom = getSettingValue(SETTING_MAIL_FROM);
+        authServ = getSettingValue(SETTING_MAIL_SERV, "Alert Email server name", "Email server address");
+        authUser = getSettingValue(SETTING_MAIL_USER, "Alert Email user name", "Email user for authentication");
+        authPass = getSettingValue(SETTING_MAIL_PASS, "Alert Email password", "Email password for authentication");
+        emailFrom = getSettingValue(SETTING_MAIL_FROM, "Alert Email From", "Email From address");
     }
 
-    private String getSettingValue(String alias) {
-        SettingRow s = SettingController.getSetting(alias);
+    private String getSettingValue(String alias, String defName, String defDesc) {
+        SettingRow s = null;//SettingController.getSetting(alias);
         if (s == null || s.value.isEmpty()) {
             System.out.println("MailAlert.getSettingValue() setting '" + alias + "' is not set!");
             validSettings = false;
@@ -47,7 +47,8 @@ public class MailAlert implements IAlert {
                 s = new SettingRow();
                 s.value = "";
                 s.alias = alias;
-                s.name = alias;
+                s.name = defName;
+                s.description = defDesc;
                 SettingController.setSetting(s);
             }
         }

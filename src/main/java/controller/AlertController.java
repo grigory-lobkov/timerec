@@ -15,6 +15,7 @@ public class AlertController {
     private static ITable<UserRow> storageUser = StorageFactory.getUserInstance();
 
     public static alert.IAlert mailAlert = new alert.MailAlert();
+    public static alert.IAlert telegramAlert = new alert.NoAlert();//alert.TelegramAlert();
 
     public static void alertNewSchedule(UserRow client, ScheduleRow row, UserRow user) {
         alertSchedule("Record", client, row, user, "");
@@ -98,6 +99,10 @@ public class AlertController {
                         case "e-mail":
                         case "mail":
                             mailAlert.sendAlert(pathAdress, title, htmlText);
+                            break;
+                        case "telegram":
+                        case "telega":
+                            telegramAlert.sendAlert(pathAdress, title, htmlText);
                             break;
                         default:
                             System.out.println("Unknown alert type '"+path.trim()+"'");
