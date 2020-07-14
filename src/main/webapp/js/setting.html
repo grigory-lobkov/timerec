@@ -18,7 +18,7 @@
 <nav id="navMenuContainer" style="background-color: #e3f2fd; display:block; height: 56px;"></nav>
 
 <!-- CONTENT -->
-<div class="container">
+<div class="container" style="display:none">
     <h1>Edit Settings</h1>
   	<hr>
 	<div class="row">
@@ -28,14 +28,11 @@
       
       <!-- edit form column -->
       <div class="col-md-11 settings">
-        <div class="alert alert-info alert-dismissable">
-          <a class="panel-close close" data-dismiss="alert">×</a> 
-          <i class="fa fa-coffee"></i>
-          This is an <strong>.alert</strong>. Use this to show important messages to the user.
-        </div>
+        <div id="alertMessage"></div>
+
         <form class="form-horizontal" role="form">
-		
-          <h3>Client</h3>
+          <div id="allSettings"></div>
+          <!--<h3>Client</h3>
 		  
           <div class="form-group row">
             <label class="col-lg-4 control-label">Default time zone:</label>
@@ -92,27 +89,106 @@
             <div class="col-lg-4">
               <input name="userAvatarSize" class="form-control" type="text" value="150">
             </div>
-          </div>
+          </div>-->
 		  
 		  <hr>
           <div class="form-group">
             <label class="col-md-2 control-label"></label>
             <div class="col-md-8">
-              <input type="button" class="btn btn-primary" value="Save Changes">
+              <input type="button" class="btn btn-primary" value="Save Changes" onclick="postData(); return false;">
               <span></span>
-              <input type="reset" class="btn btn-default" value="Cancel">
+              <input type="reset" class="btn btn-default" value="Cancel" onclick="fillTable(); return false;">
             </div>
           </div>
         </form>
       </div>
   </div>
 </div>
+<script>
+
+API_URL = "/timerec/api/" + "setting/";
+
+var SETTINGS = [];
+
+function getSettingHtml( s ) {
+  return '    <div class="form-group row">' +
+    '      <label class="col-lg-4 control-label">' + s.name + '</label>' +
+    '      <div class="col-lg-4">' +
+    '        <textarea id="' + s.alias + '" class="form-control" rows="1">' + s.value + '</textarea>' +
+    '      </div>' +
+    '      <small class="col-lg-4 control-label">' + (s.description ? s.description : '') + '</small>' +
+    '    </div>';
+}
+
+function fillTable() {
+    var htmlU = "";
+    var htmlMA = "";
+    var htmlTA = "";
+    var html = "";
+    SETTINGS.forEach( function( s ){
+        if( s.alias.substring(0,19) == 'ALL_SERVICES_CLIENT' )
+            htmlU += getSettingHtml( s );
+        else if( s.alias.substring(0,10) == 'MAIL_ALERT' )
+            htmlMA += getSettingHtml( s );
+        else if( s.alias.substring(0,14) == 'TELEGRAM_ALERT' )
+            htmlTA += getSettingHtml( s );
+        else
+            html += getSettingHtml( s );
+    });
+    $( "#allSettings" ).html(
+        ( htmlU ? "<h3>Default usage limit</h3>" + htmlU : "" ) +
+        ( htmlMA ? "<h3>Mail Alert</h3>" + htmlMA : "" ) +
+        ( htmlTA ? "<h3>Telegram Alert</h3>" + htmlTA : "" ) +
+        ( html ? "<h3>Other settings</h3>" + html : "" )
+    );
+}
+
+function getData() {
+	var url = API_URL + "?_=" + (new Date()).getTime();
+	getAjaxJson({
+		url: url,
+		done: function( data ) {
+		    SETTINGS = data;
+			fillTable();
+			$( ".container" ).show();
+		}
+	});
+}
+
+
+function readTable() {
+    var data = [];
+    SETTINGS.forEach( function( s ){
+        data.push({
+          alias: s.alias,
+          value: $( '#' + s.alias ).val()
+        });
+    });
+    return data;
+}
+
+function postData() {
+	getAjaxJson({
+		method: "PUT",
+		url: API_URL + '?',
+		data: JSON.stringify(
+		    readTable()
+		),
+		done: function( data ) {
+			alertMessage( "Settings saved successfully" );
+		}
+	})
+}
+
+
+document.addEventListener( 'DOMContentLoaded', function(){ getData() } );
+</script>
 <!-- /CONTENT -->
 
 	<hr>
 	<!-- Optional JavaScript -->
 	<!-- jQuery first, then Popper.js, then Bootstrap JS -->
-<script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous"></script>
 	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
 </body>

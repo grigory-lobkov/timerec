@@ -95,7 +95,7 @@ public class RecordApi extends HttpServlet {
             long service_id = getServiceId(req);
             Instant instant = Instant.now();
             //ZonedDateTime dateStart = ZonedDateTime.now();
-            ZonedDateTime dateStart = instant.atZone(ZoneOffset.UTC);
+            ZonedDateTime dateStart = instant.atZone(ZoneOffset.UTC).minusHours(4);
             ZonedDateTime dateEnd = dateStart.plusDays(POSSIBLE_RECORD_INTERVAL);
             UserRow user = SessionUtils.getSessionUser(req);
             // get data

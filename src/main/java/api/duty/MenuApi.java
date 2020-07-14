@@ -1,4 +1,4 @@
-package api.menu;
+package api.duty;
 
 import api.session.SessionUtils;
 import model.AccessRow;

@@ -26,7 +26,7 @@ import java.util.List;
  * RESTful: https://www.restapitutorial.com/lessons/httpmethods.html
  *
  * WARNING
- * We should not delete all records from the table - we should modify the changed one to save Schedule links
+ * We should not delete all records from the table - we should modify the changed one to save Schedule links, if any
  *
  */
 

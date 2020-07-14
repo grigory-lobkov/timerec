@@ -7,15 +7,17 @@ import storage.StorageFactory;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class SettingController implements ServletContextListener {
 
     private static ITable<SettingRow> storage = StorageFactory.getSettingInstance();
     private static boolean debugLog = false;
-    
+
     private static final String CLIENT_LIMIT_DAILY_ALIAS = "CLIENT_LIMIT_DAILY";
     private static final String CLIENT_LIMIT_WEEKLY_ALIAS = "CLIENT_LIMIT_WEEKLY";
     private static final String CLIENT_LIMIT_MONTHLY_ALIAS = "CLIENT_LIMIT_MONTHLY";
@@ -60,33 +62,37 @@ public class SettingController implements ServletContextListener {
                     sSetting = allSetting;
                     otherSettings.put(s.alias, s);
                 }
-                Integer intValue = stringToInteger(s.value);
-                if (intValue!=null && intValue > 0) {
-                    switch (s.alias) {
-                        case CLIENT_LIMIT_DAILY_ALIAS:
-                            sSetting.limitPerDay = intValue;
-                            sSetting.limitPerDayRow = s;
-                            break;
-                        case CLIENT_LIMIT_WEEKLY_ALIAS:
-                            sSetting.limitPerWeek = intValue;
-                            sSetting.limitPerWeekRow = s;
-                            break;
-                        case CLIENT_LIMIT_MONTHLY_ALIAS:
-                            sSetting.limitPerMonth = intValue;
-                            sSetting.limitPerMonthRow = s;
-                            break;
-                    }
-                } else {
-                    switch (s.alias) {
-                        case ALERT_PATHS_ALIAS:
-                            sSetting.alertPaths = s.value;
-                            sSetting.alertPathsRow = s;
-                            break;
-                    }
-                }
+                readMySetting(s, sSetting);
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private static void readMySetting(SettingRow s, ServiceSettingRow sSetting) {
+        Integer intValue = stringToInteger(s.value);
+        if (intValue != null && intValue > 0) {
+            switch (s.alias) {
+                case CLIENT_LIMIT_DAILY_ALIAS:
+                    sSetting.limitPerDay = intValue;
+                    sSetting.limitPerDayRow = s;
+                    break;
+                case CLIENT_LIMIT_WEEKLY_ALIAS:
+                    sSetting.limitPerWeek = intValue;
+                    sSetting.limitPerWeekRow = s;
+                    break;
+                case CLIENT_LIMIT_MONTHLY_ALIAS:
+                    sSetting.limitPerMonth = intValue;
+                    sSetting.limitPerMonthRow = s;
+                    break;
+            }
+        } else {
+            switch (s.alias) {
+                case ALERT_PATHS_ALIAS:
+                    sSetting.alertPaths = s.value;
+                    sSetting.alertPathsRow = s;
+                    break;
+            }
         }
     }
 
@@ -120,15 +126,22 @@ public class SettingController implements ServletContextListener {
         return otherSettings.get(alias);
     }
 
+    public static synchronized List<SettingRow> getSettings() {
+        return new ArrayList<>(otherSettings.values());
+    }
+
     public static synchronized void setSetting(SettingRow setting) {
         SettingRow old = otherSettings.get(setting.alias);
         try {
             if (old != null) {
                 setting.setting_id = old.setting_id;
                 storage.update(setting);
+                otherSettings.remove(setting.alias);
             } else {
                 storage.insert(setting);
             }
+            otherSettings.put(setting.alias, setting);
+            readMySetting(setting, allSetting);
         } catch (Exception e) {
             e.printStackTrace();
         }

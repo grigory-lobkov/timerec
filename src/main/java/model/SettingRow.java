@@ -23,4 +23,16 @@ public class SettingRow {
     // owner user_id
     public long owner_id;
 
+    @Override
+    public String toString() {
+        return "SettingRow{" +
+                "setting_id=" + setting_id +
+                ", alias='" + alias + '\'' +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", value='" + value + '\'' +
+                ", service_id=" + service_id +
+                ", owner_id=" + owner_id +
+                '}';
+    }
 }
