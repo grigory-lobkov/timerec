@@ -8,6 +8,7 @@ const DAY_DATE_FORMAT = new Intl.DateTimeFormat(window.navigator.language, { wee
 var TIME_CLASS_BUSY = "btn btn-secondary";
 var TIME_CLASS_FREE = "btn btn-outline-secondary";
 var TIME_CLASS_CHOOSEN = "btn btn-primary";
+var TIME_CLASS_BAN = "btn btn-outline-danger";
 
 function getServiceHtml( s ) {
   var imgSrc = s.image_bitmap ? s.image_bitmap : 'img/service.png';
@@ -83,10 +84,13 @@ function getScheduleTimeHtml(s) {
     var time = getScheduleTime(s.start);
     var btnClass = "btn";
     var btnAttrib = "";
-    if(s.type=="SCH_BUSY") {
+    if( s.type == "SCH_BUSY" ) {
         btnClass = TIME_CLASS_BUSY;
         btnAttrib = 'disabled';
-    } else if(s.type=="SCH_FREE") {
+    } else if( s.type == "SCH_BAN" ) {
+        btnClass = TIME_CLASS_BAN;
+        btnAttrib = 'disabled';
+    } else if( s.type == "SCH_FREE" ) {
         btnClass = TIME_CLASS_FREE;
         interval = getScheduleInterval(s);
         btnAttrib = 'onclick="clickTime(this,\'' +interval+ '\'); return false;"';
@@ -226,7 +230,19 @@ function postData() {
                 setTimeout( function(){
                     alertMessageHide();
                 }, 10000 );
-			} else {
+			} else if( data.ban ) {
+                ban_msg = "This time is not available, because of limitations, sorry";
+                alertMessage( ban_msg );
+                setTimeout( function(){
+                    getSchedule(SERVICE_ID);
+                    if( $( '#alertMessage' ).text() == "" ) {
+                        alertMessage( ban_msg );
+                    }
+                }, 3000 );
+                setTimeout( function(){
+                    alertMessageHide();
+                }, 10000 );
+            } else {
 			    alertMessage( "Record status is unknown. Please, try again later", JSON.stringify( data ) );
 			}
 		}

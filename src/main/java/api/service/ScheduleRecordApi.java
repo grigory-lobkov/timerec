@@ -4,6 +4,7 @@ import api.session.SessionUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import controller.ScheduleController;
+import controller.UserController;
 import model.ScheduleRow;
 import model.UserRow;
 import storage.IScheduleTable;
@@ -61,7 +62,8 @@ public class ScheduleRecordApi extends HttpServlet {
         String line;
         boolean done1 = false;
         UserRow user = SessionUtils.getSessionUser(req);
-        Timestamp timeNow = new Timestamp(System.currentTimeMillis());
+        int deltaSec = UserController.getTzOffsetSeconds(user);
+        Timestamp timeNow = new Timestamp(System.currentTimeMillis() - deltaSec * 1000);
 
         while ((line = rr.readLine()) != null) {
             data = gson.fromJson(line, ScheduleRow.class);

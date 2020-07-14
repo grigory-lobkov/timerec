@@ -57,10 +57,10 @@ public class MailAlert implements IAlert {
     @Override
     public void sendAlert(String toEmail, String title, String htmlText) {
         if(!validSettings) {
-            System.out.println("MailAlert.sendAlert() Cannot send email, because not all settings set.");
-            System.out.println("toEmail="+toEmail);
-            System.out.println("title="+title);
-            System.out.println("htmlText="+htmlText);
+//            System.out.println("MailAlert.sendAlert() Cannot send email, because not all settings set.");
+//            System.out.println("toEmail="+toEmail);
+//            System.out.println("title="+title);
+//            System.out.println("htmlText="+htmlText);
             return;
         }
         Properties props = new Properties();
