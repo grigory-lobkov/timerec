@@ -109,9 +109,18 @@ class Updater {
      */
     static void exec(String action, String query) throws SQLException {
         System.out.print(action + " ... ");
-        statement.executeUpdate(query);
+        try {
+            statement.executeUpdate(query);
+        } catch (Exception e) {
+            System.out.println(query);
+            throw e;
+        }
         System.out.println("ok");
     }
+
+    static String fromDual;
+    static String preSeqNextval;
+    static String postSeqNextval;
 
     /**
      * Creates table structure and indexes
@@ -120,6 +129,10 @@ class Updater {
      */
     static void createStructures() throws SQLException {
         Connection conn = StorageFactory.dbPool.connection();
+        fromDual = StorageFactory.dbPool.fromDual();
+        preSeqNextval = StorageFactory.dbPool.preSeqNextval();
+        postSeqNextval = StorageFactory.dbPool.postSeqNextval();
+
         statement = conn.createStatement();
 
         //exec("image_filename_idx drop", "DROP INDEX IF EXISTS image_filename_idx");
@@ -132,11 +145,11 @@ class Updater {
         exec("image",
                 "CREATE TABLE IF NOT EXISTS image " +
                         "(image_id BIGINT PRIMARY KEY, " +
-                        " filename VARCHAR2(100)," +
-                        " altname VARCHAR2(1000)," +
+                        " filename VARCHAR(100)," +
+                        " altname VARCHAR(1000)," +
                         " width INTEGER," +
                         " height INTEGER," +
-                        " bitmap CLOB)");
+                        " bitmap TEXT)");
 
         exec("image_filename_idx",
                 "CREATE INDEX IF NOT EXISTS image_filename_idx ON image (filename)");
@@ -148,24 +161,24 @@ class Updater {
                 "CREATE TABLE IF NOT EXISTS tz " +
                         "(tz_id BIGINT PRIMARY KEY," +
                         " utc_offset INTEGER," +
-                        " name VARCHAR2(1000)," +
+                        " name VARCHAR(1000)," +
                         " owner_id BIGINT)");
 
         exec("tz_update_list",
                 "INSERT INTO tz (tz_id, utc_offset, name)" +
-                        "SELECT seq_tz_id.nextval tz_id, utc_offset, name FROM (" +
-                        " SELECT 2*60 utc_offset, 'Kaliningrad' name FROM dual UNION ALL" +
-                        " SELECT 3*60, 'Moscow' FROM dual UNION ALL" +
-                        " SELECT 4*60, 'Samara' FROM dual UNION ALL" +
-                        " SELECT 5*60, 'Yekaterinburg' FROM dual UNION ALL" +
-                        " SELECT 6*60, 'Omsk' FROM dual UNION ALL" +
-                        " SELECT 7*60, 'Krasnoyarsk, Novosibirsk' FROM dual UNION ALL" +
-                        " SELECT 8*60, 'Irkutsk' FROM dual UNION ALL" +
-                        " SELECT 9*60, 'Yakutsk, Chita' FROM dual UNION ALL" +
-                        " SELECT 10*60, 'Vladivostok' FROM dual UNION ALL" +
-                        " SELECT 11*60, 'Magadan, Sakhalinsk, Srednekolymsk' FROM dual UNION ALL" +
-                        " SELECT 12*60, 'Anadyr, Petropavlovsk-Kamchatsky' FROM dual" +
-                        ")WHERE (name) NOT IN (SELECT name FROM tz)");
+                        "SELECT " + preSeqNextval + "seq_tz_id" + postSeqNextval + " tz_id, utc_offset, name FROM (" +
+                        " SELECT 2*60 utc_offset, 'Kaliningrad' as name " + fromDual + " UNION ALL" +
+                        " SELECT 3*60, 'Moscow' " + fromDual + " UNION ALL" +
+                        " SELECT 4*60, 'Samara' " + fromDual + " UNION ALL" +
+                        " SELECT 5*60, 'Yekaterinburg' " + fromDual + " UNION ALL" +
+                        " SELECT 6*60, 'Omsk' " + fromDual + " UNION ALL" +
+                        " SELECT 7*60, 'Krasnoyarsk, Novosibirsk' " + fromDual + " UNION ALL" +
+                        " SELECT 8*60, 'Irkutsk' " + fromDual + " UNION ALL" +
+                        " SELECT 9*60, 'Yakutsk, Chita' " + fromDual + " UNION ALL" +
+                        " SELECT 10*60, 'Vladivostok' " + fromDual + " UNION ALL" +
+                        " SELECT 11*60, 'Magadan, Sakhalinsk, Srednekolymsk' " + fromDual + " UNION ALL" +
+                        " SELECT 12*60, 'Anadyr, Petropavlovsk-Kamchatsky' " + fromDual + "" +
+                        ")x WHERE (name) NOT IN (SELECT name FROM tz)");
 
         userRole();
 
@@ -193,10 +206,10 @@ class Updater {
         exec("setting",
                 "CREATE TABLE IF NOT EXISTS setting" +
                         "(setting_id BIGINT PRIMARY KEY," +
-                        " alias VARCHAR2(64)," +
-                        " name VARCHAR2(1000)," +
-                        " description CLOB," +
-                        " value VARCHAR2(4000)," +
+                        " alias VARCHAR(64)," +
+                        " name VARCHAR(1000)," +
+                        " description TEXT," +
+                        " value VARCHAR(4000)," +
                         " service_id BIGINT," +
                         " owner_id BIGINT)");
 
@@ -208,15 +221,16 @@ class Updater {
 
         exec("setting_update_list",
                 "INSERT INTO setting (setting_id, alias, name, description, value)" +
-                        "SELECT seq_setting_id.nextval setting_id, alias, name, description, value FROM (" +
-                        "  SELECT 'ALL_SERVICES_CLIENT_LIMIT_DAILY' alias, '" + CLIENT_LIMIT_DAILY + "' value," +
-                        "         'All services usage limit per day' name, 'Client cannot take more than this count of services per day.' description FROM dual UNION ALL" +
-                        "  SELECT 'ALL_SERVICES_CLIENT_LIMIT_WEEKLY' alias, '" + CLIENT_LIMIT_WEEKLY + "' value," +
-                        "         'All services usage limit per week', 'Client cannot take more than this count of services per week.' FROM dual UNION ALL" +
-                        "  SELECT 'ALL_SERVICES_CLIENT_LIMIT_MONTHLY' alias, '" + CLIENT_LIMIT_MONTHLY + "' value," +
-                        "         'All services usage limit per month', 'Client cannot take more than this count of services per month.' FROM dual" +
-                        ")WHERE (alias) NOT IN (SELECT alias FROM setting)");
+                        "SELECT " + preSeqNextval + "seq_setting_id" + postSeqNextval + " setting_id, alias, name, description, value FROM (" +
+                        "  SELECT 'ALL_SERVICES_CLIENT_LIMIT_DAILY' as alias, '" + CLIENT_LIMIT_DAILY + "' as value," +
+                        "         'All services usage limit per day' as name, 'Client cannot take more than this count of services per day.' as description " + fromDual + " UNION ALL" +
+                        "  SELECT 'ALL_SERVICES_CLIENT_LIMIT_WEEKLY', '" + CLIENT_LIMIT_WEEKLY + "'," +
+                        "         'All services usage limit per week', 'Client cannot take more than this count of services per week.' " + fromDual + " UNION ALL" +
+                        "  SELECT 'ALL_SERVICES_CLIENT_LIMIT_MONTHLY', '" + CLIENT_LIMIT_MONTHLY + "'," +
+                        "         'All services usage limit per month', 'Client cannot take more than this count of services per month.' " + fromDual + "" +
+                        ")x WHERE (alias) NOT IN (SELECT alias FROM setting)");
     }
+
     /**
      * USER table creation
      *
@@ -228,35 +242,35 @@ class Updater {
         //exec("user_email_idx drop", "DROP INDEX IF EXISTS user_email_idx");
         //exec("user drop", "DROP TABLE IF EXISTS user");
 
-        exec("seq_user_id",
-                "CREATE SEQUENCE IF NOT EXISTS seq_user_id");
+        exec("seq_users_id",
+                "CREATE SEQUENCE IF NOT EXISTS seq_users_id");
 
-        exec("user",
-                "CREATE TABLE IF NOT EXISTS user " +
+        exec("users",
+                "CREATE TABLE IF NOT EXISTS users " +
                         "(user_id BIGINT PRIMARY KEY," +
                         " role_id BIGINT," +
-                        " name VARCHAR2(1000)," +
+                        " name VARCHAR(1000)," +
                         " tz_id BIGINT," +
-                        " email VARCHAR2(100)," +
-                        " password VARCHAR2(100)," +
+                        " email VARCHAR(100)," +
+                        " password VARCHAR(100)," +
                         " image_id BIGINT," +
                         " owner_id BIGINT)");
 
-        exec("user_email_idx",
-                "CREATE INDEX IF NOT EXISTS user_email_idx ON user (email)");
+        exec("users_email_idx",
+                "CREATE INDEX IF NOT EXISTS users_email_idx ON users (email)");
 
 
-        exec("user_insert_admin",
-                "INSERT INTO user (user_id, role_id, name, tz_id, email, password)" +
-                        "SELECT seq_user_id.nextval, role_id, '" + ADMIN_NAME + "', 2, '" + ADMIN_EMAIL + "', '" + Passwords.encrypt(ADMIN_PASSWORD) + "'" +
+        exec("users_insert_admin",
+                "INSERT INTO users (user_id, role_id, name, tz_id, email, password)" +
+                        "SELECT " + preSeqNextval + "seq_user_id" + postSeqNextval + ", role_id, '" + ADMIN_NAME + "', 2, '" + ADMIN_EMAIL + "', '" + Passwords.encrypt(ADMIN_PASSWORD) + "'" +
                         "FROM role " +
-                        "WHERE name = '" + ROLE_ADMIN + "' AND (SELECT COUNT(user_id) FROM user) = 0");
+                        "WHERE name = '" + ROLE_ADMIN + "' AND (SELECT COUNT(user_id) FROM users) = 0");
 
-        exec("user_insert_client",
-                "INSERT INTO user (user_id, role_id, name, tz_id, email, password)" +
-                        "SELECT seq_user_id.nextval, role_id, '" + CLIENT_NAME + "', 2, '" + CLIENT_EMAIL + "', '" + Passwords.encrypt(CLIENT_PASSWORD) + "'" +
+        exec("users_insert_client",
+                "INSERT INTO users (user_id, role_id, name, tz_id, email, password)" +
+                        "SELECT " + preSeqNextval + "seq_user_id" + postSeqNextval + ", role_id, '" + CLIENT_NAME + "', 2, '" + CLIENT_EMAIL + "', '" + Passwords.encrypt(CLIENT_PASSWORD) + "'" +
                         "FROM role " +
-                        "WHERE name = '" + ROLE_CLIENT + "' AND (SELECT COUNT(user_id) FROM user) = 1");
+                        "WHERE name = '" + ROLE_CLIENT + "' AND (SELECT COUNT(user_id) FROM users) = 1");
     }
 
     /**
@@ -275,22 +289,22 @@ class Updater {
         exec("role",
                 "CREATE TABLE IF NOT EXISTS role " +
                         "(role_id BIGINT PRIMARY KEY," +
-                        " name VARCHAR2(1000)," +
+                        " name VARCHAR(1000)," +
                         " owner_id BIGINT," +
                         " is_default BOOLEAN)");
 
         exec("role_update_list_public", // PUBLIC USER ROLE MUST HAVE role_id=1 ALWAYS, SessiotUtils.getPublicUser() LIMITATION
                 "INSERT INTO role (role_id, name, is_default)" +
-                        "SELECT seq_role_id.nextval role_id, name, false FROM (" +
-                        " SELECT '" + ROLE_PUBLIC + "' name FROM dual" +
-                        ")WHERE (name) NOT IN (SELECT name FROM role)");
+                        "SELECT " + preSeqNextval + "seq_role_id" + postSeqNextval + " role_id, name, false FROM (" +
+                        " SELECT '" + ROLE_PUBLIC + "' as name " + fromDual + "" +
+                        ")x WHERE (name) NOT IN (SELECT name FROM role)");
 
         exec("role_update_list",
                 "INSERT INTO role (role_id, name, is_default)" +
-                        "SELECT seq_role_id.nextval role_id, name, def FROM (" +
-                        " SELECT '" + ROLE_ADMIN + "' name, false def FROM dual UNION ALL" +
-                        " SELECT '" + ROLE_CLIENT + "' name, true def FROM dual" +
-                        ")WHERE (name) NOT IN (SELECT name FROM role)");
+                        "SELECT " + preSeqNextval + "seq_role_id" + postSeqNextval + " role_id, name, def FROM (" +
+                        " SELECT '" + ROLE_ADMIN + "' as name, false def " + fromDual + " UNION ALL" +
+                        " SELECT '" + ROLE_CLIENT + "' as name, true def " + fromDual + "" +
+                        ")x WHERE (name) NOT IN (SELECT name FROM role)");
     }
 
     /**
@@ -310,7 +324,7 @@ class Updater {
                 "CREATE TABLE IF NOT EXISTS access " +
                         "(access_id BIGINT PRIMARY KEY," +
                         " role_id BIGINT," +
-                        " object_name VARCHAR2(100)," +
+                        " object_name VARCHAR(100)," +
                         " all_get BOOLEAN," +
                         " all_put BOOLEAN," +
                         " all_post BOOLEAN," +
@@ -323,45 +337,45 @@ class Updater {
         exec("access_insert_role_admin",
                 "INSERT INTO access (access_id, role_id, object_name," +
                         " all_get, all_put, all_post, all_delete, own_get, own_put, own_post, own_delete)" +
-                        "SELECT seq_access_id.nextval, role_id, page.name, true, true, true, true, true, true, true, true " +
+                        "SELECT " + preSeqNextval + "seq_access_id" + postSeqNextval + ", role_id, page.name, true, true, true, true, true, true, true, true " +
                         "FROM role, (" +
-                        " SELECT 'menu' name FROM dual UNION ALL" +
-                        " SELECT 'setting' FROM dual UNION ALL" +
-                        " SELECT 'user' FROM dual UNION ALL" +
-                        " SELECT 'profile' FROM dual UNION ALL" +
-                        " SELECT 'role' FROM dual UNION ALL" +
-                        " SELECT 'access' FROM dual UNION ALL" +
-                        " SELECT 'image' FROM dual UNION ALL" +
-                        " SELECT 'service' FROM dual UNION ALL" +
-                        " SELECT 'repeat' FROM dual UNION ALL" +
-                        " SELECT 'schedule' FROM dual UNION ALL" +
-                        " SELECT 'tz' FROM dual UNION ALL" +
-                        " SELECT 'login' name FROM dual UNION ALL" +
-                        " SELECT 'logout' FROM dual" +
+                        " SELECT 'menu' as name " + fromDual + " UNION ALL" +
+                        " SELECT 'setting' " + fromDual + " UNION ALL" +
+                        " SELECT 'user' " + fromDual + " UNION ALL" +
+                        " SELECT 'profile' " + fromDual + " UNION ALL" +
+                        " SELECT 'role' " + fromDual + " UNION ALL" +
+                        " SELECT 'access' " + fromDual + " UNION ALL" +
+                        " SELECT 'image' " + fromDual + " UNION ALL" +
+                        " SELECT 'service' " + fromDual + " UNION ALL" +
+                        " SELECT 'repeat' " + fromDual + " UNION ALL" +
+                        " SELECT 'schedule' " + fromDual + " UNION ALL" +
+                        " SELECT 'tz' " + fromDual + " UNION ALL" +
+                        " SELECT 'login' " + fromDual + " UNION ALL" +
+                        " SELECT 'logout' " + fromDual + "" +
                         ") page " +
                         "WHERE role.name = '" + ROLE_ADMIN + "' AND NOT EXISTS (SELECT 1 FROM access WHERE role_id=role.role_id)");
 
         exec("access_insert_role_client",
                 "INSERT INTO access (access_id, role_id, object_name," +
                         " all_get, all_put, all_post, all_delete, own_get, own_put, own_post, own_delete)" +
-                        "SELECT seq_access_id.nextval, role_id, page.name, true, true, true, true, true, true, true, true " +
+                        "SELECT " + preSeqNextval + "seq_access_id" + postSeqNextval + ", role_id, page.name, true, true, true, true, true, true, true, true " +
                         "FROM role, (" +
-                        " SELECT 'menu' name FROM dual UNION ALL" +
-                        " SELECT 'profile' FROM dual UNION ALL" +
-                        " SELECT 'record' FROM dual UNION ALL" +
-                        " SELECT 'records' FROM dual UNION ALL" +
-                        " SELECT 'login' name FROM dual UNION ALL" +
-                        " SELECT 'logout' FROM dual" +
+                        " SELECT 'menu' as name " + fromDual + " UNION ALL" +
+                        " SELECT 'profile' " + fromDual + " UNION ALL" +
+                        " SELECT 'record' " + fromDual + " UNION ALL" +
+                        " SELECT 'records' " + fromDual + " UNION ALL" +
+                        " SELECT 'login' " + fromDual + " UNION ALL" +
+                        " SELECT 'logout' " + fromDual + "" +
                         ") page " +
                         "WHERE role.name = '" + ROLE_CLIENT + "' AND NOT EXISTS (SELECT 1 FROM access WHERE role_id=role.role_id)");
 
         exec("access_insert_role_public",
                 "INSERT INTO access (access_id, role_id, object_name," +
                         " all_get, all_put, all_post, all_delete, own_get, own_put, own_post, own_delete)" +
-                        "SELECT seq_access_id.nextval, role_id, page.name, true, true, true, true, true, true, true, true " +
+                        "SELECT " + preSeqNextval + "seq_access_id" + postSeqNextval + ", role_id, page.name, true, true, true, true, true, true, true, true " +
                         "FROM role, (" +
-                        " SELECT 'login' name FROM dual UNION ALL" +
-                        " SELECT 'register' FROM dual" +
+                        " SELECT 'login' as name " + fromDual + " UNION ALL" +
+                        " SELECT 'register' " + fromDual + "" +
                         ") page " +
                         "WHERE role.name = '" + ROLE_PUBLIC + "' AND NOT EXISTS (SELECT 1 FROM access WHERE role_id=role.role_id)");
     }
@@ -383,7 +397,7 @@ class Updater {
                 "CREATE TABLE IF NOT EXISTS service " +
                         "(service_id BIGINT PRIMARY KEY," +
                         " name VARCHAR(1000)," +
-                        " description CLOB," +
+                        " description TEXT," +
                         " image_id BIGINT," +
                         " duration INTEGER," +
                         " cost DECIMAL," +
@@ -420,8 +434,8 @@ class Updater {
                         " user_id BIGINT," +
                         " date_from TIMESTAMP WITHOUT TIME ZONE," +
                         " duration INTEGER," +
-                        " title VARCHAR2(4000)," +
-                        " description CLOB)");
+                        " title VARCHAR(4000)," +
+                        " description TEXT)");
 
         exec("schedule_service_date_idx",
                 "CREATE INDEX IF NOT EXISTS schedule_service_date_idx ON schedule (service_id, date_from)");

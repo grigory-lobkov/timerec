@@ -15,13 +15,14 @@ import java.util.List;
  */
 public class AccessTable implements ITable<AccessRow> {
 
-    /**
-     * Connection fast access variable
-     */
-    IConnectionPool pool;
+    private IConnectionPool pool;
+    private String preSeqNextval;
+    private String postSeqNextval;
 
     public AccessTable(IConnectionPool connection) {
         pool = connection;
+        preSeqNextval = pool.preSeqNextval();
+        postSeqNextval = pool.postSeqNextval();
     }
 
     /**
@@ -121,7 +122,7 @@ public class AccessTable implements ITable<AccessRow> {
                 "INSERT INTO access (access_id, role_id, object_name," +
                         " all_get, all_put, all_post, all_delete," +
                         " own_get, own_put, own_post, own_delete)" +
-                        "VALUES (seq_access_id.nextval, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", resultColumns);
+                        "VALUES (" + preSeqNextval + "seq_access_id" + postSeqNextval + ", ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", resultColumns);
         try {
             ps.setLong(1, access.role_id);
             ps.setString(2, access.object_name);

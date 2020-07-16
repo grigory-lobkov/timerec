@@ -18,14 +18,15 @@ import java.util.List;
  */
 public class SettingMTable implements IMultiRowTable<SettingRow> {
 
-    /**
-     * Connection pool fast access variable
-     */
-    IConnectionPool pool;
+    private IConnectionPool pool;
+    private String preSeqNextval;
+    private String postSeqNextval;
 
 
     public SettingMTable(IConnectionPool connection) {
         pool = connection;
+        preSeqNextval = pool.preSeqNextval();
+        postSeqNextval = pool.postSeqNextval();
     }
 
 
@@ -159,7 +160,7 @@ public class SettingMTable implements IMultiRowTable<SettingRow> {
         String resultColumns[] = new String[]{"setting_id"};
         PreparedStatement ps = conn.prepareStatement(
                 "INSERT INTO setting (setting_id, alias, name, description, value, service_id, owner_id)" +
-                        "VALUES (seq_setting_id.nextval, ?, ?, ?, ?, ?, ?)", resultColumns);
+                        "VALUES (" + preSeqNextval + "seq_setting_id" + postSeqNextval + ", ?, ?, ?, ?, ?, ?)", resultColumns);
 
         int affectedRows = 0;
         try {

@@ -1,7 +1,7 @@
 package storage;
 
 import model.*;
-import storage.connectImpl.H2ConnectionPool;
+import storage.connectImpl.*;
 import storage.tableImpl.*;
 
 /**
@@ -9,8 +9,7 @@ import storage.tableImpl.*;
  */
 public class StorageFactory {
 
-    public static IConnectionPool dbPool = new H2ConnectionPool();
-
+    public static IConnectionPool dbPool = new PgConnectionPool();
 
     static private volatile ITable<ServiceRow> serviceInstance = null;
 

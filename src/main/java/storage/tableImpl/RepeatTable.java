@@ -17,14 +17,15 @@ import java.util.List;
  */
 public class RepeatTable implements IMultiRowTable<RepeatRow> {
 
-    /**
-     * Connection pool fast access variable
-     */
-    IConnectionPool pool;
+    private IConnectionPool pool;
+    private String preSeqNextval;
+    private String postSeqNextval;
 
 
     public RepeatTable(IConnectionPool connection) {
         pool = connection;
+        preSeqNextval = pool.preSeqNextval();
+        postSeqNextval = pool.postSeqNextval();
     }
 
 
@@ -155,7 +156,7 @@ public class RepeatTable implements IMultiRowTable<RepeatRow> {
         String resultColumns[] = new String[]{"repeat_id"};
         PreparedStatement ps = conn.prepareStatement(
                 "INSERT INTO repeat (repeat_id, service_id, dow, duration, time_from, time_to)" +
-                        "VALUES (seq_repeat_id.nextval, ?, ?, ?, ?, ?)", resultColumns);
+                        "VALUES (" + preSeqNextval + "seq_repeat_id" + postSeqNextval + ", ?, ?, ?, ?, ?)", resultColumns);
 
         int affectedRows = 0;
         try {

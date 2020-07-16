@@ -15,13 +15,14 @@ import java.util.List;
  */
 public class SettingTable implements ITable<SettingRow> {
 
-    /**
-     * Connection fast access variable
-     */
-    IConnectionPool pool;
+    private IConnectionPool pool;
+    private String preSeqNextval;
+    private String postSeqNextval;
 
     public SettingTable(IConnectionPool connection) {
         pool = connection;
+        preSeqNextval = pool.preSeqNextval();
+        postSeqNextval = pool.postSeqNextval();
     }
 
 
@@ -134,7 +135,7 @@ public class SettingTable implements ITable<SettingRow> {
         String resultColumns[] = new String[]{"setting_id"};
         PreparedStatement ps = conn.prepareStatement(
                 "INSERT INTO setting (setting_id, alias, name, description, value, service_id, owner_id)" +
-                        "VALUES (seq_setting_id.nextval, ?, ?, ?, ?, ?, ?)", resultColumns);
+                        "VALUES (" + preSeqNextval + "seq_setting_id" + postSeqNextval + ", ?, ?, ?, ?, ?, ?)", resultColumns);
         try {
             ps.setString(1, object.alias);
             ps.setString(2, object.name);

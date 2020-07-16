@@ -38,7 +38,7 @@ public class H2ConnectionPool implements IConnectionPool {
         try {
             // Register JDBC driver
             Class.forName(JDBC_DRIVER);
-            // Open a connection
+            // Create the pool
             pool = JdbcConnectionPool.create(JDBC_URL, DB_USER, DB_PASSWORD);
             pool.setMaxConnections(JDBC_MAX_POOL_SIZE);
             pool.setLoginTimeout(JDBC_CONNECTION_TIMEOUT);
@@ -46,6 +46,16 @@ public class H2ConnectionPool implements IConnectionPool {
             e.printStackTrace();
         }
         if (debugLog) System.out.println("H2ConnectionPool init anonymous block end");
+    }
+
+    public String fromDual(){
+        return "FROM dual";
+    };
+    public String preSeqNextval() {
+        return "";
+    }
+    public String postSeqNextval() {
+        return ".nextval";
     }
 
     /**

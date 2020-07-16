@@ -15,13 +15,14 @@ import java.util.List;
  */
 public class UserTable implements ITable<UserRow> {
 
-    /**
-     * Connection fast access variable
-     */
-    IConnectionPool pool;
+    private IConnectionPool pool;
+    private String preSeqNextval;
+    private String postSeqNextval;
 
     public UserTable(IConnectionPool connection) {
         pool = connection;
+        preSeqNextval = pool.preSeqNextval();
+        postSeqNextval = pool.postSeqNextval();
     }
 
 
@@ -35,7 +36,7 @@ public class UserTable implements ITable<UserRow> {
     public UserRow select(long object_id) throws Exception {
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
-                "SELECT * FROM user WHERE user_id = ?");
+                "SELECT * FROM users WHERE user_id = ?");
         ps.setLong(1, object_id);
         ResultSet rs = ps.executeQuery();
         try {
@@ -69,7 +70,7 @@ public class UserTable implements ITable<UserRow> {
     public UserRow select(String filter) throws Exception {
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
-                "SELECT * FROM user WHERE email = ?");
+                "SELECT * FROM users WHERE email = ?");
         ps.setString(1, filter);
         ResultSet rs = ps.executeQuery();
         try {
@@ -103,7 +104,7 @@ public class UserTable implements ITable<UserRow> {
     public boolean update(UserRow user) throws Exception {
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
-                "UPDATE user SET role_id = ?, name = ?, tz_id = ?, email = ?, password = ?, image_id = ?, owner_id = ?" +
+                "UPDATE users SET role_id = ?, name = ?, tz_id = ?, email = ?, password = ?, image_id = ?, owner_id = ?" +
                         " WHERE user_id = ?");
         try {
             ps.setLong(1, user.role_id);
@@ -136,8 +137,8 @@ public class UserTable implements ITable<UserRow> {
         Connection conn = pool.connection();
         String resultColumns[] = new String[]{"user_id"};
         PreparedStatement ps = conn.prepareStatement(
-                "INSERT INTO user (user_id, role_id, name, tz_id, email, password, image_id, owner_id)" +
-                        "VALUES (seq_user_id.nextval, ?, ?, ?, ?, ?, ?, ?)", resultColumns);
+                "INSERT INTO users (user_id, role_id, name, tz_id, email, password, image_id, owner_id)" +
+                        "VALUES (" + preSeqNextval + "seq_users_id" + postSeqNextval + ", ?, ?, ?, ?, ?, ?, ?)", resultColumns);
         try {
             ps.setLong(1, user.role_id);
             ps.setString(2, user.name);

@@ -15,14 +15,15 @@ import java.util.List;
  * JDBC storage access to {@code model.ScheduleRow} objects
  */
 public class ScheduleTable implements IScheduleTable<ScheduleRow> {
-    
-    /**
-     * Connection fast access variable
-     */
-    IConnectionPool pool;
+
+    private IConnectionPool pool;
+    private String preSeqNextval;
+    private String postSeqNextval;
 
     public ScheduleTable(IConnectionPool connection) {
         pool = connection;
+        preSeqNextval = pool.preSeqNextval();
+        postSeqNextval = pool.postSeqNextval();
     }
 
 
@@ -106,7 +107,7 @@ public class ScheduleTable implements IScheduleTable<ScheduleRow> {
         String resultColumns[] = new String[]{"schedule_id"};
         PreparedStatement ps = conn.prepareStatement(
                 "INSERT INTO schedule (schedule_id, service_id, user_id, date_from, duration, title, description)" +
-                        "VALUES (seq_schedule_id.nextval, ?, ?, ?, ?, ?, ?)", resultColumns);
+                        "VALUES (" + preSeqNextval + "seq_schedule_id" + postSeqNextval + ", ?, ?, ?, ?, ?, ?)", resultColumns);
         try {
             ps.setLong(1, schedule.service_id);
             ps.setLong(2, schedule.user_id);

@@ -15,14 +15,15 @@ import java.util.List;
  */
 public class ServiceTable implements ITable<ServiceRow> {
 
-    /**
-     * Connection fast access variable
-     */
-    IConnectionPool pool;
+    private IConnectionPool pool;
+    private String preSeqNextval;
+    private String postSeqNextval;
 
 
     public ServiceTable(IConnectionPool connection) {
         pool = connection;
+        preSeqNextval = pool.preSeqNextval();
+        postSeqNextval = pool.postSeqNextval();
     }
 
 
@@ -117,7 +118,7 @@ public class ServiceTable implements ITable<ServiceRow> {
         String resultColumns[] = new String[]{"service_id"};
         PreparedStatement ps = conn.prepareStatement(
                 "INSERT INTO service (service_id, name, description, image_id, duration, cost, owner_id)" +
-                        "VALUES (seq_service_id.nextval, ?, ?, ?, ?, ?, ?)", resultColumns);
+                        "VALUES (" + preSeqNextval + "seq_service_id" + postSeqNextval + ", ?, ?, ?, ?, ?, ?)", resultColumns);
         try {
             ps.setString(1, service.name);
             ps.setString(2, service.description);

@@ -7,7 +7,6 @@ import storage.ITable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -15,13 +14,14 @@ import java.util.List;
  */
 public class ImageTable implements ITable<ImageRow> {
 
-    /**
-     * Connection fast access variable
-     */
-    IConnectionPool pool;
+    private IConnectionPool pool;
+    private String preSeqNextval;
+    private String postSeqNextval;
 
     public ImageTable(IConnectionPool connection) {
         pool = connection;
+        preSeqNextval = pool.preSeqNextval();
+        postSeqNextval = pool.postSeqNextval();
     }
 
 
@@ -131,7 +131,7 @@ public class ImageTable implements ITable<ImageRow> {
         String resultColumns[] = new String[]{"image_id"};
         PreparedStatement ps = conn.prepareStatement(
                 "INSERT INTO image (image_id, filename, altname, width, height, bitmap)" +
-                        "VALUES (seq_image_id.nextval, ?, ?, ?, ?, ?)", resultColumns);
+                        "VALUES (" + preSeqNextval + "seq_image_id" + postSeqNextval + ", ?, ?, ?, ?, ?)", resultColumns);
         try {
             ps.setString(1, image.filename);
             ps.setString(2, image.altname);

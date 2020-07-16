@@ -19,4 +19,10 @@ public interface IConnectionPool {
      */
     void close();
 
+    String fromDual();
+
+    String preSeqNextval();
+
+    String postSeqNextval();
+
 }

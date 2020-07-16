@@ -15,13 +15,14 @@ import java.util.List;
  */
 public class RoleTable implements ITable<RoleRow> {
 
-    /**
-     * Connection fast access variable
-     */
-    IConnectionPool pool;
+    private IConnectionPool pool;
+    private String preSeqNextval;
+    private String postSeqNextval;
 
     public RoleTable(IConnectionPool connection) {
         pool = connection;
+        preSeqNextval = pool.preSeqNextval();
+        postSeqNextval = pool.postSeqNextval();
     }
 
 
@@ -125,7 +126,7 @@ public class RoleTable implements ITable<RoleRow> {
         String resultColumns[] = new String[]{"role_id"};
         PreparedStatement ps = conn.prepareStatement(
                 "INSERT INTO role (role_id, name, is_default)" +
-                        "VALUES (seq_role_id.nextval, ?, ?)", resultColumns);
+                        "VALUES (" + preSeqNextval + "seq_role_id" + postSeqNextval + ", ?, ?)", resultColumns);
         try {
             ps.setString(1, role.name);
             ps.setBoolean(2, role.is_default);
