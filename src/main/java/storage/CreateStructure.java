@@ -19,13 +19,18 @@ public class CreateStructure implements ServletContextListener {
     boolean checkStructureNeedCreate() {
         boolean result = true;
         try (Connection conn = StorageFactory.dbPool.connection()) {
-            DatabaseMetaData meta = conn.getMetaData();
-            ResultSet res = meta.getTables("", null, "SETTING", new String[]{"TABLE"});
-            while (res.next())
-                result = false;
-            res.close();
+//            DatabaseMetaData meta = conn.getMetaData();
+//            ResultSet res = meta.getTables("", null, "setting", new String[]{"TABLE"}); // case-dependent search in PostgreSQL, deprecated by me
+//            while (res.next()) result = false;
+//            res.close();
+            Statement statement = conn.createStatement();
+            try {
+                result = !statement.execute("SELECT 1 FROM role"); // query, which will raise exception if create structure needed
+            } finally {
+                statement.close();
+            }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("checkStructureNeedCreate() " + e.getMessage());
         }
         return result;
     }
@@ -111,11 +116,11 @@ class Updater {
         System.out.print(action + " ... ");
         try {
             statement.executeUpdate(query);
+            System.out.println("ok");
         } catch (Exception e) {
             System.out.println(query);
             throw e;
         }
-        System.out.println("ok");
     }
 
     static String fromDual;
