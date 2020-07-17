@@ -6,8 +6,10 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import controller.RepeatConvert;
 import model.RepeatRow;
+import model.ServiceRow;
 import model.UserRow;
 import storage.IMultiRowTable;
+import storage.ITable;
 import storage.StorageFactory;
 
 import javax.servlet.ServletException;
@@ -33,9 +35,16 @@ import java.util.List;
 @WebServlet(urlPatterns = "/api/repeat/service/*")
 public class RepeatServiceApi extends HttpServlet {
 
-    private IMultiRowTable<RepeatRow> storage = StorageFactory.getRepeatInstance();
+    private IMultiRowTable<RepeatRow> storageRepeat = StorageFactory.getRepeatInstance();
+    private ITable<ServiceRow> storageService = StorageFactory.getServiceInstance();
+
     Type listType = new TypeToken<List<RepeatRow>>() {
     }.getType();
+
+    class Transport {
+        ServiceRow service;
+        List<RepeatRow> repeat;
+    }
 
     private boolean debugLog = false;
 
@@ -58,14 +67,16 @@ public class RepeatServiceApi extends HttpServlet {
 
         try {
             // query storage
-            List<RepeatRow> data = storage.select(service_id);
+            Transport data = new Transport();
+            data.repeat = storageRepeat.select(service_id);
+            data.service = storageService.select(service_id);
 
-            if (data == null) {
+            if (data.repeat == null) {
                 if (debugLog) System.out.println("SC_NOT_FOUND");
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             } else {
                 UserRow user = SessionUtils.getSessionUser(req);
-                RepeatConvert.prepareOutputList(data, user);
+                RepeatConvert.prepareOutputList(data.repeat, user);
                 String jsonStr = gson.toJson(data);
                 if (debugLog) System.out.println(jsonStr);
                 resp.setContentType("application/json; charset=UTF-8");
@@ -128,15 +139,15 @@ public class RepeatServiceApi extends HttpServlet {
                 return;
             }
             RepeatConvert.prepareInputList(datas, user);
-            if (datas != null && datas.size() > 0) {
+            if (datas != null) {
                 try {
                     if (debugLog) System.out.println("object: " + datas + "(" + datas.size() + ")");
 
                     // update storage
                     if (!done1) {
-                        storage.delete(service_id);
+                        storageRepeat.delete(service_id);
                     }
-                    int inserted = storage.insert(datas);
+                    int inserted = storageRepeat.insert(datas);
 
                     if (inserted == datas.size()) {
                         String jsonStr = gson.toJson(datas);

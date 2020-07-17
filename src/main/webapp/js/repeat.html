@@ -42,7 +42,7 @@
           </div>
           <label class="col-lg-1 d-flex p-2">duration</label>
           <div class="col-lg-2">
-            <input id="day1duration" class="form-control" type="text" placeholder="30">
+            <input id="day1duration" class="form-control" type="text" placeholder="">
           </div>
         </div>
 		
@@ -57,7 +57,7 @@
           </div>
           <label class="col-lg-1 d-flex p-2">duration</label>
           <div class="col-lg-2">
-            <input id="day2duration" class="form-control" type="text" placeholder="30">
+            <input id="day2duration" class="form-control" type="text" placeholder="">
           </div>
         </div>
 		
@@ -72,7 +72,7 @@
           </div>
           <label class="col-lg-1 d-flex p-2">duration</label>
           <div class="col-lg-2">
-            <input id="day3duration" class="form-control" type="text" placeholder="30">
+            <input id="day3duration" class="form-control" type="text" placeholder="">
           </div>
         </div>
 		
@@ -87,7 +87,7 @@
           </div>
           <label class="col-lg-1 d-flex p-2">duration</label>
           <div class="col-lg-2">
-            <input id="day4duration" class="form-control" type="text" placeholder="30">
+            <input id="day4duration" class="form-control" type="text" placeholder="">
           </div>
         </div>
 		
@@ -102,7 +102,7 @@
           </div>
           <label class="col-lg-1 d-flex p-2">duration</label>
           <div class="col-lg-2">
-            <input id="day5duration" class="form-control" type="text" placeholder="30">
+            <input id="day5duration" class="form-control" type="text" placeholder="">
           </div>
         </div>
 		
@@ -117,7 +117,7 @@
           </div>
           <label class="col-lg-1 d-flex p-2">duration</label>
           <div class="col-lg-2">
-            <input id="day6duration" class="form-control" type="text" placeholder="30">
+            <input id="day6duration" class="form-control" type="text" placeholder="">
           </div>
         </div>
 		
@@ -132,7 +132,7 @@
           </div>
           <label class="col-lg-1 d-flex p-2">duration</label>
           <div class="col-lg-2">
-            <input id="day7duration" class="form-control" type="text" placeholder="30">
+            <input id="day7duration" class="form-control" type="text" placeholder="">
           </div>
         </div>
 
@@ -153,6 +153,7 @@
 
 API_URL = "/timerec/api/" + "repeat/service/";
 SERVICE_ID = null;
+DEF_DURATION = 30;
 
 /*DOWS[1] = 'Monday';
 DOWS[2] = 'Tuesday';
@@ -197,6 +198,10 @@ function fillTable(data) {
             $( "#day" + i + "to" ).attr("placeholder", "");
             $( "#day" + i + "duration" ).attr("placeholder", "");
         }
+    } else {
+        for (i = 1; i <= 7; i++) {
+            $( "#day" + i + "duration" ).attr("placeholder", DEF_DURATION);
+        }
     }
 }
 function readTable() {
@@ -205,13 +210,18 @@ function readTable() {
       f = timeToSeconds( $( "#day" + i + "from" ).val() );
       t = timeToSeconds( $( "#day" + i + "to" ).val() );
       d = $( "#day" + i + "duration" ).val();
-      if( f > -1 && t > -1 && d > 0 )
+      if( f > -1 && t > -1 ) {
+        if( (0 + d) == 0 ) {
+            d = DEF_DURATION;
+            $( "#day" + i + "duration" ).val( d );
+        }
         data.push({
           dow: i,
           time_from: f,
           time_to: t,
           duration: d
         });
+      }
     }
     return data;
 }
@@ -229,8 +239,10 @@ function getData() {
 	getAjaxJson({
 		url: url,
 		done: function( data ) {
+			if(data && data.service && data.service.duration && data.service.duration > 0)
+			    DEF_DURATION = data.service.duration;
 			cleanTable();
-			fillTable(data);
+			fillTable(data.repeat);
 			$( ".container" ).show();
 		}
 	});
@@ -262,7 +274,7 @@ function checkData() {
 }
 
 function timeToSeconds(strTime, description) {
-    if( !( strTime ) ) return null;
+    if( !( strTime ) ) return -1;
 	var regex = /(\d{1,2}):(\d{1,2})/;
 	var match;
     if ((match = regex.exec(strTime)) === null) {
