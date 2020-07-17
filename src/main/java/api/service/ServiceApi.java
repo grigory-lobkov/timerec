@@ -146,12 +146,15 @@ public class ServiceApi extends HttpServlet {
 
                     if (done && data.service.service_id > 0) {
                         // update image
-                        if(data.service.image_id==0 && data.service.image_bitmap!=null && !data.service.image_bitmap.isEmpty()) {
+                        if(data.service.image_id==0 && data.service.image_bitmap!=null
+                                && !data.service.image_bitmap.isEmpty()) {
                             ImageRow image = new ImageRow();
                             image.bitmap = data.service.image_bitmap;
                             done = storageImage.insert(image);
-                            if(done)
+                            if(done) {
                                 data.service.image_id = image.image_id;
+                                storageService.update(data.service);
+                            }
                         }
                         // add settings
                         SettingController.setServiceSetting(data.service.service_id, data.setting);

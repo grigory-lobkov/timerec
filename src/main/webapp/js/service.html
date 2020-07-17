@@ -37,8 +37,8 @@
 
 		  <h3>Service info</h3>
 
-		  <input id="serviceId" style="display:none" type="text" value="">
-		  <input id="imageId" style="display:none" type="text" value="">
+		  <input id="serviceId" style="display:none" type="text" value="0">
+		  <input id="imageId" style="display:none" type="text" value="0">
 
 		  <div class="form-group">
 			<label class="col-lg-3 control-label">Name</label>
@@ -210,15 +210,14 @@ function postData() {
 			alertMessage( "Service saved successfully" );
 		})
 		.fail(AJAX_FAIL_PRC);*/
-	var imgId = $( "#imageId" ).val();
 	getAjaxJson({
 		method: SERVICE_ID == null ? "POST" : "PUT",
 		url: url,
 		data: JSON.stringify({
 			service: {
 				service_id: SERVICE_ID,
-				image_id: imgId,
-				image_bitmap: imgId == 0 ? $( "#image" ).attr( "src" ) : "",
+				image_id: $( "#imageId" ).val(),
+				image_bitmap: NEW_IMAGE_ATTACHED == 1 ? $( "#image" ).attr( "src" ) : "",
 				name: $( "#serviceName" ).val(),
 				cost: $( "#serviceCost" ).val(),
 				description: $("#serviceDescription").val(),
@@ -229,8 +228,10 @@ function postData() {
 				limitPerMonth: ($( "#limitPerMonth" ).val()) ? $( "#limitPerMonth" ).val() : 0},
 		}),
 		done: SERVICE_ID == null ? function( data ) {
-			$( "#serviceId" ).val( data.service_id );
-			SERVICE_ID = data.service_id;
+			NEW_IMAGE_ATTACHED = 0;
+			$( "#serviceId" ).val( data.service.service_id );
+			SERVICE_ID = data.service.service_id;
+			window.history.pushState( {}, "", "?service_id=" + SERVICE_ID );
 			getMenu( false );
 			alertMessage( "Service created successfully" );
 		} : function( data ) {
@@ -242,6 +243,7 @@ function postData() {
 // IMAGE
 
 var MAX_IMAGE_FILE_KB = 256; // size in kilobytes
+var NEW_IMAGE_ATTACHED = 0;
 
 document.getElementById('selectImage').onchange = function( evt ) {
 	if( this.files && this.files[0] ) {
@@ -254,7 +256,7 @@ document.getElementById('selectImage').onchange = function( evt ) {
 		var reader = new FileReader();
 		reader.onload = function( e ) {
 			$( "#image" ).attr( "src", e.target.result );
-			$( "#imageId" ).val( 0 );
+			NEW_IMAGE_ATTACHED = 1;
 		}
 		reader.readAsDataURL( file ); // convert to base64 string
 	}
