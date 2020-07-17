@@ -221,9 +221,11 @@ public class ServiceApi extends HttpServlet {
                             dbData = storageService.select(data.service.service_id);
                         image.bitmap = data.service.image_bitmap;
                         image.image_id = dbData.image_id;
-                        if(dbData.image_id>0)
+                        if(dbData.image_id>0) {
                             done = storageImage.update(image);
-                        else
+                            if(!done)
+                                done = storageImage.insert(image);
+                        } else
                             done = storageImage.insert(image);
                         if(done)
                             data.service.image_id = image.image_id;
@@ -293,7 +295,7 @@ public class ServiceApi extends HttpServlet {
             }
         if (done) {
             resp.setContentType("application/json; charset=UTF-8");
-            resp.getWriter().println("{}");
+            resp.getWriter().println("{\"deleted\":\"1\"}");
         } else {
             if (debugLog) System.out.println("SC_NOT_FOUND");
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);

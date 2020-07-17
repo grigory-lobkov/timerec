@@ -90,9 +90,17 @@
 		  <div class="form-group">
 			<label class="col-lg-5 control-label"></label>
 			<div class="col-lg-8">
-			  <input type="button" class="btn btn-primary" value="Save Changes" onclick="postData(); return false;">
-			  <span></span>
-			  <input type="reset" class="btn btn-default" value="Cancel" onclick="getData(); return false;">
+				<input type="button" class="btn btn-primary" value="Save Changes" onclick="postData(); return false;">
+				&nbsp;
+				<input type="reset" class="btn btn-default" value="Cancel" onclick="getData(); return false;">
+				&nbsp;
+				<button class="btn btn-outline-danger" type="button" data-toggle="collapse" data-target="#collapseRemove" aria-expanded="false" aria-controls="collapseRemove">Remove service</button>
+				&nbsp;
+				<div class="collapse multi-collapse" id="collapseRemove">
+                    <br>
+					<span>Do you really want to remove this service?</span>&nbsp;
+					<input type="button" class="btn btn-danger" value="Remove service" onclick="removeMe(); return false;">
+				</div>
 			</div>
 		  </div>
       </div>
@@ -240,22 +248,47 @@ function postData() {
 	})
 }
 
+function removeMe() {
+	SERVICE_ID = getUrlVars()["service_id"];
+	if( SERVICE_ID != null ) SERVICE_ID = $( "#serviceId" ).val();
+	if( SERVICE_ID > 0 ) {
+		var url = API_URL + (SERVICE_ID == null ? "" : SERVICE_ID)
+		getAjaxJson({
+			method: "DELETE",
+			url: url,
+			data: JSON.stringify({
+				service: {
+					service_id: SERVICE_ID,
+					image_id: $( "#imageId" ).val()}
+			}),
+			done: function( data ) {
+				alertMessage( "Service deleted successfully." );
+				setTimeout( function(){
+					window.location.href = "index.html";
+				}, 2000 );
+			}
+		});
+	} else {
+		location.reload();
+	}
+}
 // IMAGE
 
-var MAX_IMAGE_FILE_KB = 256; // size in kilobytes
-var NEW_IMAGE_ATTACHED = 0;
+MAX_IMAGE_FILE_KB = 256; // size in kilobytes
+NEW_IMAGE_ATTACHED = 0;
 
 document.getElementById('selectImage').onchange = function( evt ) {
 	if( this.files && this.files[0] ) {
 		var file = this.files[0];
 		alertMessageHide();
 		if( file.size > MAX_IMAGE_FILE_KB * 1024 ) {
-			alertMessage( "Image file size is too big. It must be less than " + MAX_IMAGE_FILE_SIZE_KB  + " KB" );
+			alertMessage( "Image file size is too big. It must be less than " + MAX_IMAGE_FILE_KB  + " KB" );
 			return false;
 		}
 		var reader = new FileReader();
 		reader.onload = function( e ) {
 			$( "#image" ).attr( "src", e.target.result );
+			$( "#imageId" ).val( 0 )
 			NEW_IMAGE_ATTACHED = 1;
 		}
 		reader.readAsDataURL( file ); // convert to base64 string

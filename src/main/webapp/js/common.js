@@ -60,11 +60,11 @@ function getMenu(cache=true) {
 
 function fillMenu(data) {
 	// for service menu
-	function addMenuElement(name, page, params) {
-		if(window.location.pathname == page) {
-			return '<li class="nav-item active"><a class="nav-link" href="'+page+params+'">'+name+' <span class="sr-only">(current)</span></a></li>';
+	function addMenuElement( name, page, curPage ) {
+		if( curPage == page ) {
+			return '<li class="nav-item active"><a class="nav-link" href="'+page+'">'+name+' <span class="sr-only">(current)</span></a></li>';
 		} else {
-			return '<li class="nav-item"><a class="nav-link" href="'+page+params+'">'+name+'</a></li>';
+			return '<li class="nav-item"><a class="nav-link" href="'+page+'">'+name+'</a></li>';
 		}
 	}
 
@@ -84,47 +84,55 @@ function fillMenu(data) {
 			'</div>'+
 		'</li>';
 
-	// services list
-	var sMenu = '';
-	var serviceId = getUrlVars()["service_id"];
-	var serviceName = '(service list)';
-	var path = window.location.pathname;
-	var ss = data.services;
-    for (var i = 0, len = ss.length; i < len; i++) {
-		if(serviceId==ss[i].service_id) {
-			serviceName = ss[i].name;
-			sMenu += '<a class="dropdown-item active" href="'+path+'?service_id='+ss[i].service_id+'">'+ss[i].name+' <span class="sr-only">(current)</span></a>';
-		} else {
-			sMenu += '<a class="dropdown-item" href="'+path+'?service_id='+ss[i].service_id+'">'+ss[i].name+'</a>';
-			if(serviceId==null) serviceId = ss[i].service_id;
-		}
-    }
-	var urlParams = serviceId==null?"":"?service_id=" + serviceId;
-
-	// services menu
-	/*var mMenu = addMenuElement('Service', 'service.html', urlParams) +
-		addMenuElement('Repeat', 'repeat.html', urlParams) +
-		addMenuElement('Schedule', 'schedule.html', urlParams) +
-		'<li class="nav-item dropdown">'+
-			'<a class="nav-link dropdown-toggle" href="#" id="navbarDropdownS" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+
-				serviceName+
-			'</a>'+
-			'<div class="dropdown-menu" aria-labelledby="navbarDropdownS">'+sMenu+'</div>'+
-		'</li>';*/
-
+    // pages menu
     var mMenu = "";
+	var path = window.location.href;
+    var page = path.split("/").pop();
 	var ps = data.pages;
 	var isService = false;
     for (var i = 0, len = ps.length; i < len; i++) {
         if(isUser && ps[i].item == 'login') {
             //skip
         } else {
-		    mMenu += addMenuElement(ps[i].name, ps[i].item+'.html', ps[i].param ? '?' + ps[i].param : '');
+		    mMenu += addMenuElement(ps[i].name, ps[i].item+'.html'+( ps[i].param ? '?' + ps[i].param : ''), page);
 		}
 		if( ps[i].item == 'service' ) {
 		    isService = true;
 		}
     }
+
+	// services list
+	var sMenu = '';
+    var page = page.split("?").shift();
+	if( isService ) {
+        var serviceId = getUrlVars()["service_id"];
+        var serviceName = '(service list)';
+        if( ! ['service.html', 'repeat.html', 'schedule.html'].includes( page ) )
+            page = 'service.html';
+        var ss = data.services;
+        for ( var i = 0, len = ss.length; i < len; i++ ) {
+            if( serviceId == ss[i].service_id ) {
+                serviceName = ss[i].name;
+                sMenu += '<a class="dropdown-item active" href="'+page+'?service_id='+ss[i].service_id+'">'+ss[i].name+' <span class="sr-only">(current)</span></a>';
+            } else {
+                sMenu += '<a class="dropdown-item" href="'+page+'?service_id='+ss[i].service_id+'">'+ss[i].name+'</a>';
+                if( serviceId == null ) serviceId = ss[i].service_id;
+            }
+        }
+	}
+
+	// services menu
+	/*var urlParams = serviceId==null?"":"?service_id=" + serviceId;
+    var mMenu = addMenuElement('Service', 'service.html', urlParams) +
+        addMenuElement('Repeat', 'repeat.html', urlParams) +
+        addMenuElement('Schedule', 'schedule.html', urlParams) +
+        '<li class="nav-item dropdown">'+
+            '<a class="nav-link dropdown-toggle" href="#" id="navbarDropdownS" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+
+                serviceName+
+            '</a>'+
+            '<div class="dropdown-menu" aria-labelledby="navbarDropdownS">'+sMenu+'</div>'+
+        '</li>';*/
+
     if(sMenu && isService) {
 		mMenu += '<li class="nav-item dropdown">'+
     			'<a class="nav-link dropdown-toggle" href="#" id="navbarDropdownS" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+
