@@ -38,7 +38,7 @@ public class ScheduleTable implements IScheduleTable<ScheduleRow> {
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
                 "SELECT s.*, u.name user_name, e.name service_name" +
-                        " FROM schedule s, user u, service e" +
+                        " FROM schedule s, users u, service e" +
                         " WHERE u.user_id = s.user_id AND e.service_id = s.service_id" +
                         "   AND s.schedule_id = ?");
         ps.setLong(1, object_id);
@@ -164,7 +164,7 @@ public class ScheduleTable implements IScheduleTable<ScheduleRow> {
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
                 "SELECT s.*, u.name user_name, e.name service_name" +
-                        " FROM schedule s, user u, service e" +
+                        " FROM schedule s, users u, service e" +
                         " WHERE u.user_id = s.user_id AND e.service_id = s.service_id" +
                         "   AND s.service_id = ? AND s.date_from BETWEEN ? AND ?" +
                         " ORDER BY s.date_from");
@@ -208,7 +208,7 @@ public class ScheduleTable implements IScheduleTable<ScheduleRow> {
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
                 "SELECT s.*, u.name user_name, e.name service_name" +
-                        " FROM schedule s, user u, service e" +
+                        " FROM schedule s, users u, service e" +
                         " WHERE u.user_id = s.user_id AND e.service_id = s.service_id" +
                         "   AND s.user_id = ? AND s.date_from BETWEEN ? AND ?" +
                         " ORDER BY s.date_from");
@@ -252,7 +252,7 @@ public class ScheduleTable implements IScheduleTable<ScheduleRow> {
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
                 "SELECT s.*, u.name user_name, e.name service_name" +
-                        " FROM schedule s, user u, service e" +
+                        " FROM schedule s, users u, service e" +
                         " WHERE u.user_id = s.user_id AND e.service_id = s.service_id" +
                         "   AND s.date_from BETWEEN ? AND ?" +
                         " ORDER BY s.date_from");

@@ -173,7 +173,7 @@ public class UserTable implements ITable<UserRow> {
     public boolean delete(long object_id) throws Exception {
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
-                "DELETE FROM user WHERE user_id = ?");
+                "DELETE FROM users WHERE user_id = ?");
         ps.setLong(1, object_id);
         try {
             int affectedRows = ps.executeUpdate();
@@ -195,7 +195,7 @@ public class UserTable implements ITable<UserRow> {
     public List<UserRow> select() throws Exception {
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
-                "SELECT user_id, name FROM user ORDER BY name");
+                "SELECT user_id, name FROM users ORDER BY name");
         ResultSet rs = ps.executeQuery();
         List<UserRow> list = new ArrayList<UserRow>();
         try {

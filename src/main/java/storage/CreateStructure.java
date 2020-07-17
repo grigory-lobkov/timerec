@@ -25,7 +25,7 @@ public class CreateStructure implements ServletContextListener {
 //            res.close();
             Statement statement = conn.createStatement();
             try {
-                result = !statement.execute("SELECT 1 FROM role"); // query, which will raise exception if create structure needed
+                result = !statement.execute("SELECT user_id FROM users"); // query, which will raise exception if create structure needed
             } finally {
                 statement.close();
             }
