@@ -1,0 +1,5 @@
+src/main/webapp/js/fullcalendar-4.4.0/* linguist-vendored
+TimeRec.pptx linguist-documentation
+*.md linguist-documentation
+.gitattributes export-ignore
+.gitignore export-ignore
