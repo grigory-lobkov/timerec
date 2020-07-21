@@ -144,7 +144,7 @@ public class RepeatTable implements IMultiRowTable<RepeatRow> {
 
     /**
      * Create new {@code model.RepeatRow} object in storage
-     * {@code repeat.repeat_id} will be update to new value
+     * {@code repeat.repeat_id} will be updated to new value
      *
      * @param objects new objects list
      * @return {@code true} on success

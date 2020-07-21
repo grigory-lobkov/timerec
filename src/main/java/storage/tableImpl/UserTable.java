@@ -36,7 +36,8 @@ public class UserTable implements ITable<UserRow> {
     public UserRow select(long object_id) throws Exception {
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
-                "SELECT * FROM users WHERE user_id = ?");
+                "SELECT u.*, (SELECT utc_offset FROM tz WHERE tz_id = u.tz_id) AS tz_utc_offset" +
+                        " FROM users u WHERE user_id = ?");
         ps.setLong(1, object_id);
         ResultSet rs = ps.executeQuery();
         try {
@@ -51,6 +52,7 @@ public class UserTable implements ITable<UserRow> {
             r.password = rs.getString("password");
             r.image_id = rs.getLong("image_id");
             r.owner_id = rs.getLong("owner_id");
+            r.tz_utc_offset = rs.getInt("tz_utc_offset");
             return r;
         } finally {
             rs.close();
@@ -70,7 +72,8 @@ public class UserTable implements ITable<UserRow> {
     public UserRow select(String filter) throws Exception {
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
-                "SELECT * FROM users WHERE email = ?");
+                "SELECT u.*, (SELECT utc_offset FROM tz WHERE tz_id = u.tz_id) AS tz_utc_offset" +
+                        " FROM users u WHERE email = ?");
         ps.setString(1, filter);
         ResultSet rs = ps.executeQuery();
         try {
@@ -127,7 +130,7 @@ public class UserTable implements ITable<UserRow> {
 
     /**
      * Create new {@code model.UserRow} object in storage
-     * {@code user.user_id} will be update to new value
+     * {@code user.user_id} will be updated to new value
      *
      * @param user new object
      * @return {@code true} on success

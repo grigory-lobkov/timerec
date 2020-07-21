@@ -120,7 +120,7 @@ public class ImageTable implements ITable<ImageRow> {
 
     /**
      * Create new {@code model.ImageRow} object in storage
-     * {@code image.image_id} will be update to new value
+     * {@code image.image_id} will be updated to new value
      *
      * @param image new object
      * @return {@code true} on success

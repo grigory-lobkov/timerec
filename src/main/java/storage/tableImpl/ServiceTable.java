@@ -107,7 +107,7 @@ public class ServiceTable implements ITable<ServiceRow> {
 
     /**
      * Create new {@code model.ServiceRow} object in storage
-     * {@code service.service_id} will be update to new value
+     * {@code service.service_id} will be updated to new value
      *
      * @param service new object
      * @return {@code true} on success

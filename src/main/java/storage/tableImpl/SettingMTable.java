@@ -148,7 +148,7 @@ public class SettingMTable implements IMultiRowTable<SettingRow> {
 
     /**
      * Create new {@code model.SettingRow} object in storage
-     * {@code setting.setting_id} will be update to new value
+     * {@code setting.setting_id} will be updated to new value
      *
      * @param objects new objects list
      * @return {@code true} on success

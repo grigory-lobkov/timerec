@@ -1,6 +1,7 @@
 package controller;
 
 import model.RoleRow;
+import model.TzRow;
 import model.UserRow;
 import storage.ITable;
 import storage.StorageFactory;
@@ -10,9 +11,19 @@ import java.util.List;
 public class UserController {
 
     static private ITable<RoleRow> storageRole = StorageFactory.getRoleInstance();
+    static private ITable<TzRow> storageTz = StorageFactory.getTzInstance();
 
 
     public static int getTzOffsetSeconds(UserRow user) {
+        if (user.tz_utc_offset != -1) return user.tz_utc_offset * 60;
+        if (user.tz_id > 0)
+            try {
+                TzRow tz = storageTz.select(user.tz_id);
+                user.tz_utc_offset = tz.utc_offset;
+                return user.tz_utc_offset * 60;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         return 3 * 60 * 60; // Moscow
     }
 

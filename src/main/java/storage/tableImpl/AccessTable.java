@@ -109,7 +109,7 @@ public class AccessTable implements ITable<AccessRow> {
 
     /**
      * Create new {@code model.AccessRow} object in storage
-     * {@code access.access_id} will be update to new value
+     * {@code access.access_id} will be updated to new value
      *
      * @param access new object
      * @return {@code true} on success

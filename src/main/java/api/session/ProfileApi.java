@@ -3,6 +3,7 @@ package api.session;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import integration.Integrator;
+import model.TzRow;
 import model.UserRow;
 import storage.ITable;
 import storage.Passwords;
@@ -15,13 +16,19 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.List;
 
 @WebServlet(urlPatterns = "/api/profile/*")
 public class ProfileApi extends HttpServlet {
 
 
-    private ITable<UserRow> storage = StorageFactory.getUserInstance();
+    private ITable<UserRow> storageUser = StorageFactory.getUserInstance();
+    private ITable<TzRow> storageTz = StorageFactory.getTzInstance();
 
+    class Transport {
+        UserRow user;
+        List<TzRow> tzs;
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -29,10 +36,12 @@ public class ProfileApi extends HttpServlet {
         Gson gson = (new GsonBuilder()).create();
 
         try {
+            Transport data = new Transport();
             // query storage
-            UserRow data = storage.select(user.user_id);
+            data.user = storageUser.select(user.user_id);
+            data.tzs = storageTz.select();
 
-            if (data == null) {
+            if (data.user == null) {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             } else {
                 String jsonStr = gson.toJson(data);
@@ -71,21 +80,20 @@ public class ProfileApi extends HttpServlet {
                     data.name = data.name.trim();
                     data.email = data.email.trim();
                     boolean allow = Integrator.getInstance().profile_allowModification(user, data);
-                    // password changed
-                    if (data.password == null || data.password.isEmpty()) {
-                        data.password = user.password;
-                    } else {
-                        data.password = Passwords.encrypt(data.password);
-                    }
-                    // update storage
-                    boolean done = storage.update(data);
-                    if (done) {
-                        done1 = true;
-                    }
-                    // user auto re-login
-                    if (!data.password.equals(user.password) || !data.email.equals(user.email)) {
-                        SessionUtils.setResponceCookies(resp, data.email, data.password);
-                        SessionUtils.createUserSession(req, data);
+                    if (allow) {
+                        // password changed
+                        if (data.password == null || data.password.isEmpty()) {
+                            data.password = user.password;
+                        } else {
+                            data.password = Passwords.encrypt(data.password);
+                        }
+                        // update storage
+                        done1 = storageUser.update(data);
+                        // user auto re-login
+                        if (!data.password.equals(user.password) || !data.email.equals(user.email)) {
+                            SessionUtils.setResponceCookies(resp, data.email, data.password);
+                            SessionUtils.createUserSession(req, data);
+                        }
                     }
                 } catch (Exception e) {
                     resp.sendError(HttpServletResponse.SC_NO_CONTENT);
@@ -111,7 +119,7 @@ public class ProfileApi extends HttpServlet {
         if (user != null && user.user_id > 0)
             try {
                 // update storage
-                done1 = storage.delete(user.user_id);
+                done1 = storageUser.delete(user.user_id);
 
             } catch (Exception e) {
                 resp.sendError(HttpServletResponse.SC_NO_CONTENT);

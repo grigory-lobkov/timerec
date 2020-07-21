@@ -124,7 +124,7 @@ public class SettingTable implements ITable<SettingRow> {
 
     /**
      * Create new {@code model.SettingRow} object in storage
-     * {@code setting.setting_id} will be update to new value
+     * {@code setting.setting_id} will be updated to new value
      *
      * @param object new object
      * @return {@code true} on success

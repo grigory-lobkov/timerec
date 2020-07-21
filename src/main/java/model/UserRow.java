@@ -26,6 +26,8 @@ public class UserRow {
     // owner user_id
     public long owner_id;
 
+    // other fields
+    public int tz_utc_offset = -1;
 
     public void copyTo(UserRow receiver) {
         receiver.user_id = this.user_id;

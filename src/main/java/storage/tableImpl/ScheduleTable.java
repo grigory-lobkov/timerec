@@ -96,7 +96,7 @@ public class ScheduleTable implements IScheduleTable<ScheduleRow> {
 
     /**
      * Create new {@code model.ScheduleRow} object in storage
-     * {@code schedule.schedule_id} will be update to new value
+     * {@code schedule.schedule_id} will be updated to new value
      *
      * @param schedule new object
      * @return {@code true} on success

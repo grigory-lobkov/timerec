@@ -154,6 +154,24 @@ public class StorageFactory {
         return imageInstance;
     }
 
+
+    static private volatile ITable<TzRow> tzInstance = null;
+
+    /**
+     * Generate Tz storage actions
+     *
+     * @return singleton instance
+     */
+    public static ITable<TzRow> getTzInstance() {
+        if (tzInstance == null)
+            synchronized (StorageFactory.class) {
+                if (tzInstance == null) {
+                    tzInstance = new TzTable(dbPool);
+                }
+            }
+        return tzInstance;
+    }
+
     /**
      * Generate parameter-based storage {@code ITable} object
      * Used to determine owner inside AccessFilterApi. Deprecated.

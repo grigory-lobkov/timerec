@@ -1,6 +1,6 @@
 package storage.tableImpl;
 
-import model.RoleRow;
+import model.TzRow;
 import storage.IConnectionPool;
 import storage.ITable;
 
@@ -11,15 +11,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * JDBC storage access to {@code model.RoleRow} objects
+ * JDBC storage access to {@code model.TzRow} objects
  */
-public class RoleTable implements ITable<RoleRow> {
+public class TzTable implements ITable<TzRow> {
 
     private IConnectionPool pool;
     private String preSeqNextval;
     private String postSeqNextval;
 
-    public RoleTable(IConnectionPool connection) {
+    public TzTable(IConnectionPool connection) {
         pool = connection;
         preSeqNextval = pool.preSeqNextval();
         postSeqNextval = pool.postSeqNextval();
@@ -27,25 +27,25 @@ public class RoleTable implements ITable<RoleRow> {
 
 
     /**
-     * Get {@code model.RoleRow} object from storage by {@code role_id}
+     * Get {@code model.TzRow} object from storage by {@code tz_id}
      *
      * @param object_id object identifier
-     * @return {@code model.RoleRow} object
+     * @return {@code model.TzRow} object
      * @throws Exception on error accessing storage
      */
-    public RoleRow select(long object_id) throws Exception {
+    public TzRow select(long object_id) throws Exception {
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
-                "SELECT * FROM role WHERE role_id = ?");
+                "SELECT * FROM tz WHERE tz_id = ?");
         ps.setLong(1, object_id);
         ResultSet rs = ps.executeQuery();
         try {
             if (!rs.next()) return null;
 
-            RoleRow r = new RoleRow();
-            r.role_id = rs.getLong("role_id");
+            TzRow r = new TzRow();
+            r.tz_id = rs.getLong("tz_id");
+            r.utc_offset = rs.getInt("utc_offset");
             r.name = rs.getString("name");
-            r.is_default = rs.getBoolean("is_default");
             return r;
         } finally {
             rs.close();
@@ -56,28 +56,26 @@ public class RoleTable implements ITable<RoleRow> {
 
 
     /**
-     * Get {@code model.RoleRow} object from storage by smart filter
+     * Get {@code model.TzRow} object from storage by {@code utc_offset}
      *
      * @param filter object
-     * @return {@code model.RoleRow} object
+     * @return {@code model.TzRow} object
      * @throws Exception on error accessing storage
      */
-    public RoleRow select(String filter) throws Exception {
+    public TzRow select(String filter) throws Exception {
+        Integer utc = Integer.valueOf(filter);
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
-                "SELECT * FROM role" +
-                        " WHERE CASE" +
-                        "  WHEN is_default THEN \"1\"" +
-                        "  ELSE \"0\" END = ?");
-        ps.setString(1, filter);
+                "SELECT * FROM tz WHERE utc_offset = ? ORDER BY tz_id");
+        ps.setInt(1, utc);
         ResultSet rs = ps.executeQuery();
         try {
             if (!rs.next()) return null;
 
-            RoleRow r = new RoleRow();
-            r.role_id = rs.getLong("role_id");
+            TzRow r = new TzRow();
+            r.tz_id = rs.getLong("tz_id");
+            r.utc_offset = rs.getInt("utc_offset");
             r.name = rs.getString("name");
-            r.is_default = rs.getBoolean("is_default");
             return r;
         } finally {
             rs.close();
@@ -88,21 +86,20 @@ public class RoleTable implements ITable<RoleRow> {
 
 
     /**
-     * Set {@code model.RoleRow} object to storage by {@code role.role_id}
+     * Set {@code model.TzRow} object to storage by {@code tz.tz_id}
      *
-     * @param role updated object
+     * @param tz updated object
      * @return {@code true} on success
      * @throws Exception on error accessing storage
      */
-    public boolean update(RoleRow role) throws Exception {
+    public boolean update(TzRow tz) throws Exception {
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
-                "UPDATE role SET name = ?, is_default = ?" +
-                        " WHERE role_id = ?");
+                "UPDATE tz SET utc_offset = ?, name = ? WHERE tz_id = ?");
         try {
-            ps.setString(1, role.name);
-            ps.setBoolean(2, role.is_default);
-            ps.setLong(3, role.role_id);
+            ps.setInt(1, tz.utc_offset);
+            ps.setString(2, tz.name);
+            ps.setLong(3, tz.tz_id);
 
             int affectedRows = ps.executeUpdate();
             return affectedRows == 1;
@@ -114,28 +111,28 @@ public class RoleTable implements ITable<RoleRow> {
 
 
     /**
-     * Create new {@code model.RoleRow} object in storage
-     * {@code role.role_id} will be updated to new value
+     * Create new {@code model.TzRow} object in storage
+     * {@code tz.tz_id} will be updated to new value
      *
-     * @param role new object
+     * @param tz new object
      * @return {@code true} on success
      * @throws Exception on error accessing storage
      */
-    public boolean insert(RoleRow role) throws Exception {
+    public boolean insert(TzRow tz) throws Exception {
         Connection conn = pool.connection();
-        String resultColumns[] = new String[]{"role_id"};
+        String resultColumns[] = new String[]{"tz_id"};
         PreparedStatement ps = conn.prepareStatement(
-                "INSERT INTO role (role_id, name, is_default)" +
-                        "VALUES (" + preSeqNextval + "seq_role_id" + postSeqNextval + ", ?, ?)", resultColumns);
+                "INSERT INTO tz (tz_id, utc_offset, name)" +
+                        "VALUES (" + preSeqNextval + "seq_tz_id" + postSeqNextval + ", ?, ?)", resultColumns);
         try {
-            ps.setString(1, role.name);
-            ps.setBoolean(2, role.is_default);
+            ps.setInt(1, tz.utc_offset);
+            ps.setString(2, tz.name);
 
             int affectedRows = ps.executeUpdate();
             if (affectedRows == 1) {
                 ResultSet generatedKeys = ps.getGeneratedKeys();
                 if (generatedKeys.next()) {
-                    role.role_id = generatedKeys.getLong(1);
+                    tz.tz_id = generatedKeys.getLong(1);
                 }
             }
             return affectedRows == 1;
@@ -146,7 +143,7 @@ public class RoleTable implements ITable<RoleRow> {
     }
 
     /**
-     * Delete {@code model.RoleRow} object from storage by {@code role_id}
+     * Delete {@code model.TzRow} object from storage by {@code tz_id}
      *
      * @param object_id
      * @return {@code true} on success
@@ -156,7 +153,7 @@ public class RoleTable implements ITable<RoleRow> {
     public boolean delete(long object_id) throws Exception {
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
-                "DELETE FROM role WHERE role_id = ?");
+                "DELETE FROM tz WHERE tz_id = ?");
         ps.setLong(1, object_id);
         try {
             int affectedRows = ps.executeUpdate();
@@ -169,24 +166,24 @@ public class RoleTable implements ITable<RoleRow> {
 
 
     /**
-     * Reads list of all roles
+     * Reads all from list of tz
      *
-     * @return list of shortened {@code model.RoleRow} objects
+     * @return list of {@code model.TzRow} objects
      * @throws Exception
      */
     @Override
-    public List<RoleRow> select() throws Exception {
+    public List<TzRow> select() throws Exception {
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
-                "SELECT * FROM role ORDER BY name");
+                "SELECT tz_id, utc_offset, name FROM tz ORDER BY utc_offset");
         ResultSet rs = ps.executeQuery();
-        List<RoleRow> list = new ArrayList<RoleRow>();
+        List<TzRow> list = new ArrayList<TzRow>();
         try {
             while (rs.next()) {
-                RoleRow r = new RoleRow();
-                r.role_id = rs.getLong("role_id");
+                TzRow r = new TzRow();
+                r.tz_id = rs.getLong("tz_id");
+                r.utc_offset = rs.getInt("utc_offset");
                 r.name = rs.getString("name");
-                r.is_default = rs.getBoolean("is_default");
                 list.add(r);
             }
         } finally {
@@ -199,18 +196,18 @@ public class RoleTable implements ITable<RoleRow> {
 
 
     /*
-     * Check model.RoleRow object {@code object_id} is owned by {@code role_id}
+     * Check model.TzRow object {@code object_id} is owned by {@code user_id}
      *
      * @param object_id object to check
-     * @param role_id role to check
-     * @return true if {@code role_id} is owner of object {@code object_id}
+     * @param user_id user to check
+     * @return true if {@code user_id} is owner of object {@code object_id}
 
     @Override
-    public boolean checkIsOwner(long object_id, long role_id) throws SQLException {
+    public boolean checkIsOwner(long object_id, long user_id) throws SQLException {
         PreparedStatement ps = connectImpl.prepareStatement(
-                "SELECT * FROM role WHERE role_id = ? AND owner_id = ?");
+                "SELECT * FROM tz WHERE tz_id = ? AND owner_id = ?");
         ps.setLong(1, object_id);
-        ps.setLong(2, role_id);
+        ps.setLong(2, user_id);
         ResultSet rs = ps.executeQuery();
         try {
             return rs.next();

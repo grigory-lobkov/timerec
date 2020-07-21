@@ -156,8 +156,16 @@ class Updater {
                         " height INTEGER," +
                         " bitmap TEXT)");
 
-        exec("image_filename_idx",
-                "CREATE INDEX IF NOT EXISTS image_filename_idx ON image (filename)");
+        exec("image_pk_idx",
+                "CREATE INDEX IF NOT EXISTS image_pk_idx ON image (image_id)");
+
+        //exec("image_filename_idx",
+        //        "CREATE INDEX IF NOT EXISTS image_filename_idx ON image (filename)");
+
+        //exec("tz_utc_offset_idx drop", "DROP INDEX IF EXISTS tz_utc_offset_idx");
+        //exec("tz_pk_idx drop", "DROP INDEX IF EXISTS tz_pk_idx");
+        //exec("tz drop", "DROP TABLE IF EXISTS tz");
+        //exec("seq_tz_id drop", "DROP SEQUENCE IF EXISTS seq_tz_id");
 
         exec("seq_tz_id",
                 "CREATE SEQUENCE IF NOT EXISTS seq_tz_id");
@@ -172,18 +180,24 @@ class Updater {
         exec("tz_update_list",
                 "INSERT INTO tz (tz_id, utc_offset, name)" +
                         "SELECT " + preSeqNextval + "seq_tz_id" + postSeqNextval + " tz_id, utc_offset, name FROM (" +
-                        " SELECT 2*60 utc_offset, 'Kaliningrad' as name " + fromDual + " UNION ALL" +
-                        " SELECT 3*60, 'Moscow' " + fromDual + " UNION ALL" +
-                        " SELECT 4*60, 'Samara' " + fromDual + " UNION ALL" +
-                        " SELECT 5*60, 'Yekaterinburg' " + fromDual + " UNION ALL" +
-                        " SELECT 6*60, 'Omsk' " + fromDual + " UNION ALL" +
-                        " SELECT 7*60, 'Krasnoyarsk, Novosibirsk' " + fromDual + " UNION ALL" +
-                        " SELECT 8*60, 'Irkutsk' " + fromDual + " UNION ALL" +
-                        " SELECT 9*60, 'Yakutsk, Chita' " + fromDual + " UNION ALL" +
-                        " SELECT 10*60, 'Vladivostok' " + fromDual + " UNION ALL" +
-                        " SELECT 11*60, 'Magadan, Sakhalinsk, Srednekolymsk' " + fromDual + " UNION ALL" +
-                        " SELECT 12*60, 'Anadyr, Petropavlovsk-Kamchatsky' " + fromDual + "" +
+                        " SELECT 2*60 utc_offset, '(UTC+2) Kaliningrad' as name " + fromDual + " UNION ALL" +
+                        " SELECT 3*60, '(UTC+3) Moscow' " + fromDual + " UNION ALL" +
+                        " SELECT 4*60, '(UTC+4) Samara' " + fromDual + " UNION ALL" +
+                        " SELECT 5*60, '(UTC+5) Yekaterinburg' " + fromDual + " UNION ALL" +
+                        " SELECT 6*60, '(UTC+6) Omsk' " + fromDual + " UNION ALL" +
+                        " SELECT 7*60, '(UTC+7) Krasnoyarsk, Novosibirsk' " + fromDual + " UNION ALL" +
+                        " SELECT 8*60, '(UTC+8) Irkutsk' " + fromDual + " UNION ALL" +
+                        " SELECT 9*60, '(UTC+9) Yakutsk, Chita' " + fromDual + " UNION ALL" +
+                        " SELECT 10*60, '(UTC+10) Vladivostok' " + fromDual + " UNION ALL" +
+                        " SELECT 11*60, '(UTC+11) Magadan, Sakhalinsk, Srednekolymsk' " + fromDual + " UNION ALL" +
+                        " SELECT 12*60, '(UTC+12) Anadyr, Petropavlovsk-Kamchatsky' " + fromDual + "" +
                         ")x WHERE (name) NOT IN (SELECT name FROM tz)");
+
+        exec("tz_pk_idx",
+                "CREATE INDEX IF NOT EXISTS tz_pk_idx ON tz (tz_id)");
+
+        exec("tz_utc_offset_idx",
+                "CREATE INDEX IF NOT EXISTS tz_utc_offset_idx ON tz (utc_offset)");
 
         userRole();
 
@@ -218,6 +232,9 @@ class Updater {
                         " service_id BIGINT," +
                         " owner_id BIGINT)");
 
+        exec("setting_pk_idx",
+                "CREATE INDEX IF NOT EXISTS setting_pk_idx ON setting (setting_id)");
+
 //        no need indexes, cause of api.setting.SettingController stores it in memory
 //        exec("setting_service_idx",
 //                "CREATE INDEX IF NOT EXISTS setting_service_idx ON setting (service_id)");
@@ -243,7 +260,7 @@ class Updater {
      */
     private static void user() throws SQLException {
 
-        //exec("seq_user_id drop", "DROP SEQUENCE IF EXISTS seq_user_id");
+        //exec("seq_users_id drop", "DROP SEQUENCE IF EXISTS seq_users_id");
         //exec("user_email_idx drop", "DROP INDEX IF EXISTS user_email_idx");
         //exec("user drop", "DROP TABLE IF EXISTS user");
 
@@ -261,19 +278,22 @@ class Updater {
                         " image_id BIGINT," +
                         " owner_id BIGINT)");
 
+        exec("users_pk_idx",
+                "CREATE INDEX IF NOT EXISTS users_pk_idx ON users (user_id)");
+
         exec("users_email_idx",
                 "CREATE INDEX IF NOT EXISTS users_email_idx ON users (email)");
 
 
         exec("users_insert_admin",
                 "INSERT INTO users (user_id, role_id, name, tz_id, email, password)" +
-                        "SELECT " + preSeqNextval + "seq_user_id" + postSeqNextval + ", role_id, '" + ADMIN_NAME + "', 2, '" + ADMIN_EMAIL + "', '" + Passwords.encrypt(ADMIN_PASSWORD) + "'" +
+                        "SELECT " + preSeqNextval + "seq_users_id" + postSeqNextval + ", role_id, '" + ADMIN_NAME + "', 2, '" + ADMIN_EMAIL + "', '" + Passwords.encrypt(ADMIN_PASSWORD) + "'" +
                         "FROM role " +
                         "WHERE name = '" + ROLE_ADMIN + "' AND (SELECT COUNT(user_id) FROM users) = 0");
 
         exec("users_insert_client",
                 "INSERT INTO users (user_id, role_id, name, tz_id, email, password)" +
-                        "SELECT " + preSeqNextval + "seq_user_id" + postSeqNextval + ", role_id, '" + CLIENT_NAME + "', 2, '" + CLIENT_EMAIL + "', '" + Passwords.encrypt(CLIENT_PASSWORD) + "'" +
+                        "SELECT " + preSeqNextval + "seq_users_id" + postSeqNextval + ", role_id, '" + CLIENT_NAME + "', 2, '" + CLIENT_EMAIL + "', '" + Passwords.encrypt(CLIENT_PASSWORD) + "'" +
                         "FROM role " +
                         "WHERE name = '" + ROLE_CLIENT + "' AND (SELECT COUNT(user_id) FROM users) = 1");
     }
@@ -297,6 +317,9 @@ class Updater {
                         " name VARCHAR(1000)," +
                         " owner_id BIGINT," +
                         " is_default BOOLEAN)");
+
+        exec("role_pk_idx",
+                "CREATE INDEX IF NOT EXISTS role_pk_idx ON role (role_id)");
 
         exec("role_update_list_public", // PUBLIC USER ROLE MUST HAVE role_id=1 ALWAYS, SessiotUtils.getPublicUser() LIMITATION
                 "INSERT INTO role (role_id, name, is_default)" +
@@ -338,6 +361,9 @@ class Updater {
                         " own_put BOOLEAN," +
                         " own_post BOOLEAN," +
                         " own_delete BOOLEAN)");
+
+        exec("access_pk_idx",
+                "CREATE INDEX IF NOT EXISTS access_pk_idx ON access (access_id)");
 
         exec("access_insert_role_admin",
                 "INSERT INTO access (access_id, role_id, object_name," +
@@ -408,6 +434,9 @@ class Updater {
                         " cost DECIMAL," +
                         " owner_id BIGINT)");
 
+        exec("service_pk_idx",
+                "CREATE INDEX IF NOT EXISTS service_pk_idx ON service (service_id)");
+
         //exec("seq_repeat_id drop", "DROP SEQUENCE IF EXISTS seq_repeat_id");
         //exec("repeat_service_idx drop", "DROP INDEX IF EXISTS repeat_service_idx");
         //exec("repeat drop", "DROP TABLE IF EXISTS repeat");
@@ -423,6 +452,9 @@ class Updater {
                         " duration INTEGER," +
                         " time_from INTEGER," +
                         " time_to INTEGER)");
+
+        exec("repeat_pk_idx",
+                "CREATE INDEX IF NOT EXISTS repeat_pk_idx ON repeat (repeat_id)");
 
         exec("repeat_service_idx",
                 "CREATE INDEX IF NOT EXISTS repeat_service_idx ON repeat (service_id)");
@@ -441,6 +473,9 @@ class Updater {
                         " duration INTEGER," +
                         " title VARCHAR(4000)," +
                         " description TEXT)");
+
+        exec("schedule_pk_idx",
+                "CREATE INDEX IF NOT EXISTS schedule_pk_idx ON schedule (schedule_id)");
 
         exec("schedule_service_date_idx",
                 "CREATE INDEX IF NOT EXISTS schedule_service_date_idx ON schedule (service_id, date_from)");
