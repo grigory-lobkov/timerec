@@ -472,6 +472,7 @@ public class MoodleIntegrator implements IIntegrator {
         String firstName = "";
         String lastName = "";
         user.email = "";
+        user.tz_id = 0;
 
         if (con.getResponseCode() == 200) {
             String inKey = "input type=\"text\"";
@@ -509,15 +510,8 @@ public class MoodleIntegrator implements IIntegrator {
                     String value = strCurrentLine.substring(strCurrentLine.indexOf(opKey) + opKey.length());
                     value = value.substring(0, value.indexOf("\""));
                     Integer offset = moodleTzs.get(value);
-                    if(offset == null) {
-                        offset = (03)*60; // default is Moscow TZ (UTC+03)
-                    }
-                    try {
-                        TzRow tz = storageTz.select(offset.toString());
-                        user.tz_id = tz.tz_id;
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    if(offset != null)
+                        updateUserTz(user, offset);
                 }
                 strPrevLine = strCurrentLine;
             }
@@ -529,10 +523,23 @@ public class MoodleIntegrator implements IIntegrator {
         if(user.email.isEmpty())
             throw new RuntimeException("Cannot find user ID="+id+" email!");
 
+        if(user.tz_id == 0)
+            updateUserTz(user, (03)*60); // default is Moscow TZ (UTC+03)
+
         user.name = firstName + ' ' + lastName;
         user.password = moodleSession;
 
         return user;
+    }
+
+    private void updateUserTz(UserRow user, Integer offset) {
+        try {
+            TzRow tz = storageTz.select(offset.toString());
+            user.tz_id = tz.tz_id;
+            user.tz_utc_offset = offset;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**

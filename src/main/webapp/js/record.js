@@ -3,9 +3,11 @@ var SERVICE_ID = 0;
 var SCHEDULE = [];
 var SCHEDULE_TIME = "";
 var DAYS = [];
+var DEL_SCHEDULE_ID = 0;
 
 const DAY_DATE_FORMAT = new Intl.DateTimeFormat(window.navigator.language, { weekday: 'long', month: 'long', day: 'numeric' });
 var TIME_CLASS_BUSY = "btn btn-secondary";
+var TIME_CLASS_REC = "btn btn-warning";
 var TIME_CLASS_FREE = "btn btn-outline-secondary";
 var TIME_CLASS_CHOOSEN = "btn btn-primary";
 var TIME_CLASS_BAN = "btn btn-outline-danger";
@@ -94,6 +96,20 @@ function getScheduleTimeHtml(s) {
         btnClass = TIME_CLASS_FREE;
         interval = getScheduleInterval(s);
         btnAttrib = 'onclick="clickTime(this,\'' +interval+ '\'); return false;"';
+    } else if( s.type == "SCH_REC" ) {
+        if( s.r && s.r.schedule_id ) {
+            btnClass = TIME_CLASS_REC;
+            interval = getScheduleInterval(s);
+            btnAttrib = 'onclick="clickSelfTime(this,\''
+               + htmlEntities( s.r.title ) + '\', \''
+               + s.r.date_from + '\', '
+               + s.r.duration + ', \''
+               + htmlEntities( s.r.description ) + '\', '
+               + s.r.schedule_id + '); return false;"';
+        } else {
+            btnClass = TIME_CLASS_BUSY;
+            btnAttrib = 'disabled';
+        }
     }
     return '<input type="button" class="' + btnClass + '" ' +
         'id="' + s.start + '" ' +
@@ -105,6 +121,39 @@ function getScheduleInterval(s) {
     var fr = getScheduleTime(s.start);
     var to = timeFromSeconds( timeToSeconds( fr ) + (s.duration * 60) );
     return fr + '—' + to;
+}
+
+function clickSelfTime(b, rTitle, rStart, rDuration, rDescription, rScheduleId) {
+    modal = $( '#modalCenter' );
+    bdy = rDescription + '<br>' +
+        '<small><br><b>Start</b>: ' + rStart +
+        '<br><b>Duration</b>: ' + rDuration + ' minutes' +
+        '</small>';
+    modal.find( '.modal-title' ).text( rTitle );
+    modal.find( '.modal-body' ).html( bdy );
+    modal.modal( 'show' );
+    DEL_SCHEDULE_ID = rScheduleId;
+}
+
+function deleteRecord() {
+	if( confirm('Are you sure want to delete this record?') ) {
+		getAjaxJson({
+			method: "DELETE",
+			url: API_DEL_URL,
+			data: JSON.stringify( {
+			    schedule_id: DEL_SCHEDULE_ID
+			} ),
+			done: function( data ) {
+				if(data.success) {
+					getSchedule(SERVICE_ID);
+				} else {
+			    	alertMessage( "Delete status is unknown. Please, try again later", JSON.stringify( data ) );
+				}
+			}
+		});
+		modal = $( '#modalCenter' );
+		modal.modal( 'hide' );
+	}
 }
 
 function clickTime(b, interval) {
@@ -128,7 +177,7 @@ function showSchedule() {
     var currDay = "";
     SCHEDULE.forEach( function( s ){
         var nowDay = s.start.substring( 0, 10 );
-        if(nowDay!=currDay) {
+        if( nowDay != currDay ) {
             html += getScheduleDayHtml( currDay, htmlDay );
             htmlDay = "";
             currDay = nowDay;
@@ -215,9 +264,12 @@ function postData() {
                 alertMessage( "You have recorded successfully" );
                 $( "#servicePage" ).hide();
                 $( "#schedulePage" ).hide();
-                setTimeout( function(){
-                    window.location.href = "index.html";
-                }, 10000 );
+                if( $( '#navMenuContainer' ).length ) { // check if integration works
+                    // it's not integration
+                    setTimeout( function(){
+                        window.location.href = "index.html";
+                    }, 10000 );
+                }
 			} else if( data.busy ) {
 			    busy_msg = "This time is already busy, sorry";
                 alertMessage( busy_msg );

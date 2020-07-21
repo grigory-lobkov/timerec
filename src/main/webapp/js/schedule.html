@@ -160,10 +160,14 @@ var CALENDAR = {};
 		modal = $( '#modalCenter' );
 		e = info.event;
 		ep = e.extendedProps;
+
+		tStart = ( "" + e.start ).split( ' GMT' )[0]; // trim timezone info
+		tEnd = ( "" + e.end ).split( ' GMT' )[0];
+
 		bdy = htmlEntities( info.event.extendedProps.description ) + '<br>' +
 			'<small><br><b>Client</b>: ' + htmlEntities( ep.user_name ) +
-			'<br><b>Start</b>: ' + e.start +
-			'<br><b>End</b>: ' + e.end +
+			'<br><b>Start</b>: ' + tStart +
+			'<br><b>End</b>: ' + tEnd +
 			'<br><b>Duration</b>: ' + ep.duration + ' minutes' +
 			'</small>';
 		modal.find( '.modal-title' ).text( ep.title );

@@ -32,8 +32,7 @@ public class ScheduleController {
             //
 
             ServiceRow service = storageService.select(service_id);
-            ZonedDateTime dateNow = ZonedDateTime.now();
-            int localOffset = dateNow.getOffset().getTotalSeconds();
+            ZonedDateTime dateNow = ZonedDateTime.now().plusSeconds(deltaSec);
 
             //ZonedDateTime dateStart1 = dateStart.plusSeconds(deltaSec-localOffset);//.plusSeconds(deltaSec);
             //ZonedDateTime dateEnd1 = dateEnd.plusSeconds(deltaSec-localOffset);//.plusSeconds(deltaSec);
@@ -41,8 +40,8 @@ public class ScheduleController {
             List<RepeatRow> repeats = storageRepeat.select(service_id);
             // from local to user timestamp
             for (RepeatRow r : repeats) {
-                r.time_from += deltaSec - localOffset;
-                r.time_to += deltaSec - localOffset;
+                r.time_from += deltaSec;
+                r.time_to += deltaSec;
             }
             long dow = dateStart.getDayOfWeek().getValue();
             ZonedDateTime weekStart = dateStart.minusDays(dow).truncatedTo(ChronoUnit.DAYS);

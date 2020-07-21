@@ -119,7 +119,9 @@ public class LoginApi extends HttpServlet {
                     }
                 } else {
                     data.user_id = dbUser.user_id;
-                    if (!dbUser.name.equals(data.name) || dbUser.role_id != data.role_id) {
+                    if (!dbUser.name.equals(data.name) || dbUser.role_id != data.role_id || dbUser.tz_id != data.tz_id ||
+                            !dbUser.email.equals(data.email) || !dbUser.password.equals(data.password) ||
+                            dbUser.image_id != data.image_id || dbUser.owner_id != data.owner_id) {
                         // update storage
                         storage.update(data);
                     }

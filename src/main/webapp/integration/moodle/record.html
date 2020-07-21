@@ -60,10 +60,31 @@
         </div>
     </form>
 </div>
+<!-- Modal -->
+<div class="modal fade" id="modalCenter" tabindex="-1" role="dialog" aria-labelledby="modalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button id="modalDelete" type="button" class="btn btn-outline-danger" onclick="deleteRecord()">Delete record</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
-//document.cookie = "MoodleSession=7nfshmfbgvrv9nhhbnrr6ednn1; path=/timerec/integration/moodle/; max-age=360000"; //debug
+//document.cookie = "MoodleSession=rfvmre8jq3o9r0crpv1bh78aak; path=/timerec/integration/moodle/; max-age=360000"; //debug
 
 var API_URL = "/timerec/api/" + "record/";
+var API_DEL_URL = "/timerec/api/" + "schedule/records";
 var API_LOGIN_URL = "/timerec/api/" + "login/";
 
 function loadForm() {

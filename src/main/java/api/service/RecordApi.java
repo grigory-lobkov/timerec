@@ -49,6 +49,11 @@ public class RecordApi extends HttpServlet {
         SCH_BUSY,
 
         /**
+         * When schedule is busy by me
+         */
+        SCH_REC,
+
+        /**
          * When schedule is free, but client cannot record, because of service period limitations
          */
         SCH_BAN
@@ -58,6 +63,7 @@ public class RecordApi extends HttpServlet {
         String start;
         int duration;
         ScheduleType type;
+        ScheduleRow r;
     }
 
     class TransportRecord {
@@ -105,7 +111,7 @@ public class RecordApi extends HttpServlet {
             // Convert to transport
             List<TransportSchedule> data = new ArrayList<>(list.size());
             for (ScheduleRow row : list) {
-                data.add(convertToTransport(row));
+                data.add(convertToTransport(row, user));
             }
             // send data
             String jsonStr = gson.toJson(data, scheduleTList);
@@ -114,7 +120,7 @@ public class RecordApi extends HttpServlet {
         }
     }
 
-    private TransportSchedule convertToTransport(ScheduleRow row) {
+    private TransportSchedule convertToTransport(ScheduleRow row, UserRow user) {
         TransportSchedule t = new TransportSchedule();
 
         //t.start = row.date_from.toString();
@@ -122,7 +128,18 @@ public class RecordApi extends HttpServlet {
         //t.start = df.format(row.date_from);
         t.start = row.date_from.toString().replace(" ", "T");
 
-        t.type = row.user_id > 0 ? (row.user_id == 1 ? ScheduleType.SCH_BAN : ScheduleType.SCH_BUSY) : ScheduleType.SCH_FREE;
+        if(row.user_id == user.user_id) {
+            t.type = ScheduleType.SCH_REC;
+            t.r = row;
+        } else {
+            t.type = row.user_id == 0 ?
+                    ScheduleType.SCH_FREE :
+                    (
+                            row.user_id == 1 ?
+                                    ScheduleType.SCH_BAN :
+                                    ScheduleType.SCH_BUSY
+                    );
+        }
         t.duration = row.duration;
 
         return t;

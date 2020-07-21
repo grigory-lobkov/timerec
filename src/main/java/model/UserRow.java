@@ -38,5 +38,6 @@ public class UserRow {
         receiver.password = this.password;
         receiver.image_id = this.image_id;
         receiver.owner_id = this.owner_id;
+        receiver.tz_utc_offset = this.tz_utc_offset;
     }
 }
