@@ -69,7 +69,7 @@ public class ScheduleRecordApi extends HttpServlet {
             data = gson.fromJson(line, ScheduleRow.class);
             try {
                 ScheduleRow schedule = storageSchedule.select(data.schedule_id);
-                if(schedule.user_id == user.user_id) {
+                if(schedule != null && schedule.user_id == user.user_id) {
                     if(timeNow.compareTo(schedule.date_from) > 0) {
                         resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                         return;

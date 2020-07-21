@@ -71,13 +71,13 @@ public class ScheduleServiceApi extends HttpServlet {
         boolean done1 = false;
         UserRow user = SessionUtils.getSessionUser(req);
 
-        long service_id = ServiceApi.getServiceId(req);
+        //long service_id = ServiceApi.getServiceId(req);
 
         while ((line = rr.readLine()) != null) {
             data = gson.fromJson(line, ScheduleRow.class);
             try {
                 ScheduleRow schedule = storageSchedule.select(data.schedule_id);
-                if(data.service_id == schedule.service_id) {
+                if(schedule != null && data.service_id == schedule.service_id) {
                     UserRow client = null;
                     if(schedule.user_id > 0)
                         try {
