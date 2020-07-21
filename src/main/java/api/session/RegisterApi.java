@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import controller.UserController;
 import integration.Integrator;
+import model.TzRow;
 import model.UserRow;
 import storage.ITable;
 import storage.Passwords;
@@ -16,13 +17,37 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.List;
 
 @WebServlet(urlPatterns = "/api/register/*")
 public class RegisterApi extends HttpServlet {
 
 
     private ITable<UserRow> storageUser = StorageFactory.getUserInstance();
+    private ITable<TzRow> storageTz = StorageFactory.getTzInstance();
 
+    class Transport {
+        List<TzRow> tzs;
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        UserRow user = SessionUtils.getSessionUser(req);
+        Gson gson = (new GsonBuilder()).create();
+
+        try {
+            Transport data = new Transport();
+            // query storage
+            data.tzs = storageTz.select();
+
+            String jsonStr = gson.toJson(data);
+            resp.setContentType("application/json; charset=UTF-8");
+            resp.getWriter().println(jsonStr);
+        } catch (Exception e) {
+            resp.sendError(HttpServletResponse.SC_NO_CONTENT);
+            e.printStackTrace();
+        }
+    }
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

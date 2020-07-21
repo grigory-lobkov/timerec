@@ -49,23 +49,12 @@
               <input id="uEmail" class="form-control" type="text">
             </div>
           </div>
-          <div class="form-group" style="display:none">
+          <div class="form-group">
             <label class="col-lg-3 control-label">Time Zone:</label>
             <div class="col-lg-8">
               <div class="ui-select">
                 <input id="uTzId" class="form-control" type="hidden">
-                <select id="uTZ" class="form-control">
-                  <option value="UTC+2">(UTC +2) Kaliningrad</option>
-                  <option value="UTC+3" selected="selected">(UTC +3) Moscow</option>
-                  <option value="UTC+4">(UTC +4) Samara</option>
-                  <option value="UTC+5">(UTC +5) Yekaterinburg</option>
-                  <option value="UTC+6">(UTC +6) Omsk</option>
-                  <option value="UTC+7">(UTC +7) Krasnoyarsk, Novosibirsk</option>
-                  <option value="UTC+8">(UTC +8) Irkutsk</option>
-                  <option value="UTC+9">(UTC +9) Yakutsk, Chita</option>
-                  <option value="UTC+10">(UTC +10) Vladivostok</option>
-                  <option value="UTC+11">(UTC +11) Magadan, Sakhalinsk, Srednekolymsk</option>
-                  <option value="UTC+12">(UTC +12) Anadyr, Petropavlovsk-Kamchatsky</option>
+                <select id="uTz" class="form-control">
                 </select>
               </div>
             </div>
@@ -141,26 +130,56 @@ function checkData() {
 	return true;
 }
 
+function getData() {
+	var url = API_URL + "?_=" + (new Date()).getTime();
+	getAjaxJson({
+		url: url,
+		done: function( data ) {
+            fillTzSelect("uTz", data.tzs, 60*3);
+			$( ".container" ).show();
+		}
+	});
+}
+
+function fillTzSelect( selectId, options, selectedOffset ) {
+    var select = document.getElementById( selectId );
+    for( var i = 0; i < options.length; i++ ) {
+        var opt = options[i];
+        var el = document.createElement( "option" );
+        el.textContent = opt.name;
+        el.value = opt.tz_id;
+        el.selected = opt.utc_offset == selectedOffset ? "selected" : "";
+        select.appendChild( el );
+    }
+}
+
+function getTzSelectId( selectId ) {
+    var select = document.getElementById( selectId );
+    return select.options[ select.selectedIndex ].value;
+}
+
 function postData() {
 	if( !checkData() ) return false;
 	getAjaxJson({
 		method: "POST",
 		url: API_URL,
 		data: JSON.stringify({
-			name: $("#uName").val(),
-			email: $("#uEmail").val(),
-			password: $("#uPassword1").val(),
-			//image_id: $("#uImageId").val(),
-			//tz_id: $("#uTzId").val(),
+			name: $( "#uName" ).val(),
+			email: $( "#uEmail" ).val(),
+			password: $( "#uPassword1" ).val(),
+			//image_id: $( "#uImageId" ).val(),
+			tz_id: getTzSelectId( "uTz" ),
 		}),
 		done: function( data ) {
-			alertMessage( "Profile created successfully. You are logged in now!" );
+			alertMessage( "User registered successfully. You are logged in now!" );
             setTimeout( function(){
                window.location.href = "index.html";
             }, 3000 );
 		}
 	})
 }
+
+document.addEventListener( 'DOMContentLoaded', function(){ getData() } );
 </script>
 <!-- /CONTENT -->
 
