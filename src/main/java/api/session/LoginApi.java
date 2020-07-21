@@ -62,7 +62,7 @@ public class LoginApi extends HttpServlet {
                             resp.setStatus(HttpServletResponse.SC_CREATED);
                             SessionUtils.setResponceCookies(resp, dbUser.email, dbUser.password);
                             SessionUtils.createUserSession(req, dbUser);
-                            System.out.println("LoginApi logged in "+ dbUser.name+" ("+dbUser.email+")");
+                            if (debugLog) System.out.println("LoginApi logged in "+ dbUser.name+" ("+dbUser.email+")");
                         } else {
                             if (debugLog) System.out.println("LoginApi SC_FORBIDDEN");
                             resp.sendError(HttpServletResponse.SC_FORBIDDEN);

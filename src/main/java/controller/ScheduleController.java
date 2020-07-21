@@ -151,7 +151,7 @@ public class ScheduleController {
 
             Timestamp timeNow = new Timestamp(System.currentTimeMillis() - deltaSec * 1000);
             for (ScheduleRow schedule : scheduleList) {
-                System.out.println("timeNow="+timeNow+" schedule.date_from="+schedule.date_from);
+                //System.out.println("timeNow="+timeNow+" schedule.date_from="+schedule.date_from);
                 if (timeNow.compareTo(schedule.date_from) < 0)
                     schedule.is_passed = 0;
                 schedule.date_from = new Timestamp(schedule.date_from.getTime() + deltaSec * 1000); // to user timestamp
