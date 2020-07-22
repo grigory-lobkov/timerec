@@ -33,7 +33,7 @@ function getUrlVars() {
     return _GET;
 }
 
-function getMenu(cache=true) {
+function getMenu(cache) {
 /*	$.ajax({
 		method: "GET",
 		url: API_SERVER_URI + "menu",
@@ -44,6 +44,7 @@ function getMenu(cache=true) {
 	}).fail(function( jqXHR, textStatus ) {
 		alert( "Menu Get failed: " + textStatus );
 	});*/
+	if(!( cache )) cache = true;
 	var serviceId = getUrlVars()["service_id"];
 	var url = "/timerec/api/" + "menu" + (serviceId ? "?service_id=" + serviceId : "");
 	getAjaxJson({
@@ -107,7 +108,7 @@ function fillMenu(data) {
 	if( isService ) {
         var serviceId = getUrlVars()["service_id"];
         var serviceName = '(service list)';
-        if( ! ['service.html', 'repeat.html', 'schedule.html'].includes( page ) )
+        if( page != 'service.html' && page != 'repeat.html' && page != 'schedule.html' )
             page = 'service.html';
         var ss = data.services;
         for ( var i = 0, len = ss.length; i < len; i++ ) {
@@ -163,7 +164,8 @@ function fillMenu(data) {
 
 }
 
-function alertMessage(htmlText, htmlTitle="") {
+function alertMessage(htmlText, htmlTitle) {
+    if(!( htmlTitle )) htmlTitle="";
 	$('#alertMessage').html(
 		'<div class="alert alert-info alert-dismissable">'+
 		'<a class="panel-close close" data-dismiss="alert">×</a>'+

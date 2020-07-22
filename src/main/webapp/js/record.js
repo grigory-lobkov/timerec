@@ -236,8 +236,8 @@ function timeToSeconds(strTime, description) {
 }
 
 function timeFromSeconds(seconds) {
-	var h = Math.trunc(seconds / 60 / 60);
-    var m = Math.trunc(seconds / 60) - h * 60;
+	let h = (seconds / 60 / 60) >>> 0; // divide and truncate
+    let m = ((seconds / 60) >>> 0) - (h * 60);
     hh = ( h < 10 ? '0' : '' ) + h;
     mm = ( m < 10 ? '0' : '' ) + m;
     return hh + ':' + mm;
