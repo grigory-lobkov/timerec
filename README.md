@@ -1,4 +1,4 @@
-# TimeRec
+# Schedule Clients - Time Recorder - TimeRec
 
 Stores list of services and it's schedule. Allow clients to choose any time
 
@@ -28,4 +28,10 @@ To choose database, change `dbPool` variable to desirable implementation in [Sto
 
 ## Integration
 
-Can be integrated with Moodle, just copy Body tag content from [record.html](https://github.com/grigory-lobkov/timerec/blob/master/src/main/webapp/integration/moodle/record.html) and put it where you need on moodle page.
+Can be integrated with Moodle, just copy Body tag content from [record.html](https://github.com/grigory-lobkov/timerec/blob/master/src/main/webapp/integration/moodle/record.html) and put it where you need inside moodle page. Don't forget to put your url in `MOODLE_USER_PROFILE_URL` variable in [MoodleIntegrator.java](https://github.com/grigory-lobkov/timerec/blob/master/src/main/java/integration/impl/MoodleIntegrator.java).
+
+To disable integration, change `getInstance()` method in [Integrator.java](https://github.com/grigory-lobkov/timerec/blob/master/src/main/java/integration/Integrator.java) `instance = new DefaultIntegrator();`
+
+## Alerting
+
+- by Email in profile
