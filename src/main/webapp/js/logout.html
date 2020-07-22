@@ -33,16 +33,15 @@ function postData() {
 		url: API_URL
 	});
     $( ".container" ).show();
-	setTimeout( () => {
-	    //deleteCookie( 'user' );
-	    //deleteCookie( 'name' );
+	setTimeout( function () {
+	    //deleteCookie( 'JSESSIONID' );
 	    //deleteCookie( 'email' );
 	    //deleteCookie( 'password' );
 	    window.location.replace( "index.html" );
 	}, 1000);
 }
 //function deleteCookie( name ) {
-//    document.cookie = name + '=; Max-Age=-99999999;';
+//    document.cookie = name + '=; Max-Age=-99999999;expires=' + expiryDate.toUTCString();
 //}
 
 document.addEventListener( 'DOMContentLoaded', function(){ postData(); } );

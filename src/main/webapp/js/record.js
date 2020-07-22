@@ -5,7 +5,7 @@ var SCHEDULE_TIME = "";
 var DAYS = [];
 var DEL_SCHEDULE_ID = 0;
 
-const DAY_DATE_FORMAT = new Intl.DateTimeFormat(window.navigator.language, { weekday: 'long', month: 'long', day: 'numeric' });
+var DAY_DATE_FORMAT = new Intl.DateTimeFormat(window.navigator.language, { weekday: 'long', month: 'long', day: 'numeric' });
 var TIME_CLASS_BUSY = "btn btn-secondary";
 var TIME_CLASS_REC = "btn btn-warning";
 var TIME_CLASS_FREE = "btn btn-outline-secondary";
@@ -236,8 +236,8 @@ function timeToSeconds(strTime, description) {
 }
 
 function timeFromSeconds(seconds) {
-	let h = (seconds / 60 / 60) >>> 0; // divide and truncate
-    let m = ((seconds / 60) >>> 0) - (h * 60);
+	var h = (seconds / 60 / 60) >>> 0; // divide and truncate
+    var m = ((seconds / 60) >>> 0) - (h * 60);
     hh = ( h < 10 ? '0' : '' ) + h;
     mm = ( m < 10 ? '0' : '' ) + m;
     return hh + ':' + mm;

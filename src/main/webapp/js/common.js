@@ -230,7 +230,7 @@ function getAjaxJson( _ ) {
 
 function htmlEntities(str) {
     var buf = [];
-    let s = 0;
+    var s = 0;
     if(str)
         for (var i=str.length-1;i>=0;i--) {
             c = str[i].charCodeAt();
