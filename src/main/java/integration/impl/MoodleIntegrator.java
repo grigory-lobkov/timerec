@@ -11,7 +11,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 
@@ -25,7 +24,8 @@ import java.util.HashMap;
  */
 public class MoodleIntegrator implements IIntegrator {
 
-    HashMap<String, Integer> moodleTzs;
+    private String MOODLE_USER_PROFILE_URL = "http://lms.progwards.ru/moodle/user/edit.php";
+    private HashMap<String, Integer> moodleTzs;
     private ITable<TzRow> storageTz = StorageFactory.getTzInstance();
 
     /**
@@ -460,7 +460,7 @@ public class MoodleIntegrator implements IIntegrator {
     }
 
     public UserRow getUserBySessionCookie(String moodleSession) throws IOException {
-        URL url = new URL("http://lms.progwards.ru/moodle/user/edit.php");
+        URL url = new URL(MOODLE_USER_PROFILE_URL);
 
         HttpURLConnection con = (HttpURLConnection)url.openConnection();
         con.setDoOutput(true);
