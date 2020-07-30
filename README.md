@@ -35,3 +35,7 @@ To disable integration, change `getInstance()` method in [Integrator.java](https
 ## Alerting
 
 - by Email in profile
+
+## Help
+
+If you want for business relationship, write me by email grigorymail.at.mail.in.ru or call +7922122DATA
