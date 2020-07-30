@@ -101,13 +101,25 @@ var CALENDAR = {};
     //var initialLocaleCode = 'en';
     var initialLocaleCode = window.navigator.language;
     var calendarEl = document.getElementById('calendar');
+    var startList = new Date();
+    var endList = new Date();
+    endList.setDate(endList.getDate() + 8);
 
     CALENDAR = new FullCalendar.Calendar(calendarEl, {
       plugins: [ 'dayGrid', 'timeGrid', 'list', 'interaction' ],
       header: {
         left: 'prev,next today',
         center: 'title',
-        right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+        //right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek,list'
+        right: 'dayGridMonth,listWeek,listDay,list'
+      },
+      buttonText: {
+        listWeek: 'Week',
+        listDay: 'Day'
+      },
+      visibleRange: {
+        start: startList.toISOString().substr(0, 10),
+        end: endList.toISOString().substr(0, 10)
       },
       /*header: {
         center: 'addEventButton'
@@ -136,7 +148,7 @@ var CALENDAR = {};
 	  columnHeaderText: function(arg) { n=arg.toLocaleString(initialLocaleCode,{weekday: 'long'}); return n.charAt(0).toUpperCase() + n.slice(1) }, // Full week name
       weekNumberCalculation: 'ISO', // start day is Monday
 
-	  defaultView: 'listWeek', // default view is "Week"
+	  defaultView: 'list',
       //defaultDate: '2020-02-12',
       navLinks: true, // can click day/week names to navigate views
       editable: false,

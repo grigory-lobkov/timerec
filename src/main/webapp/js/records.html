@@ -98,19 +98,30 @@ SERVICE_ID = null;
     //var initialLocaleCode = 'en';
     var initialLocaleCode = window.navigator.language;
     var calendarEl = document.getElementById('calendar');
+    var startList = new Date();
+    startList.setDate(startList.getDate() - 1);
+    var endList = new Date();
+    endList.setDate(endList.getDate() + 8);
 
     var calendar = new FullCalendar.Calendar(calendarEl, {
       plugins: [ 'dayGrid', 'timeGrid', 'list', 'interaction' ],
       header: {
         left: 'prev,next',
         center: 'title',
-        right: 'dayGridMonth,listMonth'
+        right: 'listMonth,list'
+      },
+      buttonText: {
+        listMonth: 'Month'
+      },
+      visibleRange: {
+        start: startList.toISOString().substr(0, 10),
+        end: endList.toISOString().substr(0, 10)
       },
 	  locale: initialLocaleCode, // locale of texts
 	  //columnHeaderText: function(arg) { n=arg.toLocaleString(initialLocaleCode,{weekday: 'long'}); return n.charAt(0).toUpperCase() + n.slice(1) }, // Full week name
       weekNumberCalculation: 'ISO', // start day is Monday
 
-	  defaultView: 'listMonth', // default view is "Week"
+	  defaultView: 'list',
       navLinks: true, // can click day/week names to navigate views
       editable: false,
       eventLimit: true, // allow "more" link when too many events
