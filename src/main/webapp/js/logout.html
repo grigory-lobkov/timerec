@@ -20,7 +20,7 @@
 <div class="container" style="display:none">
     <div id="alertMessage"></div>
     <br><br><br>
-    You have logged out. You will be redirected to root now.
+    You have logged out.
     <br><br><br>
 </div>
 <script>
@@ -30,15 +30,18 @@ API_URL = "/timerec/api/" + "logout";
 function postData() {
 	getAjaxJson({
 	    method: 'POST',
-		url: API_URL
+		url: API_URL,
+		done: function( data ) {
+	        getMenu(false);
+		}
 	});
     $( ".container" ).show();
-	setTimeout( function () {
+	//setTimeout( function () {
 	    //deleteCookie( 'JSESSIONID' );
 	    //deleteCookie( 'email' );
 	    //deleteCookie( 'password' );
-	    window.location.replace( "index.html" );
-	}, 1000);
+	//    window.location.replace( "index.html" );
+	//}, 1000);
 }
 //function deleteCookie( name ) {
 //    document.cookie = name + '=; Max-Age=-99999999;expires=' + expiryDate.toUTCString();
