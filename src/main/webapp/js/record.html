@@ -33,7 +33,7 @@
                 <div id="alertMessage"></div>
 
                 <div class="form-group" id="servicePage" style="display:none">
-                    <h2>Choose service</h2>
+                    <h2 id="hService">Choose service</h2>
                     <hr>
                     <div id="serviceList">...</div>
                 </div>
@@ -42,7 +42,7 @@
                     <div class="row">
                         <h2>
                             <svg onClick="backToServices()" data-v-cf22f5d6="" data-v-02e405f8="" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" aria-labelledby="box" role="presentation"><title data-v-cf22f5d6="">back</title><g data-v-cf22f5d6="" fill="currentColor"><path data-v-02e405f8="" fill-rule="evenodd" clip-rule="evenodd" d="M17.815 6.962H3.747c-.003 0-.005-.005-.003-.005l5.307-5.1A1.078 1.078 0 1 0 7.555.301L.331 7.244a1.08 1.08 0 0 0 0 1.555l7.263 6.98a1.074 1.074 0 0 0 1.526-.029 1.08 1.08 0 0 0-.03-1.525l-5.306-5.1c-.003-.003 0-.005.002-.005H17.84a1.08 1.08 0 0 0 1.077-1.013c.037-.625-.476-1.145-1.101-1.145z" data-v-cf22f5d6=""></path></g></svg>
-                            Choose time
+                            <span id="hTime">Choose time</span>
                         </h2>
                         <hr>
                     </div>
@@ -52,10 +52,10 @@
                             <h3 id="serviceName"></h3>
                             <div id="serviceTime"></div>
                             <br>
-                            <div>Title</div>
+                            <div id="lTitle">Title</div>
                             <input id="uTitle" type="text" class="form-control" value="" />
                             <br>
-                            <div>Short description</div>
+                            <div id="lDescription">Short description</div>
                             <textarea id="uDescription" class="form-control" rows="5"></textarea>
                             <br>
                             <input id="serviceBtn" type="button" class="btn btn-primary" value="Check In" onclick="postData(); return false;">
@@ -81,7 +81,7 @@
             </div>
             <div class="modal-footer">
                 <button id="modalDelete" type="button" class="btn btn-outline-danger" onclick="deleteRecord()">Delete record</button>
-                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                <button id="modalClose" type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -91,7 +91,7 @@
 var API_URL = "/timerec/api/" + "record/";
 var API_DEL_URL = "/timerec/api/" + "schedule/records";
 
-document.addEventListener( 'DOMContentLoaded', function() { getServices(); } );
+document.addEventListener( 'DOMContentLoaded', function() { translateForm(); getServices(); } );
 
 </script>
 <!-- /CONTENT -->

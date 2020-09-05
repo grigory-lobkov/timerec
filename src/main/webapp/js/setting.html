@@ -19,7 +19,7 @@
 
 <!-- CONTENT -->
 <div class="container" style="display:none">
-    <h1>Edit Settings</h1>
+    <h1 id="header">Edit Settings</h1>
   	<hr>
 	<div class="row">
       <!-- left column -->
@@ -95,9 +95,9 @@
           <div class="form-group">
             <label class="col-md-2 control-label"></label>
             <div class="col-md-8">
-              <input type="button" class="btn btn-primary" value="Save Changes" onclick="postData(); return false;">
+              <input id="bSave" type="button" class="btn btn-primary" value="Save Changes" onclick="postData(); return false;">
               <span></span>
-              <input type="reset" class="btn btn-default" value="Cancel" onclick="fillTable(); return false;">
+              <input id="bCancel" type="reset" class="btn btn-default" value="Cancel" onclick="fillTable(); return false;">
             </div>
           </div>
         </form>
@@ -110,21 +110,59 @@ API_URL = "/timerec/api/" + "setting/";
 
 var SETTINGS = [];
 
+GRP_USAGE_LIMIT = 'Default usage limit';
+GRP_MAIL_ALERT = 'Mail Alert';
+GRP_TELEGRAM_ALERT = 'Telegram Alert'
+GRP_OTHERS = 'Other settings';
+MSG_SAVED = 'Settings saved successfully';
+
+function translateForm() {
+  if(USER_LANG == 'ru-RU') {
+    document.title = 'TimeRec: Общие настройки';
+    $('#header').text('Настройки');
+    $('#toRegister').text('Зарегистрироваться');
+    $('#bSave').prop('value', 'Сохранить изменения');
+    $('#bCancel').prop('value', 'Отменить');
+
+    GRP_USAGE_LIMIT = 'Лимит на все услуги';
+    DICT['All services usage limit per day']='Ежедневный';
+    DICT['All services usage limit per month']='Ежемесячный';
+    DICT['All services usage limit per week']='Еженедельный';
+    DICT['Client cannot take more than this count of services per day']='Клиент не может записаться более заданного количества раз в сутки';
+    DICT['Client cannot take more than this count of services per month']='Клиент не может записаться более заданного количества раз в месяц';
+    DICT['Client cannot take more than this count of services per week']='Клиент не может записаться более заданного количества раз в неделю';
+
+    GRP_MAIL_ALERT = 'Почтовые оповещения';
+    DICT['Alert Email From']='Почтовый адрес отправителя';
+    DICT['Alert Email password']='Пароль для авторизации';
+    DICT['Alert Email server name']='Имя сервера';
+    DICT['Alert Email user name']='Имя пользователя';
+    DICT['Email From address']='Пользователь сможет отправить ответ именно сюда';
+    DICT['Email password for authentication']='Пароль авторизации для почтового сервера';
+    DICT['Email server address']='Адрес почтового сервера';
+    DICT['Email user for authentication']='Имя пользователя авторизации на почтовом сервере';
+
+    GRP_TELEGRAM_ALERT = 'Оповещения Телеграм'
+    GRP_OTHERS = 'Прочие настройки';
+    MSG_SAVED = 'Настройки сохранены успешно';
+  }
+}
+
 function getSettingHtml( s ) {
   return '    <div class="form-group row">' +
-    '      <label class="col-lg-4 control-label">' + s.name + '</label>' +
+    '      <label class="col-lg-4 control-label">' + _(s.name) + '</label>' +
     '      <div class="col-lg-4">' +
     '        <textarea id="' + s.alias + '" class="form-control" rows="1">' + s.value + '</textarea>' +
     '      </div>' +
-    '      <small class="col-lg-4 control-label">' + (s.description ? s.description : '') + '</small>' +
+    '      <small class="col-lg-4 control-label">' + (s.description ? _(s.description) : '') + '</small>' +
     '    </div>';
 }
 
 function fillTable() {
-    var htmlU = "";
-    var htmlMA = "";
-    var htmlTA = "";
-    var html = "";
+    var htmlU = '';
+    var htmlMA = '';
+    var htmlTA = '';
+    var html = '';
     SETTINGS.forEach( function( s ){
         if( s.alias.substring(0,19) == 'ALL_SERVICES_CLIENT' )
             htmlU += getSettingHtml( s );
@@ -135,16 +173,16 @@ function fillTable() {
         else
             html += getSettingHtml( s );
     });
-    $( "#allSettings" ).html(
-        ( htmlU ? "<h3>Default usage limit</h3>" + htmlU : "" ) +
-        ( htmlMA ? "<h3>Mail Alert</h3>" + htmlMA : "" ) +
-        ( htmlTA ? "<h3>Telegram Alert</h3>" + htmlTA : "" ) +
-        ( html ? "<h3>Other settings</h3>" + html : "" )
+    $( '#allSettings' ).html(
+        ( htmlU ? '<h3>' + GRP_USAGE_LIMIT + '</h3>' + htmlU : '' ) +
+        ( htmlMA ? '<h3>' + GRP_MAIL_ALERT + '</h3>' + htmlMA : '' ) +
+        ( htmlTA ? '<h3>' + GRP_TELEGRAM_ALERT + '</h3>' + htmlTA : '' ) +
+        ( html ? '<h3>' + GRP_OTHERS + '</h3>' + html : '' )
     );
 }
 
 function getData() {
-	var url = API_URL + "?_=" + (new Date()).getTime();
+	var url = API_URL + '?_=' + (new Date()).getTime();
 	getAjaxJson({
 		url: url,
 		done: function( data ) {
@@ -175,13 +213,13 @@ function postData() {
 		    readTable()
 		),
 		done: function( data ) {
-			alertMessage( "Settings saved successfully" );
+			alertMessage( MSG_SAVED );
 		}
 	})
 }
 
 
-document.addEventListener( 'DOMContentLoaded', function(){ getData() } );
+document.addEventListener( 'DOMContentLoaded', function(){ translateForm(); getData() } );
 </script>
 <!-- /CONTENT -->
 

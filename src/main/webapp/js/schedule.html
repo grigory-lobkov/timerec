@@ -85,7 +85,7 @@ tr.fc-list-item:hover, a.fc-event:hover {
 <div class="container">
   <div id="alertMessage"></div>
   <form role="form" class="sSchedule">
-    <h1>Schedule of service</h1>
+    <h1 id="header">Schedule of service</h1>
   	<div id="calendar"></div>
   </form>
 </div>
@@ -96,7 +96,37 @@ SERVICE_ID = null;
 
 var CALENDAR = {};
 
-  document.addEventListener('DOMContentLoaded', function() {
+BTN_WEEK = 'Week';
+BTN_DAY = 'Day';
+MSG_CLIENT = 'Client';
+MSG_START = 'Start';
+MSG_END = 'End';
+MSG_DURATION = 'Duration';
+MSG_DELETE_CONFIRM = 'Are you sure want to delete this record?';
+MSG_DELETE_FAIL = 'Delete status is unknown. Please, try again later';
+MSG_DELETE_404 = 'Not found on server. Somebody deleted it.';
+
+function translateForm() {
+  if(USER_LANG == 'ru-RU') {
+	title='Расписание услуги';
+	document.title = 'TimeRec: '+title;
+    $('#header').text(title);
+	BTN_WEEK = 'Неделя';
+	BTN_DAY = 'День';
+	MSG_CLIENT = 'Клиент';
+	MSG_START = 'Начало';
+	MSG_END = 'Конец';
+	MSG_DURATION = 'Длительность';
+	MSG_DELETE_CONFIRM = 'Вы действительно хотите удалить эту запись?';
+	MSG_DELETE_FAIL = 'Статус удаления записи неизвестен. Пожалуйста, попробуйте позже';
+	MSG_DELETE_404 = 'Запись не найдена на сервере. Кто-то её уже удалил.';
+    $('#modalDelete').text('Удалить запись');
+    $('#modalClose').text('Закрыть');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+	translateForm();
     SERVICE_ID = getUrlVars()["service_id"];
     //var initialLocaleCode = 'en';
     var initialLocaleCode = window.navigator.language;
@@ -114,8 +144,8 @@ var CALENDAR = {};
         right: 'dayGridMonth,listWeek,listDay,list'
       },
       buttonText: {
-        listWeek: 'Week',
-        listDay: 'Day'
+        listWeek: BTN_WEEK,
+        listDay: BTN_DAY
       },
       visibleRange: {
         start: startList.toISOString().substr(0, 10),
@@ -177,10 +207,10 @@ var CALENDAR = {};
 		tEnd = ( "" + e.end ).split( ' GMT' )[0];
 
 		bdy = htmlEntities( info.event.extendedProps.description ) + '<br>' +
-			'<small><br><b>Client</b>: ' + htmlEntities( ep.user_name ) +
-			'<br><b>Start</b>: ' + tStart +
-			'<br><b>End</b>: ' + tEnd +
-			'<br><b>Duration</b>: ' + ep.duration + ' minutes' +
+			'<small><br><b>' + MSG_CLIENT + '</b>: ' + htmlEntities( ep.user_name ) +
+			'<br><b>' + MSG_START + '</b>: ' + tStart +
+			'<br><b>' + MSG_END + '</b>: ' + tEnd +
+			'<br><b>' + MSG_DURATION + '</b>: ' + ep.duration + ' minutes' +
 			'</small>';
 		modal.find( '.modal-title' ).text( ep.title );
 		modal.find( '.modal-body' ).html( bdy );
@@ -197,56 +227,13 @@ var CALENDAR = {};
 
       events: API_URL + SERVICE_ID,
       eventBorderColor: "#fff",
-
-      /*events: [
-        {
-          groupId: 999,
-          title: 'Repeating Event',
-          start: '2020-02-09T16:00:00'
-        },
-        {
-          groupId: 999,
-          title: 'Repeating Event',
-          start: '2020-02-16T16:00:00'
-        },
-        {
-          title: 'Meeting',
-          start: '2020-02-12T10:30:00',
-          end: '2020-02-12T12:30:00'
-        },
-        {
-          title: 'Lunch',
-          start: '2020-02-12T12:00:00'
-        },
-        {
-          title: 'Meeting',
-          start: '2020-02-12T14:30:00'
-        },
-        {
-          title: 'Happy Hour',
-          start: '2020-02-12T17:30:00'
-        },
-        {
-          title: 'Dinner',
-          start: '2020-02-12T20:00:00'
-        },
-        {
-          title: 'Birthday Party',
-          start: '2020-02-13T07:00:00'
-        },
-        {
-          title: 'Click for Google',
-          url: 'http://google.com/',
-          start: '2020-02-28'
-        }
-      ]*/
     });
 
     CALENDAR.render();
-  });
+});
 
 function deleteRecord() {
-	if(confirm('Are you sure want to delete this record?')) {
+	if(confirm(MSG_DELETE_CONFIRM)) {
 		var ev_tmp = modalEvent;
 		getAjaxJson({
 			method: "DELETE",
@@ -257,12 +244,12 @@ function deleteRecord() {
 					ev_tmp.remove();
 					CALENDAR.addEvent( data );
 				} else {
-			    	alertMessage( "Delete status is unknown. Please, try again later", JSON.stringify( data ) );
+			    	alertMessage( MSG_DELETE_FAIL, JSON.stringify( data ) );
 				}
 			},
 			statusCode: {
 				404: function() {
-					alertMessage( "Not found on server. Somebody deleted it." );
+					alertMessage( MSG_DELETE_404 );
 					//ev_tmp.remove();
 					ev_tmp.background = "";
 				}
@@ -290,7 +277,7 @@ function deleteRecord() {
 			</div>
 			<div class="modal-footer">
 				<button id="modalDelete" type="button" class="btn btn-outline-danger" onclick="deleteRecord()">Delete record</button>
-				<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+				<button id="modalClose" type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
 			</div>
 		</div>
 	</div>

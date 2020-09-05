@@ -5,19 +5,40 @@
 
 _GET = null;
 SERVICE_ID = null;
-/*
-AJAX_ERRSTATUS_CODE_PRC =
-	{
-		401: function() {
-			alert("Sorry, you have no access for this action");
-			//window.location.replace("login.html");
-		}
-	};
-AJAX_FAIL_PRC =
-	function(jqXHR, textStatus) {
-		alertMessage( "Request failed: " + textStatus );
-	};
-*/
+USER_LANG = navigator.language || navigator.userLanguage;
+
+_MSG_SERVICE_LIST = '(service list)';
+_MSG_NO_ACCESS = 'Sorry, you have no access for this action';
+_MSG_REQUEST_FAILED = 'Request failed: ';
+_MSG_MENU_GET_FAILED = 'Menu Get failed: ';
+
+if (window.DICT === undefined) {
+    window.DICT = [];
+}
+if(USER_LANG == 'ru-RU') {
+    DICT['Log in']='Вход';
+    DICT['Log out']='Выход';
+    DICT['Profile']='Профиль';
+    DICT['Login']='Вход';
+    DICT['New service']='Новая услуга';
+    DICT['Service']='Услуга';
+    DICT['Repeat']='Повторение';
+    DICT['Schedule']='Расписание';
+    DICT['Register']='Регистрация';
+    DICT['Settings']='Настройки';
+    DICT['Record']='Запись';
+    DICT['Record list']='Список записей';
+    _MSG_SERVICE_LIST = '(список услуг)';
+    _MSG_NO_ACCESS = 'Извините, у вас не хватает прав на это действие';
+    _MSG_REQUEST_FAILED = 'Неудачный запрос: ';
+    _MSG_MENU_GET_FAILED = 'Ошибка получения меню: ';
+}
+
+function _(s) {
+    r = DICT[s];
+    if(r) return r;
+	return s;
+}
 
 function getUrlVars() {
 	if(_GET == null) {
@@ -54,7 +75,7 @@ function getMenu(cache) {
 			fillMenu(data);
 		},
 		fail: function( jqXHR, textStatus ) {
-			alert( "Menu Get failed: " + textStatus );
+			alert( _MSG_MENU_GET_FAILED + textStatus );
 		}
 	});
 }
@@ -63,9 +84,9 @@ function fillMenu(data) {
 	// for service menu
 	function addMenuElement( name, page, curPage ) {
 		if( curPage == page ) {
-			return '<li class="nav-item active"><a class="nav-link" href="'+page+'">'+name+' <span class="sr-only">(current)</span></a></li>';
+			return '<li class="nav-item active"><a class="nav-link" href="'+page+'">'+_(name)+' <span class="sr-only">(current)</span></a></li>';
 		} else {
-			return '<li class="nav-item"><a class="nav-link" href="'+page+'">'+name+'</a></li>';
+			return '<li class="nav-item"><a class="nav-link" href="'+page+'">'+_(name)+'</a></li>';
 		}
 	}
 
@@ -78,10 +99,10 @@ function fillMenu(data) {
 			data.user.name+
 			'</a>'+
 			'<div class="dropdown-menu" aria-labelledby="navbarDropdownU">'+
-			'<a class="dropdown-item'+(isUser?' disabled':'')+'" href="login.html">Log in</a>'+
-			'<a class="dropdown-item'+(!isUser?' disabled':'')+'" href="profile.html">Profile</a>'+
+			'<a class="dropdown-item'+(isUser?' disabled':'')+'" href="login.html">'+_('Log in')+'</a>'+
+			'<a class="dropdown-item'+(!isUser?' disabled':'')+'" href="profile.html">'+_('Profile')+'</a>'+
 			'<div class="dropdown-divider"></div>'+
-			'<a class="dropdown-item'+(!isUser?' disabled':'')+'" href="logout.html">Log out</a>'+
+			'<a class="dropdown-item'+(!isUser?' disabled':'')+'" href="logout.html">'+_('Log out')+'</a>'+
 			'</div>'+
 		'</li>';
 
@@ -107,16 +128,16 @@ function fillMenu(data) {
     var page = page.split("?").shift();
 	if( isService ) {
         var serviceId = getUrlVars()["service_id"];
-        var serviceName = '(service list)';
+        var serviceName = _MSG_SERVICE_LIST;
         if( page != 'service.html' && page != 'repeat.html' && page != 'schedule.html' )
             page = 'service.html';
         var ss = data.services;
         for ( var i = 0, len = ss.length; i < len; i++ ) {
             if( serviceId == ss[i].service_id ) {
                 serviceName = ss[i].name;
-                sMenu += '<a class="dropdown-item active" href="'+page+'?service_id='+ss[i].service_id+'">'+ss[i].name+' <span class="sr-only">(current)</span></a>';
+                sMenu += '<a class="dropdown-item active" href="'+page+'?service_id='+ss[i].service_id+'">'+_(ss[i].name)+' <span class="sr-only">(current)</span></a>';
             } else {
-                sMenu += '<a class="dropdown-item" href="'+page+'?service_id='+ss[i].service_id+'">'+ss[i].name+'</a>';
+                sMenu += '<a class="dropdown-item" href="'+page+'?service_id='+ss[i].service_id+'">'+_(ss[i].name)+'</a>';
                 if( serviceId == null ) serviceId = ss[i].service_id;
             }
         }
@@ -175,7 +196,7 @@ function alertMessage(htmlText, htmlTitle) {
 	);
 }
 function alertMessageHide() {
-	$( '#alertMessage' ).text( "" );
+	$( '#alertMessage' ).text( '' );
 }
 
 function getCookie( name ) {
@@ -202,30 +223,29 @@ function mergeObjects(obj1,obj2){
     return obj3;
 }
 
-function getAjaxJson( _ ) {
+function getAjaxJson( q ) {
 	alertMessageHide();
 	return $.ajax({
-		method: _.method === undefined ? 'GET' : _.method,
-		url: _.url,
+		method: q.method === undefined ? 'GET' : q.method,
+		url: q.url,
 		cache: false,
-		dataType: "json",
-		data: _.data,
+		dataType: 'json',
+		data: q.data,
 		statusCode: mergeObjects( {
                 403: function() {
-                    msg = "Sorry, you have no access for this action";
-                    alertMessage( msg );
-                    alert( msg );
-                    if( getCookie( "password") == null )
-                        window.location.href = "login.html";
+                    alertMessage( _MSG_NO_ACCESS );
+                    alert( _MSG_NO_ACCESS );
+                    if( getCookie( 'password' ) == null )
+                        window.location.href = 'login.html';
                 }
-			}, _.statusCode )
+			}, q.statusCode )
 		,
 		timeout: 5000, // timeout, milliseconds
 	})
-		.done( _.done === undefined ? function() {} : _.done )
-		.fail( _.fail === undefined ? function( jqXHR, textStatus ) {
-			alertMessage( _.url, "Request failed: " + textStatus );
-		} : _.fail );
+		.done( q.done === undefined ? function() {} : q.done )
+		.fail( q.fail === undefined ? function( jqXHR, textStatus ) {
+			alertMessage( q.url, _MSG_REQUEST_FAILED + textStatus );
+		} : q.fail );
 }
 
 function htmlEntities(str) {

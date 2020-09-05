@@ -245,11 +245,11 @@ class Updater {
                 "INSERT INTO setting (setting_id, alias, name, description, value)" +
                         "SELECT " + preSeqNextval + "seq_setting_id" + postSeqNextval + " setting_id, alias, name, description, value FROM (" +
                         "  SELECT 'ALL_SERVICES_CLIENT_LIMIT_DAILY' as alias, '" + CLIENT_LIMIT_DAILY + "' as value," +
-                        "         'All services usage limit per day' as name, 'Client cannot take more than this count of services per day.' as description " + fromDual + " UNION ALL" +
+                        "         'All services usage limit per day' as name, 'Client cannot take more than this count of services per day' as description " + fromDual + " UNION ALL" +
                         "  SELECT 'ALL_SERVICES_CLIENT_LIMIT_WEEKLY', '" + CLIENT_LIMIT_WEEKLY + "'," +
-                        "         'All services usage limit per week', 'Client cannot take more than this count of services per week.' " + fromDual + " UNION ALL" +
+                        "         'All services usage limit per week', 'Client cannot take more than this count of services per week' " + fromDual + " UNION ALL" +
                         "  SELECT 'ALL_SERVICES_CLIENT_LIMIT_MONTHLY', '" + CLIENT_LIMIT_MONTHLY + "'," +
-                        "         'All services usage limit per month', 'Client cannot take more than this count of services per month.' " + fromDual + "" +
+                        "         'All services usage limit per month', 'Client cannot take more than this count of services per month' " + fromDual + "" +
                         ")x WHERE (alias) NOT IN (SELECT alias FROM setting)");
     }
 

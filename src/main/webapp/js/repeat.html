@@ -18,12 +18,12 @@
 
 <!-- CONTENT -->
 <style>
-.container .row input { color: black; }
+.container .row input[type="text"] { color: black; }
 .container .row input::placeholder { color: gray; }
 </style>
 <div class="container" style="display:none">
   <form role="form" class="sRepeat">
-    <h1>Repeat of service</h1>
+    <h1 id="hMain">Repeat of service</h1>
   	<hr>
 	<div class="row">
       <!-- left column -->
@@ -33,10 +33,10 @@
       <div class="col-md-11">
         <div id="alertMessage"></div>
 		
-		<h3>Day of week</h3>
+		<h3 id="hDOW">Day of week</h3>
 
         <div class="row">
-          <label class="col-lg-2 d-flex p-2 control-label">Monday</label>
+          <label id="ld1" class="col-lg-2 d-flex p-2 control-label">Monday</label>
           <div class="col-lg-2">
             <input id="day1from" class="form-control" type="text" placeholder="9:00">
           </div>
@@ -44,14 +44,14 @@
           <div class="col-lg-2">
             <input id="day1to" class="form-control" type="text" placeholder="18:00">
           </div>
-          <label class="col-lg-1 d-flex p-2">duration</label>
+          <label class="col-lg-1 d-flex p-2 DUR">duration</label>
           <div class="col-lg-2">
             <input id="day1duration" class="form-control" type="text" placeholder="">
           </div>
         </div>
 		
         <div class="row">
-          <label class="col-lg-2 d-flex p-2 control-label">Tuesday</label>
+          <label id="ld2" class="col-lg-2 d-flex p-2 control-label">Tuesday</label>
           <div class="col-lg-2">
             <input id="day2from" class="form-control" type="text" placeholder="9:00">
           </div>
@@ -59,14 +59,14 @@
           <div class="col-lg-2">
             <input id="day2to" class="form-control" type="text" placeholder="18:00">
           </div>
-          <label class="col-lg-1 d-flex p-2">duration</label>
+          <label class="col-lg-1 d-flex p-2 DUR">duration</label>
           <div class="col-lg-2">
             <input id="day2duration" class="form-control" type="text" placeholder="">
           </div>
         </div>
 		
         <div class="row">
-          <label class="col-lg-2 d-flex p-2 control-label">Wednesday</label>
+          <label id="ld3" class="col-lg-2 d-flex p-2 control-label">Wednesday</label>
           <div class="col-lg-2">
             <input id="day3from" class="form-control" type="text" placeholder="9:00">
           </div>
@@ -74,14 +74,14 @@
           <div class="col-lg-2">
             <input id="day3to" class="form-control" type="text" placeholder="18:00">
           </div>
-          <label class="col-lg-1 d-flex p-2">duration</label>
+          <label class="col-lg-1 d-flex p-2 DUR">duration</label>
           <div class="col-lg-2">
             <input id="day3duration" class="form-control" type="text" placeholder="">
           </div>
         </div>
 		
         <div class="row">
-          <label class="col-lg-2 d-flex p-2 control-label">Thursday</label>
+          <label id="ld4" class="col-lg-2 d-flex p-2 control-label">Thursday</label>
           <div class="col-lg-2">
             <input id="day4from" class="form-control" type="text" placeholder="9:00">
           </div>
@@ -89,14 +89,14 @@
           <div class="col-lg-2">
             <input id="day4to" class="form-control" type="text" placeholder="18:00">
           </div>
-          <label class="col-lg-1 d-flex p-2">duration</label>
+          <label class="col-lg-1 d-flex p-2 DUR">duration</label>
           <div class="col-lg-2">
             <input id="day4duration" class="form-control" type="text" placeholder="">
           </div>
         </div>
 		
         <div class="row">
-          <label class="col-lg-2 d-flex p-2 control-label">Friday</label>
+          <label id="ld5" class="col-lg-2 d-flex p-2 control-label">Friday</label>
           <div class="col-lg-2">
             <input id="day5from" class="form-control" type="text" placeholder="9:00">
           </div>
@@ -104,14 +104,14 @@
           <div class="col-lg-2">
             <input id="day5to" class="form-control" type="text" placeholder="18:00">
           </div>
-          <label class="col-lg-1 d-flex p-2">duration</label>
+          <label class="col-lg-1 d-flex p-2 DUR">duration</label>
           <div class="col-lg-2">
             <input id="day5duration" class="form-control" type="text" placeholder="">
           </div>
         </div>
 		
         <div class="row">
-          <label class="col-lg-2 d-flex p-2 control-label">Saturday</label>
+          <label id="ld6" class="col-lg-2 d-flex p-2 control-label">Saturday</label>
           <div class="col-lg-2">
             <input id="day6from" class="form-control" type="text" placeholder="9:00">
           </div>
@@ -119,14 +119,14 @@
           <div class="col-lg-2">
             <input id="day6to" class="form-control" type="text" placeholder="18:00">
           </div>
-          <label class="col-lg-1 d-flex p-2">duration</label>
+          <label class="col-lg-1 d-flex p-2 DUR">duration</label>
           <div class="col-lg-2">
             <input id="day6duration" class="form-control" type="text" placeholder="">
           </div>
         </div>
 		
         <div class="row">
-          <label class="col-lg-2 d-flex p-2">Sunday</label>
+          <label id="ld7" class="col-lg-2 d-flex p-2">Sunday</label>
           <div class="col-lg-2">
             <input id="day7from" class="form-control" type="text" placeholder="9:00">
           </div>
@@ -134,7 +134,7 @@
           <div class="col-lg-2">
             <input id="day7to" class="form-control" type="text" placeholder="18:00">
           </div>
-          <label class="col-lg-1 d-flex p-2">duration</label>
+          <label class="col-lg-1 d-flex p-2 DUR">duration</label>
           <div class="col-lg-2">
             <input id="day7duration" class="form-control" type="text" placeholder="">
           </div>
@@ -144,9 +144,9 @@
 		  <label class="col-lg-5 control-label"></label>
 		  <div class="col-lg-8">
 			<span></span>
-            <input type="button" class="btn btn-primary" value="Save Changes" onclick="postData(); return false;">
+            <input id="bSave" type="button" class="btn btn-primary" value="Save Changes" onclick="postData(); return false;">
             <span></span>
-            <input type="reset" class="btn btn-default" value="Cancel" onclick="getData(); return false;">
+            <input id="bCancel" type="reset" class="btn btn-default" value="Cancel" onclick="getData(); return false;">
 		  </div>
 		</div>
       </div>
@@ -159,7 +159,8 @@ API_URL = "/timerec/api/" + "repeat/service/";
 SERVICE_ID = null;
 DEF_DURATION = 30;
 
-/*DOWS[1] = 'Monday';
+var DOWS = [];
+DOWS[1] = 'Monday';
 DOWS[2] = 'Tuesday';
 DOWS[3] = 'Wednesday';
 DOWS[4] = 'Thursday';
@@ -167,7 +168,54 @@ DOWS[5] = 'Friday';
 DOWS[6] = 'Saturday';
 DOWS[7] = 'Sunday';
 
-ROW_PATTERN =
+MSG_NO_PARAM = 'Parameter service_id is not set';
+MSG_DAY_TIME_ERR_FROM = ' FROM time';
+MSG_DAY_TIME_ERR_TO = ' TO time';
+MSG_FROM_GREATER_TO = ', FROM time must be less than TO time';
+MSG_DURATION_NOT_NUM = ', duration must be numeric';
+MSG_DURATION_BIG = ', duration(min) must be less than 1 day';
+MSG_WRONG_FORMAT = 'must be HH:MM';
+MSG_WRONG_HOURS = 'hours must be between 0 and 24';
+MSG_WRONG_MINUTES = 'minutes must be between 0 and 59';
+MSG_WRONG_H24 = 'when hours = 24, minutes must be = 0';
+MSG_SAVED = 'Repeats saved successfully';
+
+function translateForm() {
+  if(USER_LANG == 'ru-RU') {
+    DOWS[1] = 'Понедельник';
+    DOWS[2] = 'Вторник';
+    DOWS[3] = 'Среда';
+    DOWS[4] = 'Четверг';
+    DOWS[5] = 'Пятница';
+    DOWS[6] = 'Суббота';
+    DOWS[7] = 'Воскресенье';
+    title = 'Повтор услуги';
+    document.title = 'TimeRec: '+title;
+    $('#hMain').text(title);
+    $('#hDOW').text('Дни недели');
+    $('#bSave').prop('value', 'Сохранить изменения');
+    $('#bCancel').prop('value', 'Отменить');
+    $('.DUR').each(function() {
+      $( this ).text('длительность');
+    });
+    MSG_NO_PARAM = 'Параметр service_id не установлен';
+    MSG_DAY_TIME_ERR_FROM = ' время ОТ';
+    MSG_DAY_TIME_ERR_TO = ' время ДО';
+    MSG_FROM_GREATER_TO = ', время ОТ должно быть меньше, чем время ДО';
+    MSG_DURATION_NOT_NUM = ', длительность должна быть числом';
+    MSG_DURATION_BIG = ', длительность(мин) должна быть меньше 1 дня';
+    MSG_WRONG_FORMAT = 'должно быть HH:MM';
+    MSG_WRONG_HOURS = 'часы должны быть в интервале от 0 до 24';
+    MSG_WRONG_MINUTES = 'минуты должны быть в интервале от 0 до 59';
+    MSG_WRONG_H24 = 'когда часы указаны 24, минуты должны быть равны 0';
+    MSG_SAVED = 'Повторы сохранены успешно';
+  }
+  for (i = 1; i <= 7; i++) {
+    $('#ld' + i).text(DOWS[i]);
+  }
+}
+
+/*ROW_PATTERN =
  '   <div class="row">  '  +
  '     <label class="col-lg-2 d-flex p-2">{name}:</label>  '  +
  '     <div class="col-lg-2">  '  +
@@ -233,7 +281,7 @@ function readTable() {
 function getData() {
 	SERVICE_ID = getUrlVars()["service_id"];
 	if( SERVICE_ID == null ) {
-		errorText = "Parameter service_id is not set";
+		errorText = MSG_NO_PARAM;
 		$( ".container" ).html( '<br><br><h4>' + errorText + '</h4>' );
 		alert( errorText );
 		$( ".container" ).show();
@@ -258,19 +306,19 @@ function checkData() {
     for (i = 1; i <= 7; i++) {
         f = $( "#day" + i + "from" ).val();
         t = $( "#day" + i + "to" ).val();
-        fs = timeToSeconds( f, "Day " + i + " FROM time" );
-        ts = timeToSeconds( t, "Day " + i + " TO time" );
+        fs = timeToSeconds( f, DOWS[i] + MSG_DAY_TIME_ERR_FROM );
+        ts = timeToSeconds( t, DOWS[i] + MSG_DAY_TIME_ERR_TO );
         if( fs >= ts && f !== '' && t != '' ) {
-            alertMessage( "''Day " + i + "'' FROM time must be less than TO time" );
+            alertMessage( "''" + DOWS[i] + "''" + MSG_FROM_GREATER_TO );
             return false;
         }
         d = $( "#day" + i + "duration" ).val();
         if( !( 0 + d > -1 ) ) {
-            alertMessage( "''Day " + i + " duration'' must be numeric" );
+            alertMessage( "''" + DOWS[i] + "''" + MSG_DURATION_NOT_NUM );
             return false;
         }
         if( d >= 60 * 24 ) {
-            alertMessage( "''Day " + i + " duration'' must be less than 1 day" );
+            alertMessage( "''" + DOWS[i] + "''" + MSG_DURATION_BIG );
             return false;
         }
     }
@@ -282,21 +330,21 @@ function timeToSeconds(strTime, description) {
 	var regex = /(\d{1,2}):(\d{1,2})/;
 	var match;
     if ((match = regex.exec(strTime)) === null) {
-		alertMessage( "''" + description + "'' must be HH:MM" );
+		alertMessage( "''" + description + "'' " + MSG_WRONG_FORMAT );
         throw "checkIsTime: Time is bad!";
     }
     var h = +match[1];
     var m = +match[2];
     if( h < 0 || h > 24 ) {
-		alertMessage( "''" + description + "'' hours must be between 0 and 24" );
+		alertMessage( "''" + description + "'' " + MSG_WRONG_HOURS );
         throw "checkIsTime: Hours is bad!";
     }
     if( m < 0 || m > 59 ) {
-		alertMessage( "''" + description + "'' minutes must be between 0 and 59" );
+		alertMessage( "''" + description + "'' " + MSG_WRONG_MINUTES );
         throw "checkIsTime: Minutes is bad!";
     }
     if( h == 24 && m != 0 ) {
-		alertMessage( "''" + description + "'' when hours = 24, minutes must be = 0" );
+		alertMessage( "''" + description + "'' " + MSG_WRONG_H24 );
         throw "checkIsTime: Night is bad!";
     }
     var seconds = h * 60 * 60 + m * 60;
@@ -322,12 +370,12 @@ function postData() {
 		    readTable()
 		),
 		done: function( data ) {
-			alertMessage( "Service saved successfully" );
+			alertMessage( MSG_SAVED );
 		}
 	})
 }
 
-document.addEventListener( 'DOMContentLoaded', function(){ getData() } );
+document.addEventListener( 'DOMContentLoaded', function(){ translateForm(); getData() } );
 </script>
 <!-- /CONTENT -->
 

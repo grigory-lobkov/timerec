@@ -18,7 +18,7 @@
 
 <!-- CONTENT -->
 <div class="container">
-    <h1>Registration</h1>
+    <h1 id="hMain">Registration</h1>
   	<hr>
 	<div class="row">
       <!-- left column -->
@@ -34,48 +34,47 @@
       <!-- edit form column -->
       <div class="col-md-9 personal-info">
         <div id="alertMessage"></div>
-        <h3>Personal info</h3>
+        <h3 id="hPersonal">Personal info</h3>
 
         <form class="form-horizontal" role="form">
           <div class="form-group">
-            <label class="col-lg-3 control-label">Name:</label>
+            <label class="col-lg-8 control-label" id="lName">Name:</label>
             <div class="col-lg-8">
               <input id="uName" class="form-control" type="text">
             </div>
           </div>
           <div class="form-group">
-            <label class="col-lg-3 control-label">Email:</label>
+            <label class="col-lg-8 control-label" id="lEmail">Email:</label>
             <div class="col-lg-8">
               <input id="uEmail" class="form-control" type="text">
             </div>
           </div>
           <div class="form-group">
-            <label class="col-lg-3 control-label">Time Zone:</label>
+            <label class="col-lg-8 control-label" id="lTZ">Time Zone:</label>
             <div class="col-lg-8">
               <div class="ui-select">
                 <input id="uTzId" class="form-control" type="hidden">
-                <select id="uTz" class="form-control">
-                </select>
+                <select id="uTz" class="form-control"></select>
               </div>
             </div>
           </div>
           <div class="form-group">
-            <label class="col-md-3 control-label">Password:</label>
+            <label class="col-md-8 control-label" id="lPass1">Password:</label>
             <div class="col-md-8">
               <input id="uPassword1" class="form-control" type="password">
             </div>
           </div>
           <div class="form-group">
-            <label class="col-md-3 control-label">Confirm password:</label>
+            <label class="col-md-8 control-label" id="lPass2">Confirm password:</label>
             <div class="col-md-8">
               <input id="uPassword2" class="form-control" type="password">
             </div>
           </div>
           <div class="form-group">
             <div class="col-md-8">
-              <input type="button" class="btn btn-primary" value="Register" onclick="postData(); return false;">
+              <input type="button" id="bRegister" class="btn btn-primary" value="Register" onclick="postData(); return false;">
               <span></span>
-              <input type="reset" class="btn btn-default" value="Cancel" onclick="goLogin(); return false;">
+              <input type="reset" id="bCancel" class="btn btn-default" value="Cancel" onclick="goLogin(); return false;">
             </div>
           </div>
         </form>
@@ -85,6 +84,36 @@
 <script>
 
 API_URL = "/timerec/api/" + "register/";
+
+ERR_NAME_NOT_SET = "''Name'' must be set";
+ERR_NAME_SHORT = "Minimum ''Name'' length is 3 symbols";
+ERR_PASS_NOT_SET = "''Password'' must be set";
+ERR_PASS_SHORT = "Minimum ''Password'' length is 6 symbols";
+ERR_PASS_NOT_EQUAL = "''Passwords'' must be equal";
+ERR_EMAIL_BAD = "''Email'' is not valid";
+MSG_REGISTERED_LOGGED = "User registered successfully. You are logged in now!";
+
+function translateForm() {
+  if(USER_LANG == 'ru-RU') {
+    document.title = 'TimeRec: Регистрация нового пользователя';
+    $('#hMain').text('Регистрация');
+    $('#hPersonal').text('Личные данные');
+    $('#lName').text('Имя');
+    $('#lEmail').text('Адрес электронной почты');
+    $('#lTZ').text('Часовой пояс');
+    $('#lPass1').text('Пароль');
+    $('#lPass2').text('Повтор пароля');
+    $('#bRegister').prop('value', 'Регистрация');
+    $('#bCancel').prop('value', 'Отмена');
+    ERR_NAME_NOT_SET = "''Имя'' должно быть задано";
+    ERR_NAME_SHORT = "Минимальная длина поля ''Имя'' - 3 буквы";
+    ERR_PASS_NOT_SET = "''Пароль'' должен быть задан";
+    ERR_PASS_SHORT = "Минимальная длина поля ''Пароль'' - 6 символов";
+    ERR_PASS_NOT_EQUAL = "Пароли должны совпадать";
+    ERR_EMAIL_BAD = "''Адрес электронной почты'' задан не верно";
+    MSG_REGISTERED_LOGGED = "Пользователь зарегистрирован успешно. Вход выполнен.";
+  }
+}
 
 function validateEmail(email) {
   var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -103,27 +132,27 @@ function checkData() {
 	pas2 = $( "#uPassword2" ).val();
 
 	if( !( name ) ) {
-		alertMessage( "''Name'' must be set" );
+		alertMessage( ERR_NAME_NOT_SET );
 		return false;
 	}
-	if( name.length < 3 ) {
-		alertMessage( "Minimum ''Name'' length is 3 symbols" );
+	if( $.trim(name).length < 3 ) {
+		alertMessage( ERR_NAME_SHORT );
 		return false;
 	}
 	if( !( pas1 ) ) {
-		alertMessage( "''Password'' must be set" );
+		alertMessage( ERR_PASS_NOT_SET );
 		return false;
 	}
-	if( pas1.length < 6 ) {
-		alertMessage( "Minimum ''Password'' length is 6 symbols" );
+	if( $.trim(pas1).length < 6 ) {
+		alertMessage( ERR_PASS_SHORT );
 		return false;
 	}
 	if( !( pas1 == pas2 ) ) {
-		alertMessage( "''Passwords'' must be equal" );
+		alertMessage( ERR_PASS_NOT_EQUAL );
 		return false;
 	}
 	if ( !validateEmail( email ) ) {
-		alertMessage( "''Email'' is not valid" );
+		alertMessage( ERR_EMAIL_BAD );
 		return false;
 	}
 
@@ -171,7 +200,7 @@ function postData() {
 			tz_id: getTzSelectId( "uTz" ),
 		}),
 		done: function( data ) {
-			alertMessage( "User registered successfully. You are logged in now!" );
+			alertMessage( MSG_REGISTERED_LOGGED );
             setTimeout( function(){
                window.location.href = "index.html";
             }, 3000 );
@@ -179,7 +208,7 @@ function postData() {
 	})
 }
 
-document.addEventListener( 'DOMContentLoaded', function(){ getData() } );
+document.addEventListener( 'DOMContentLoaded', function(){ translateForm(); getData() } );
 </script>
 <!-- /CONTENT -->
 

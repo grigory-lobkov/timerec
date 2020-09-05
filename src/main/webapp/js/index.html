@@ -10,7 +10,7 @@
 
     <script src="common.js"></script>
 
-    <title>TimeRec: Service profile</title>
+    <title>TimeRec: Welcome</title>
 </head>
 <body>
 
@@ -21,15 +21,25 @@
     <div class="row">
         <div class="col-md-3"></div>
         <div class="col-md-6">
-            <br>
-            Welcome!
-            <br><br>
+            <br><br><br>
+            <p id="pWelcome">Welcome!</p>
+            <br><br><br>
         </div>
     </div>
 </div>
 <script>
 
 API_URL = "/timerec/api/" + "index";
+
+function translateForm() {
+  if(USER_LANG == 'ru-RU') {
+    title='Добро пожаловать'
+    $('#pWelcome').text(title+'!');
+    document.title = 'TimeRec: '+title;
+  }
+}
+
+document.addEventListener( 'DOMContentLoaded', function(){ translateForm() } );
 
 </script>
 <!-- /CONTENT -->

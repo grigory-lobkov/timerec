@@ -35,53 +35,53 @@
       <div class="col-md-8">
 		  <div id="alertMessage"></div>
 
-		  <h3>Service info</h3>
+		  <h3 id="hService">Service info</h3>
 
 		  <input id="serviceId" style="display:none" type="text" value="0">
 		  <input id="imageId" style="display:none" type="text" value="0">
 
 		  <div class="form-group">
-			<label class="col-lg-8 control-label">Name</label>
+			<label class="col-lg-8 control-label" id="lName">Name</label>
 			<div class="col-lg-8">
 			  <input id="serviceName" class="form-control" type="text" value="">
 			</div>
 		  </div>
 		  <div class="form-group" style="display:none">
-			<label class="col-lg-8 control-label">Cost</label>
+			<label class="col-lg-8 control-label" id="lCost">Cost</label>
 			<div class="col-lg-8">
 			  <input id="serviceCost" class="form-control" type="number" value="0">
 			</div>
 		  </div>
 		  <div class="form-group">
-			<label class="col-lg-8 control-label">Description</label>
+			<label class="col-lg-8 control-label" id="lDescription">Description</label>
 			<div class="col-lg-8">
 			  <textarea id="serviceDescription" class="form-control" rows="5"></textarea>
 			</div>
 		  </div>
 		  <div class="form-group">
-			<label class="col-lg-8 control-label">Default duration in minutes</label>
+			<label class="col-lg-8 control-label" id="lDuration">Default duration in minutes</label>
 			<div class="col-lg-8">
 			  <input id="serviceDuration" class="form-control" type="text" value="">
 			</div>
 			<label class="col-lg-5 control-label"></label>
 		  </div>
 		  
-		  <h3>Client usage limit</h3>
+		  <h3 id="hLimit">Client usage limit</h3>
 		  
 		  <div class="form-group row">
-			<label class="col-lg-3 control-label">Limit per day</label>
+			<label class="col-lg-3 control-label" id="limDay">Limit per day</label>
 			<div class="col-lg-5">
 			  <input id="limitPerDay" class="form-control" type="number" value="">
 			</div>
 		  </div>
 		  <div class="form-group row">
-			<label class="col-lg-3 control-label">Limit per week</label>
+			<label class="col-lg-3 control-label" id="limWeek">Limit per week</label>
 			<div class="col-lg-5">
 			  <input id="limitPerWeek" class="form-control" type="number" value="">
 			</div>
 		  </div>
 		  <div class="form-group row">
-			<label class="col-lg-3 control-label">Limit per month</label>
+			<label class="col-lg-3 control-label" id="limMonth">Limit per month</label>
 			<div class="col-lg-5">
 			  <input id="limitPerMonth" class="form-control" type="number" value="">
 			</div>
@@ -90,16 +90,16 @@
 		  <div class="form-group">
 			<label class="col-lg-5 control-label"></label>
 			<div class="col-lg-8">
-				<input type="button" class="btn btn-primary" value="Save Changes" onclick="postData(); return false;">
+				<input id="bSave" type="button" class="btn btn-primary" value="Save Changes" onclick="postData(); return false;">
 				&nbsp;
-				<input type="reset" class="btn btn-default" value="Cancel" onclick="getData(); return false;">
+				<input id="bCancel" type="reset" class="btn btn-default" value="Cancel" onclick="getData(); return false;">
 				&nbsp;
-				<button class="btn btn-outline-danger" type="button" data-toggle="collapse" data-target="#collapseRemove" aria-expanded="false" aria-controls="collapseRemove">Remove service</button>
+				<button id="bRemove" class="btn btn-outline-danger" type="button" data-toggle="collapse" data-target="#collapseRemove" aria-expanded="false" aria-controls="collapseRemove">Remove service</button>
 				&nbsp;
 				<div class="collapse multi-collapse" id="collapseRemove">
                     <br>
-					<span>Do you really want to remove this service?</span>&nbsp;
-					<input type="button" class="btn btn-danger" value="Remove service" onclick="removeMe(); return false;">
+					<span id="lConfirm">Do you really want to remove this service?</span>&nbsp;
+					<input id="bRemove2" type="button" class="btn btn-danger" value="Remove service" onclick="removeMe(); return false;">
 				</div>
 			</div>
 		  </div>
@@ -110,52 +110,59 @@
 <script>
 
 API_URL = "/timerec/api/" + "service/";
-newServiceHeader = "New Service";
+HDR_NEW_SERVICE = 'New Service';
 SERVICE_ID = null;
+MSG_DURATION_NUMERIC = "''Default duration'' must be numeric";
+MSG_COST_NUMERIC = "''Cost'' must be numeric";
+MSG_CREATED = "Service created successfully";
+MSG_SAVED = "Service saved successfully";
+MSG_DELETED = "Service deleted successfully.";
+MSG_BIG_IMAGE = "Image file size is too big. It must be less than "
+
+function translateForm() {
+  if(USER_LANG == 'ru-RU') {
+  	title = 'Профиль услуги';
+  	document.title = 'TimeRec: '+title;
+    $('#mainHeader').text(title);
+    HDR_NEW_SERVICE = 'Новая услуга';
+    $('#image').prop('alt', 'Представление услуги');
+
+    $('#hService').text('Сведения об услуге');
+    $('#lName').text('Название');
+    $('#lCost').text('Стоимость');
+    $('#lDescription').text('Описание');
+    $('#lDuration').text('Длительность в минутах');
+
+    $('#hLimit').text('Ограничения для пользователя');
+    $('#limDay').text('Ежедневное');
+    $('#limWeek').text('Еженедельное');
+    $('#limMonth').text('Ежемесячное');
+
+    $('#bSave').prop('value', 'Сохранить изменения');
+    $('#bCancel').prop('value', 'Отменить');
+    $('#bRemove').text('Удалить услугу');
+    $('#lConfirm').text('Вы действительно хотите удалить эту услугу?');
+    $('#bRemove2').prop('value', 'Подтверждаю удаление');
+
+	MSG_DURATION_NUMERIC = "''Длительность'' должно быть числом";
+	MSG_COST_NUMERIC = "''Стоимость'' должно быть числом";
+	MSG_CREATED = "Услуга создана успешно";
+	MSG_SAVED = "Услуга сохранена успешно";
+	MSG_DELETED = "Услуга удалена успешно";
+	MSG_BIG_IMAGE = "Размер файла картинки слишком велик. Размер должен быть меньше "
+  }
+}
 
 function getData() {
 	//alertMessageHide();
 	SERVICE_ID = getUrlVars()["service_id"];
 	if( SERVICE_ID == null ) {
-		//errorText = "Parameter service_id is not set";
-		//$(".container").html('<br><br><h4>'+errorText+'</h4>');
-		//alert( errorText );
-		$( "#mainHeader" ).text( newServiceHeader );
+		$( "#mainHeader" ).text( HDR_NEW_SERVICE );
+  		document.title = 'TimeRec: ' + HDR_NEW_SERVICE;
 		$( ".container" ).show();
 		return;
 	}
 	var url = API_URL + SERVICE_ID + "?_=" + (new Date()).getTime();
-/*	$.ajax({
-		method: "GET",
-		url: url,
-		cache: false,
-		dataType: "json",
-		statusCode: AJAX_ERRSTATUS_CODE_PRC
-	})
-		.done(function( data ) {
-			$("#serviceId").val(data.service_id);
-			$("#serviceName").val(data.name);
-			$("#serviceCost").val(data.cost);
-			$("#serviceDescription").val(data.description);
-			$("#serviceDuration").val(data.duration);
-			$(".container").show();
-		})
-		.fail(AJAX_FAIL_PRC);*/
-/*	$.get( url )
-		.done(function( data ) {
-			$("#serviceId").val(data.service_id);
-			$("#serviceName").val(data.name);
-			$("#serviceCost").val(data.cost);
-			$("#serviceDescription").val(data.description);
-			$("#serviceDuration").val(data.duration);
-			//$("#clientLimitDay").val(data.limitDay);
-			//$("#clientLimitWeek").val(data.limitWeek);
-			//$("#clientLimitMonth").val(data.limitMonth);
-			$(".container").show();
-		})
-		.fail(function() {
-			alertMessage( url, "Cannot load data" );
-		});*/
 	getAjaxJson({
 		url: url,
 		done: function( data ) {
@@ -178,11 +185,11 @@ function checkData() {
 	alertMessageHide();
 	
 	if( !( 0 + $( "#serviceDuration" ).val() > 0 ) ) {
-		alertMessage( "''Default duration'' must be numeric" );
+		alertMessage( MSG_DURATION_NUMERIC );
 		return false;
 	}
 	if( !( 0 + $( "#serviceCost" ).val() > -1 ) ) {
-		alertMessage( "''Cost'' must be numeric" );
+		alertMessage( MSG_COST_NUMERIC );
 		return false;
 	}
 	return true;
@@ -195,29 +202,6 @@ function postData() {
 	if( SERVICE_ID != null ) SERVICE_ID = $( "#serviceId" ).val();
 	if( SERVICE_ID === 'undefined' ) SERVICE_ID = null;
 	var url = API_URL + (SERVICE_ID == null ? "" : SERVICE_ID)
-	/*$.ajax({
-		method: SERVICE_ID==null ? "POST" : "PUT",
-		url: url,
-		cache: false,
-		dataType: "json",
-		data: JSON.stringify({
-			service_id: SERVICE_ID,
-			name: $("#serviceName").val(),
-			cost: $("#serviceCost").val(),
-			description: $("#serviceDescription").val(),
-			duration: $("#serviceDuration").val(),
-		}),
-		statusCode: AJAX_ERRSTATUS_CODE_PRC
-	})
-		.done(SERVICE_ID==null ? function( data ) {
-			$("#serviceId").val(data.service_id);
-			SERVICE_ID = data.service_id;
-			getMenu(false);
-			alertMessage( "Service created successfully" );
-		} : function( data ) {
-			alertMessage( "Service saved successfully" );
-		})
-		.fail(AJAX_FAIL_PRC);*/
 	getAjaxJson({
 		method: SERVICE_ID == null ? "POST" : "PUT",
 		url: url,
@@ -241,9 +225,9 @@ function postData() {
 			SERVICE_ID = data.service.service_id;
 			window.history.pushState( {}, "", "?service_id=" + SERVICE_ID );
 			getMenu( false );
-			alertMessage( "Service created successfully" );
+			alertMessage( MSG_CREATED );
 		} : function( data ) {
-			alertMessage( "Service saved successfully" );
+			alertMessage( MSG_SAVED );
 		}
 	})
 }
@@ -262,7 +246,7 @@ function removeMe() {
 					image_id: $( "#imageId" ).val()}
 			}),
 			done: function( data ) {
-				alertMessage( "Service deleted successfully." );
+				alertMessage( MSG_DELETED );
 				setTimeout( function(){
 					window.location.href = "index.html";
 				}, 2000 );
@@ -282,7 +266,7 @@ document.getElementById('selectImage').onchange = function( evt ) {
 		var file = this.files[0];
 		alertMessageHide();
 		if( file.size > MAX_IMAGE_FILE_KB * 1024 ) {
-			alertMessage( "Image file size is too big. It must be less than " + MAX_IMAGE_FILE_KB  + " KB" );
+			alertMessage( MSG_BIG_IMAGE + MAX_IMAGE_FILE_KB  + " KB" );
 			return false;
 		}
 		var reader = new FileReader();
@@ -295,7 +279,7 @@ document.getElementById('selectImage').onchange = function( evt ) {
 	}
 };
 
-document.addEventListener( 'DOMContentLoaded', function(){ getData() } );
+document.addEventListener( 'DOMContentLoaded', function(){ translateForm(); getData() } );
 </script>
 <!-- /CONTENT -->
 

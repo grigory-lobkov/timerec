@@ -20,12 +20,19 @@
 <div class="container" style="display:none">
     <div id="alertMessage"></div>
     <br><br><br>
-    You have logged out.
+    <span id="lLogout">You have logged out.</span>
     <br><br><br>
 </div>
 <script>
 
 API_URL = "/timerec/api/" + "logout";
+
+function translateForm() {
+  if(USER_LANG == 'ru-RU') {
+    $('#lLogout').text('Ваша сессия завершена.');
+    document.title = 'TimeRec: Выход';
+  }
+}
 
 function postData() {
 	getAjaxJson({
@@ -47,7 +54,7 @@ function postData() {
 //    document.cookie = name + '=; Max-Age=-99999999;expires=' + expiryDate.toUTCString();
 //}
 
-document.addEventListener( 'DOMContentLoaded', function(){ postData(); } );
+document.addEventListener( 'DOMContentLoaded', function(){ translateForm(); postData() } );
 </script>
 <!-- /CONTENT -->
 

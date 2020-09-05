@@ -12,6 +12,42 @@ var TIME_CLASS_FREE = "btn btn-outline-secondary";
 var TIME_CLASS_CHOOSEN = "btn btn-primary";
 var TIME_CLASS_BAN = "btn btn-outline-danger";
 
+var LABEL_MIN_SERVICE = "min";
+var BTN_CHECKIN_SERVICE = "Check In";
+var LABEL_MIN = "minutes";
+var LABEL_START = "Start";
+var LABEL_DURATION = "Duration";
+var MSG_DELETE_CONFIRM = 'Are you sure want to delete this record?';
+var MSG_DELETE_FAIL = 'Delete status is unknown. Please, try again later';
+var MSG_RECORDED = 'You have recorded successfully';
+var MSG_BUSY = 'This time is already busy, sorry';
+var MSG_BAN = 'This time is not available, because of limitations, sorry';
+var MSG_RECORD_FAIL = 'Record status is unknown. Please, try again later';
+
+function translateForm() {
+  if(USER_LANG == 'ru-RU') {
+    BTN_CHECKIN_SERVICE = 'Записаться';
+    document.title = 'TimeRec: Запись на услугу';
+    $('#hService').text('Выберите услугу');
+    $('#hTime').text('Выберите время');
+    $('#lTitle').text('Описание');
+    $('#lDescription').text('Подробное описание');
+    $('#serviceBtn').prop('value', 'Забронировать');
+    $('#modalDelete').text('Удалить запись');
+    $('#modalClose').text('Закрыть');
+    LABEL_MIN_SERVICE = "мин";
+    LABEL_START = 'Начало';
+    LABEL_DURATION = 'Продолжительность';
+    LABEL_MIN = 'минут';
+    MSG_DELETE_CONFIRM = 'Вы действительно хотите отменить данную запись?';
+    MSG_DELETE_FAIL = 'Статус удаления неизвестен. Пожалуйста, попробуйте позже';
+    MSG_RECORDED = 'Вы успешно записаны';
+    MSG_BUSY = 'Извините, это время уже занято';
+    MSG_BAN = 'Извините, данное время не доступно из за ограничений администратора';
+    MSG_RECORD_FAIL = 'Статус записи неизвестен. Пожалуйста, попробуйте позже';
+  }
+}
+
 function getServiceHtml( s ) {
   var imgSrc = s.image_bitmap ? s.image_bitmap : 'img/service.png';
   return '   <div class="row"> ' +
@@ -24,7 +60,7 @@ function getServiceHtml( s ) {
     '       <div>' + s.description + '</div>' +
     '       <div><small>' + s.duration + ' min</small></div>' +
     '       <br>' +
-    '       <input type="button" class="btn btn-primary" value="Check In" onclick="getSchedule(' + s.service_id + '); return false;">' +
+    '       <input type="button" class="btn btn-primary" value="' + BTN_CHECKIN_SERVICE + '" onclick="getSchedule(' + s.service_id + '); return false;">' +
     '     </div>' +
     '  </div>';
 }
@@ -123,11 +159,14 @@ function getScheduleInterval(s) {
     return fr + '—' + to;
 }
 
+var LABEL_START = "Start";
+var LABEL_DURATION = "Duration";
+var LABEL_MIN = "minutes";
 function clickSelfTime(b, rTitle, rStart, rDuration, rDescription, rScheduleId) {
     modal = $( '#modalCenter' );
     bdy = rDescription + '<br>' +
-        '<small><br><b>Start</b>: ' + rStart +
-        '<br><b>Duration</b>: ' + rDuration + ' minutes' +
+        '<small><br><b>' + LABEL_START + '</b>: ' + rStart +
+        '<br><b>' + LABEL_DURATION + '</b>: ' + rDuration + ' ' + LABEL_MIN +
         '</small>';
     modal.find( '.modal-title' ).text( rTitle );
     modal.find( '.modal-body' ).html( bdy );
@@ -136,7 +175,7 @@ function clickSelfTime(b, rTitle, rStart, rDuration, rDescription, rScheduleId) 
 }
 
 function deleteRecord() {
-	if( confirm('Are you sure want to delete this record?') ) {
+	if( confirm(MSG_DELETE_CONFIRM) ) {
 		getAjaxJson({
 			method: "DELETE",
 			url: API_DEL_URL,
@@ -147,7 +186,7 @@ function deleteRecord() {
 				if(data.success) {
 					getSchedule(SERVICE_ID);
 				} else {
-			    	alertMessage( "Delete status is unknown. Please, try again later", JSON.stringify( data ) );
+			    	alertMessage( MSG_DELETE_FAIL, JSON.stringify( data ) );
 				}
 			}
 		});
@@ -261,7 +300,7 @@ function postData() {
 		}),
 		done: function( data ) {
 		    if( data.success ) {
-                alertMessage( "You have recorded successfully" );
+                alertMessage( MSG_RECORDED );
                 $( "#servicePage" ).hide();
                 $( "#schedulePage" ).hide();
                 if( $( '#navMenuContainer' ).length ) { // check if integration works
@@ -271,31 +310,29 @@ function postData() {
                     }, 10000 );
                 }
 			} else if( data.busy ) {
-			    busy_msg = "This time is already busy, sorry";
-                alertMessage( busy_msg );
+                alertMessage( MSG_BUSY );
                 setTimeout( function(){
                     getSchedule(SERVICE_ID);
                     if( $( '#alertMessage' ).text() == "" ) {
-                        alertMessage( busy_msg );
+                        alertMessage( MSG_BUSY );
                     }
                 }, 3000 );
                 setTimeout( function(){
                     alertMessageHide();
                 }, 10000 );
 			} else if( data.ban ) {
-                ban_msg = "This time is not available, because of limitations, sorry";
-                alertMessage( ban_msg );
+                alertMessage( MSG_BAN );
                 setTimeout( function(){
                     getSchedule(SERVICE_ID);
                     if( $( '#alertMessage' ).text() == "" ) {
-                        alertMessage( ban_msg );
+                        alertMessage( MSG_BAN );
                     }
                 }, 3000 );
                 setTimeout( function(){
                     alertMessageHide();
                 }, 10000 );
             } else {
-			    alertMessage( "Record status is unknown. Please, try again later", JSON.stringify( data ) );
+			    alertMessage( MSG_RECORD_FAIL, JSON.stringify( data ) );
 			}
 		}
 	})

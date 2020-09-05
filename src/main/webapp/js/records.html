@@ -84,7 +84,7 @@ tr.fc-list-item:hover, a.fc-event:hover {
 <div class="container">
   <div id="alertMessage"></div>
   <form role="form" class="uSchedule">
-    <h1>Schedule of service</h1>
+    <h3 id="hMain">Record list</h3>
   	<div id="calendar"></div>
   </form>
 </div>
@@ -93,7 +93,24 @@ tr.fc-list-item:hover, a.fc-event:hover {
 API_URL = "/timerec/api/" + "schedule/records";
 SERVICE_ID = null;
 
-  document.addEventListener('DOMContentLoaded', function() {
+BTN_MONTH = 'Month';
+BTN_WEEK = 'Week';
+MSG_DEL_CONFIRM = 'Are you sure want to delete this record?';
+MSG_DEL_ERROR = 'Delete status is unknown. Please, try again later';
+
+function translateForm() {
+  if(USER_LANG == 'ru-RU') {
+    document.title = 'TimeRec: Список записей';
+    $('#hMain').text('Список записей');
+    BTN_MONTH = 'Месяц';
+    BTN_WEEK = 'Неделя';
+    MSG_DEL_CONFIRM = 'Действительно удалить эту запись?';
+    MSG_DEL_ERROR = 'Статус удаления неизвестен. Пожалуйста, попробуйте позднее';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  	translateForm();
     SERVICE_ID = getUrlVars()["service_id"];
     //var initialLocaleCode = 'en';
     var initialLocaleCode = window.navigator.language;
@@ -108,10 +125,10 @@ SERVICE_ID = null;
       header: {
         left: 'prev,next',
         center: 'title',
-        right: 'listMonth,list'
+        right: 'listMonth,list,agendaFourDay'
       },
       buttonText: {
-        listMonth: 'Month'
+        listMonth: BTN_MONTH
       },
       visibleRange: {
         start: startList.toISOString().substr(0, 10),
@@ -158,12 +175,13 @@ SERVICE_ID = null;
     });
 
     calendar.render();
-  });
+    //$( '.fc-list-button' ).text( BTN_WEEK ); //changes only once at start
+});
 
 var modalEvent = {};
 
 function deleteRecord() {
-	if(confirm('Are you sure want to delete this record?')) {
+	if(confirm(MSG_DEL_CONFIRM)) {
 		var ev_tmp = modalEvent;
 		getAjaxJson({
 			method: "DELETE",
@@ -173,7 +191,7 @@ function deleteRecord() {
 				if(data.success) {
 					ev_tmp.remove();
 				} else {
-			    	alertMessage( "Delete status is unknown. Please, try again later", JSON.stringify( data ) );
+			    	alertMessage( MSG_DEL_ERROR, JSON.stringify( data ) );
 				}
 			}
 		});
