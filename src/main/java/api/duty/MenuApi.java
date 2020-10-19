@@ -198,6 +198,7 @@ public class MenuApi extends HttpServlet {
      * @return
      */
     private String genServicesJson(List<ServiceRow> services) {
+        if(services.size() == 0) return "";
         StringBuilder result = new StringBuilder();
         for (ServiceRow s : services) {
             if (s.name.length() > MAX_SERVICE_NAME_LENGTH) {

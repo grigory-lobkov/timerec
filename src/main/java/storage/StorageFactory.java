@@ -9,7 +9,7 @@ import storage.tableImpl.*;
  */
 public class StorageFactory {
 
-    public static IConnectionPool dbPool = new PgConnectionPool();
+    public static IConnectionPool dbPool = new H2ConnectionPool();
 
     static private volatile ITable<ServiceRow> serviceInstance = null;
 
