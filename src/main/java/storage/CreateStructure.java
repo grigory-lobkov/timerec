@@ -126,6 +126,8 @@ class Updater {
     static String fromDual;
     static String preSeqNextval;
     static String postSeqNextval;
+    static String preText;
+    static String postText;
 
     /**
      * Creates table structure and indexes
@@ -137,6 +139,8 @@ class Updater {
         fromDual = StorageFactory.dbPool.fromDual();
         preSeqNextval = StorageFactory.dbPool.preSeqNextval();
         postSeqNextval = StorageFactory.dbPool.postSeqNextval();
+        preText = StorageFactory.dbPool.preText();
+        postText = StorageFactory.dbPool.postText();
 
         statement = conn.createStatement();
 
@@ -324,14 +328,14 @@ class Updater {
         exec("role_update_list_public", // PUBLIC USER ROLE MUST HAVE role_id=1 ALWAYS, SessiotUtils.getPublicUser() LIMITATION
                 "INSERT INTO role (role_id, name, is_default)" +
                         "SELECT " + preSeqNextval + "seq_role_id" + postSeqNextval + " role_id, name, false FROM (" +
-                        " SELECT '" + ROLE_PUBLIC + "' as name " + fromDual + "" +
+                        " SELECT " + preText + "'" + ROLE_PUBLIC + "'" + postText + " as name " + fromDual + "" +
                         ")x WHERE (name) NOT IN (SELECT name FROM role)");
 
         exec("role_update_list",
                 "INSERT INTO role (role_id, name, is_default)" +
                         "SELECT " + preSeqNextval + "seq_role_id" + postSeqNextval + " role_id, name, def FROM (" +
-                        " SELECT '" + ROLE_ADMIN + "' as name, false def " + fromDual + " UNION ALL" +
-                        " SELECT '" + ROLE_CLIENT + "' as name, true def " + fromDual + "" +
+                        " SELECT " + preText + "'" + ROLE_ADMIN + "'" + postText + " as name, false def " + fromDual + " UNION ALL" +
+                        " SELECT " + preText + "'" + ROLE_CLIENT + "'" + postText + " as name, true def " + fromDual + "" +
                         ")x WHERE (name) NOT IN (SELECT name FROM role)");
     }
 

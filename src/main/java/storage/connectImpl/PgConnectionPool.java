@@ -13,7 +13,7 @@ public class PgConnectionPool implements IConnectionPool {
 
     // JDBC driver name and database URL
     static private final String JDBC_DRIVER = "org.postgresql.Driver";
-    static private final String JDBC_URL = "jdbc:postgresql://127.0.0.1:5432/timerec";
+    static private final String JDBC_URL = "jdbc:postgresql://127.0.0.1:5433/timerec";
     // JDBC maximum concurrent connections
     //static private final int JDBC_MAX_POOL_SIZE = 1;
     // JDBC timeout (seconds) to acquire new connection from the pool
@@ -34,15 +34,17 @@ public class PgConnectionPool implements IConnectionPool {
     public String fromDual() {
         return "";
     }
-
-    ;
-
     public String preSeqNextval() {
         return "nextval('";
     }
-
     public String postSeqNextval() {
         return "')";
+    }
+    public String preText() {
+        return "";
+    }
+    public String postText() {
+        return "::text";
     }
 
     /**

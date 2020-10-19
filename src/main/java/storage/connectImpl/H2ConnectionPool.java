@@ -57,6 +57,12 @@ public class H2ConnectionPool implements IConnectionPool {
     public String postSeqNextval() {
         return ".nextval";
     }
+    public String preText() {
+        return "";
+    }
+    public String postText() {
+        return "";
+    }
 
     /**
      * Close pool
