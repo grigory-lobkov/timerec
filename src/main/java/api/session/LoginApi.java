@@ -111,7 +111,7 @@ public class LoginApi extends HttpServlet {
             try {
                 data.password = Passwords.encrypt(data.password);
                 // check storage again
-                UserRow dbUser = SessionUtils.checkAndGetUser(data.email, data.password);
+                UserRow dbUser = storage.select(data.email);
                 if (dbUser == null) {
                     // update storage
                     if (storage.insert(data)) {
