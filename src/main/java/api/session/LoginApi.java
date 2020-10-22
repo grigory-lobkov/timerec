@@ -110,7 +110,7 @@ public class LoginApi extends HttpServlet {
             String savePassword = data.password;
             try {
                 data.password = Passwords.encrypt(data.password);
-                // check storage again
+                // check storage for already registered account
                 UserRow dbUser = storage.select(data.email);
                 if (dbUser == null) {
                     // update storage
