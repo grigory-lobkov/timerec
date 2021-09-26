@@ -75,7 +75,7 @@ public class CreateStructure implements ServletContextListener {
     @Override
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
         if (debugLog) System.out.println("CreateStructure.contextDestroyed()");
-        StorageFactory.dbPool.close();
+        //StorageFactory.dbPool.close();
     }
 
 }

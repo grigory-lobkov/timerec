@@ -16,8 +16,9 @@ public interface IConnectionPool {
      * Close pool
      *
      * If not - Tomcat will not update WebServlet automatically.
+     * Problem got on H2 without Hikari pool
      */
-    void close();
+    //void close();
 
     /**
      * Post-statement to get data, not stored in any table

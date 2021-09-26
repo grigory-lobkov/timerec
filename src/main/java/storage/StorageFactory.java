@@ -1,65 +1,23 @@
 package storage;
 
-import integration.Integrator;
 import model.*;
-import storage.connectImpl.H2ConnectionPool;
-import storage.connectImpl.MariadbConnectionPool;
-import storage.connectImpl.PostgresConnectionPool;
 import storage.tableImpl.*;
-
-import java.util.NoSuchElementException;
 
 /**
  * Storage Singleton factory
  */
 public class StorageFactory {
 
-    // Database type
-    static private final String DB_TYPE = Integrator.getProperty("DB_TYPE");
-    static private final String DB_DRIVER = Integrator.getProperty("DB_DRIVER");
-    static private final String DB_URL = Integrator.getProperty("DB_URL");
+    public static IConnectionPool dbPool = HikariPooler.getPooler();
 
-    // JDBC maximum concurrent connections
-    static private final Integer DB_MAX_POOL_SIZE = Integrator.getIntProperty("DB_MAX_POOL_SIZE");
-
-    // JDBC timeout (seconds) to acquire new connection from the pool
-    static private final Integer DB_CONNECTION_TIMEOUT = Integrator.getIntProperty("DB_CONNECTION_TIMEOUT");
-
-    //  Database credentials
-    static private final String DB_USER = Integrator.getProperty("DB_USER");
-    static private final String DB_PASSWORD = Integrator.getProperty("DB_PASSWORD");
-
-    static public IConnectionPool dbPool = getPool();
-
-    static private volatile ITable<ServiceRow> serviceInstance = null;
+    private static volatile ITable<ServiceRow> serviceInstance = null;
 
     /**
      * Generate Service storage actions
      *
      * @return singleton instance
      */
-    static public IConnectionPool getPool() {
-        System.out.println("DB_TYPE=" + DB_TYPE + "\nDB_URL=" + DB_URL + "\nDB_USER=" + DB_USER);
-        switch (DB_TYPE != null ? DB_TYPE.toUpperCase() : "") {
-            case "POSTGRES":
-                return new PostgresConnectionPool(DB_DRIVER, DB_URL, DB_MAX_POOL_SIZE, DB_CONNECTION_TIMEOUT, DB_USER, DB_PASSWORD);
-            case "MARIADB":
-                return new MariadbConnectionPool(DB_DRIVER, DB_URL, DB_MAX_POOL_SIZE, DB_CONNECTION_TIMEOUT, DB_USER, DB_PASSWORD);
-            case "H2":
-                return new H2ConnectionPool(DB_DRIVER, DB_URL, DB_MAX_POOL_SIZE, DB_CONNECTION_TIMEOUT, DB_USER, DB_PASSWORD);
-            case "":
-                throw new NoSuchElementException("Environment variable DB_TYPE is not set");
-            default:
-                throw new NoSuchElementException("Environment variable DB_TYPE=" + DB_TYPE + " have unsupported value");
-        }
-    }
-
-    /**
-     * Generate Service storage actions
-     *
-     * @return singleton instance
-     */
-    static public ITable<ServiceRow> getServiceInstance() {
+    public static ITable<ServiceRow> getServiceInstance() {
         if (serviceInstance == null)
             synchronized (StorageFactory.class) {
                 if (serviceInstance == null) {
@@ -70,14 +28,14 @@ public class StorageFactory {
     }
 
 
-    static private volatile ITable<UserRow> userInstance = null;
+    private static volatile ITable<UserRow> userInstance = null;
 
     /**
      * Generate User storage actions
      *
      * @return singleton instance
      */
-    static public ITable<UserRow> getUserInstance() {
+    public static ITable<UserRow> getUserInstance() {
         if (userInstance == null)
             synchronized (StorageFactory.class) {
                 if (userInstance == null) {
@@ -88,7 +46,7 @@ public class StorageFactory {
     }
 
 
-    static private volatile ITable<AccessRow> accessInstance = null;
+    private static volatile ITable<AccessRow> accessInstance = null;
 
     /**
      * Generate Access storage actions
@@ -106,7 +64,7 @@ public class StorageFactory {
     }
 
 
-    static private volatile IMultiRowTable<RepeatRow> repeatInstance = null;
+    private static volatile IMultiRowTable<RepeatRow> repeatInstance = null;
 
     /**
      * Generate Access storage actions
@@ -124,7 +82,7 @@ public class StorageFactory {
     }
 
 
-    static private volatile ITable<SettingRow> settingInstance = null;
+    private static volatile ITable<SettingRow> settingInstance = null;
 
     /**
      * Generate Settings storage actions
@@ -142,7 +100,7 @@ public class StorageFactory {
     }
 
 
-    static private volatile IScheduleTable<ScheduleRow> scheduleInstance = null;
+    private static volatile IScheduleTable<ScheduleRow> scheduleInstance = null;
 
     /**
      * Generate Schedule storage actions
@@ -160,7 +118,7 @@ public class StorageFactory {
     }
 
 
-    static private volatile ITable<RoleRow> roleInstance = null;
+    private static volatile ITable<RoleRow> roleInstance = null;
 
     /**
      * Generate Role storage actions
@@ -178,7 +136,7 @@ public class StorageFactory {
     }
 
 
-    static private volatile ITable<ImageRow> imageInstance = null;
+    private static volatile ITable<ImageRow> imageInstance = null;
 
     /**
      * Generate Role storage actions
@@ -196,7 +154,7 @@ public class StorageFactory {
     }
 
 
-    static private volatile ITable<TzRow> tzInstance = null;
+    private static volatile ITable<TzRow> tzInstance = null;
 
     /**
      * Generate Tz storage actions

@@ -47,7 +47,7 @@ public class ServiceApi extends HttpServlet {
 
     private ITable<ServiceRow> storageService = StorageFactory.getServiceInstance();
     private ITable<ImageRow> storageImage = StorageFactory.getImageInstance();
-    private static boolean debugLog = false;
+    private static boolean debugLog = true;
 
     static class Transport {
         ServiceRow service;
