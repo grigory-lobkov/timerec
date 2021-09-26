@@ -57,7 +57,7 @@ public class LoginApi extends HttpServlet {
 
                     jsonStr = "{\"success\":\"0\"}";
                     if (dbUser != null) {
-                        if (Integrator.getInstance().login_allowRegistered(dbUser)) {
+                        if (Integrator.INSTANCE.login_allowRegistered(dbUser)) {
                             jsonStr = "{\"success\":\"1\",\"user\":" + gson.toJson(dbUser) + "}";
                             resp.setStatus(HttpServletResponse.SC_CREATED);
                             SessionUtils.setResponceCookies(resp, dbUser.email, dbUser.password);
@@ -96,7 +96,7 @@ public class LoginApi extends HttpServlet {
     private UserRow tryAutoRegister(UserRow data, HttpServletRequest req, HttpServletResponse resp) {
         data.owner_id = 0;
         data.role_id = 0;
-        boolean autoReg = Integrator.getInstance().login_denyAutoRegister(data);
+        boolean autoReg = Integrator.INSTANCE.login_denyAutoRegister(data);
         if (!autoReg) {
             data.user_id = 0;
             if (data.name == null || data.name.isEmpty()) {

@@ -7,10 +7,10 @@ Stores list of services and it's schedule. Allow clients to choose any time
 ## Deploy process
 
 - Copy this repository by Fork/[download](https://github.com/grigory-lobkov/timerec/archive/master.zip) sources
-- Change default users ADMIN_EMAIL, ADMIN_PASSWORD, CLIENT_EMAIL, CLIENT_PASSWORD in [CreateStructure.java](https://github.com/grigory-lobkov/timerec/blob/master/src/main/java/storage/CreateStructure.java)
 - Choose [database](#databases)
-- Compile project, take "timerec.war" and put it to Tomcat "webapps" folder. Or [run it inside IntelliJ](#run-in-intellij)
-- Open browser, open url [http://127.0.0.1/timerec/js/login.html](http://127.0.0.1/timerec/js/login.html), login as somebody, discover your site
+- Compile project or download, take "timerec.war" and put it to Tomcat "webapps" folder. Or [run it inside IntelliJ](#run-in-intellij)
+- Open browser, open url [http://127.0.0.1/timerec/js/login.html](http://127.0.0.1/timerec/js/login.html)
+- Login as admin@timerec.ru or as client@timerec.ru, password: "timerec"
 
 ## Run in IntelliJ
 
@@ -21,16 +21,22 @@ Stores list of services and it's schedule. Allow clients to choose any time
 
 ## Databases
 
-To choose database, change `dbPool` variable to desirable implementation in [StorageFactory.java](https://github.com/grigory-lobkov/timerec/blob/master/src/main/java/storage/StorageFactory.java) and set JDBC_DRIVER, JDBC_URL, DB_USER, DB_PASSWORD there:
+To choose database, set `DB_TYPE` environment variable, supported values:
 
-- H2 - [storage.connectImpl.H2ConnectionPool](https://github.com/grigory-lobkov/timerec/blob/master/src/main/java/storage/connectImpl/H2ConnectionPool.java)
-- Postgres - [storage.connectImpl.PgConnectionPool](https://github.com/grigory-lobkov/timerec/blob/master/src/main/java/storage/connectImpl/PgConnectionPool.java)
+- H2
+- Postgres
+- MariaDB
+
+You should also set DB_URL, DB_USER, DB_PASSWORD, DB_MAX_POOL_SIZE, DB_CONNECTION_TIMEOUT environment variables.
 
 ## Integration
 
-Can be integrated with Moodle, just copy Body tag content from [record.html](https://github.com/grigory-lobkov/timerec/blob/master/src/main/webapp/integration/moodle/record.html) and put it where you need inside moodle page. Don't forget to put your url in `MOODLE_USER_PROFILE_URL` variable in [MoodleIntegrator.java](https://github.com/grigory-lobkov/timerec/blob/master/src/main/java/integration/impl/MoodleIntegrator.java).
+To choose integration type, set `INTEGRATOR_TYPE` environment variable, supported values:
 
-To disable integration, change `getInstance()` method in [Integrator.java](https://github.com/grigory-lobkov/timerec/blob/master/src/main/java/integration/Integrator.java) `instance = new DefaultIntegrator();`
+- Moodle 
+
+For this integration type copy Body tag content from [record.html](https://github.com/grigory-lobkov/timerec/blob/master/src/main/webapp/integration/moodle/record.html)
+and put it where you need inside moodle page. Don't forget to configure moodle profile url through `INTEGRATOR_MOODLE_USER_PROFILE_URL` environment variable, for example: `"http://localhost/moodle/user/edit.php"`.
 
 ## Alerting
 

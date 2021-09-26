@@ -82,7 +82,7 @@ public class SessionUtils {
      */
     static public void createUserSession(HttpServletRequest req, UserRow user) {
         if (debugLog) System.out.println("SessionUtils.createUserSession()");
-        if (Integrator.getInstance().session_allowUser(user)) {
+        if (Integrator.INSTANCE.session_allowUser(user)) {
             if (debugLog) System.out.println(req.getRemoteAddr() + " " +
                     (new SimpleDateFormat("HH:mm:ss")).format(new java.util.Date()) +
                     " SessionUtils.createUserSession " + user.name + " (" + user.email + ")");

@@ -12,16 +12,17 @@ import java.sql.SQLException;
 public class H2ConnectionPool implements IConnectionPool {
 
     // JDBC driver name and database URL
-    static private final String JDBC_DRIVER = "org.h2.Driver";
-    static private final String JDBC_URL = "jdbc:h2:~/data/test";
+    private String dbDriver = "org.h2.Driver";
+    private String dbUrl = "jdbc:h2:~/data/test";
+
     // JDBC maximum concurrent connections
-    static private final int JDBC_MAX_POOL_SIZE = 1;
+    private int dbMaxPoolSize = 5;
     // JDBC timeout (seconds) to acquire new connection from the pool
-    static private final int JDBC_CONNECTION_TIMEOUT = 1;
+    private int dbConnectionTimeout = 10;
 
     //  Database credentials
-    static private final String DB_USER = "sa";
-    static private final String DB_PASSWORD = "";
+    private String dbUser = "sa";
+    private String dbPassword = "";
 
     // Enable to verbose mode
     static private boolean debugLog = false;
@@ -33,40 +34,45 @@ public class H2ConnectionPool implements IConnectionPool {
 
     /**
      * Constructor of class
-     */ {
-        if (debugLog) System.out.println("H2ConnectionPool init anonymous block");
+     */
+    public H2ConnectionPool(String dbDriver, String dbUrl, Integer dbMaxPoolSize, Integer dbConnectionTimeout, String dbUser, String dbPassword) {
+        if (debugLog) System.out.println("H2ConnectionPool init");
         try {
             // Register JDBC driver
-            Class.forName(JDBC_DRIVER);
+            Class.forName(dbDriver.isEmpty() ? this.dbDriver : dbDriver);
             // Create the pool
-            pool = JdbcConnectionPool.create(JDBC_URL, DB_USER, DB_PASSWORD);
-            pool.setMaxConnections(JDBC_MAX_POOL_SIZE);
-            pool.setLoginTimeout(JDBC_CONNECTION_TIMEOUT);
+            pool = JdbcConnectionPool.create(dbUrl == null ? this.dbUrl : dbUrl, dbUser == null ? this.dbUser : dbUser, dbPassword == null ? this.dbPassword : dbPassword);
+            pool.setMaxConnections(dbMaxPoolSize == null ? this.dbMaxPoolSize : dbMaxPoolSize);
+            pool.setLoginTimeout(dbConnectionTimeout == null ? this.dbConnectionTimeout : dbConnectionTimeout);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-        if (debugLog) System.out.println("H2ConnectionPool init anonymous block end");
+        if (debugLog) System.out.println("H2ConnectionPool init end");
     }
 
-    public String fromDual(){
+    public String fromDual() {
         return "FROM dual";
-    };
+    }
+
     public String preSeqNextval() {
         return "";
     }
+
     public String postSeqNextval() {
         return ".nextval";
     }
+
     public String preText() {
         return "";
     }
+
     public String postText() {
         return "";
     }
 
     /**
      * Close pool
-     *
+     * <p>
      * Needed to close connection.
      * If not - Tomcat will not update WebServlet automatically.
      */
@@ -86,12 +92,12 @@ public class H2ConnectionPool implements IConnectionPool {
     @Override
     public Connection connection() {
         try {
-            if (debugLog) System.out.println("H2ConnectionPool.pool()");
+            if (debugLog) System.out.println("H2ConnectionPool.connection()");
             return pool.getConnection();
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            if (debugLog) System.out.println("H2ConnectionPool.pool() end");
+            if (debugLog) System.out.println("H2ConnectionPool.connection() end");
         }
         return null;
     }

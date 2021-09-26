@@ -1,5 +1,6 @@
 package integration.impl;
 
+import integration.IIntegrator;
 import model.ScheduleRow;
 import model.UserRow;
 
@@ -8,7 +9,7 @@ import model.UserRow;
  * Implementation is singleton class
  * Constructor class: integration.Integrator
  */
-public class DefaultIntegrator {
+public class DefaultIntegrator implements IIntegrator {
 
 
     /**
@@ -29,7 +30,7 @@ public class DefaultIntegrator {
      * @param user who is doing action
      * @return {@code true} to deny
      */
-    boolean login_denyAutoRegister(UserRow user) {
+    public boolean login_denyAutoRegister(UserRow user) {
         return false;
     }
 
@@ -48,7 +49,7 @@ public class DefaultIntegrator {
      * @param user who is doing action
      * @return {@code true} to accept
      */
-    boolean login_allowRegistered(UserRow user) {
+    public boolean login_allowRegistered(UserRow user) {
         return true;
     }
 
@@ -68,7 +69,7 @@ public class DefaultIntegrator {
      * @param user who is doing action
      * @return {@code true} to accept
      */
-    boolean register_allowRegistration(UserRow user) {
+    public boolean register_allowRegistration(UserRow user) {
         return true;
     }
 
@@ -87,7 +88,7 @@ public class DefaultIntegrator {
      * @param user who is doing action
      * @return {@code true} to accept
      */
-    boolean session_allowUser(UserRow user) {
+    public boolean session_allowUser(UserRow user) {
         return true;
     }
 
@@ -107,7 +108,7 @@ public class DefaultIntegrator {
      * @param schedule chosen time and other data inside
      * @return {@code true} to accept
      */
-    boolean record_allowRecord(UserRow user, ScheduleRow schedule) {
+    public boolean record_allowRecord(UserRow user, ScheduleRow schedule) {
         return true;
     }
 
@@ -132,7 +133,7 @@ public class DefaultIntegrator {
      * @param newUser new user data
      * @return {@code true} to accept
      */
-    boolean profile_allowModification(UserRow oldUser, UserRow newUser) {
+    public boolean profile_allowModification(UserRow oldUser, UserRow newUser) {
         return true;
     }
 

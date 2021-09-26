@@ -1,17 +1,58 @@
 package storage;
 
+import integration.Integrator;
 import model.*;
-import storage.connectImpl.*;
+import storage.connectImpl.H2ConnectionPool;
+import storage.connectImpl.MariadbConnectionPool;
+import storage.connectImpl.PostgresConnectionPool;
 import storage.tableImpl.*;
+
+import java.util.NoSuchElementException;
 
 /**
  * Storage Singleton factory
  */
 public class StorageFactory {
 
-    public static IConnectionPool dbPool = new H2ConnectionPool();
+    // Database type
+    static private final String DB_TYPE = Integrator.getProperty("DB_TYPE");
+    static private final String DB_DRIVER = Integrator.getProperty("DB_DRIVER");
+    static private final String DB_URL = Integrator.getProperty("DB_URL");
+
+    // JDBC maximum concurrent connections
+    static private final Integer DB_MAX_POOL_SIZE = Integrator.getIntProperty("DB_MAX_POOL_SIZE");
+
+    // JDBC timeout (seconds) to acquire new connection from the pool
+    static private final Integer DB_CONNECTION_TIMEOUT = Integrator.getIntProperty("DB_CONNECTION_TIMEOUT");
+
+    //  Database credentials
+    static private final String DB_USER = Integrator.getProperty("DB_USER");
+    static private final String DB_PASSWORD = Integrator.getProperty("DB_PASSWORD");
+
+    static public IConnectionPool dbPool = getPool();
 
     static private volatile ITable<ServiceRow> serviceInstance = null;
+
+    /**
+     * Generate Service storage actions
+     *
+     * @return singleton instance
+     */
+    static public IConnectionPool getPool() {
+        System.out.println("DB_TYPE=" + DB_TYPE + "\nDB_URL=" + DB_URL + "\nDB_USER=" + DB_USER);
+        switch (DB_TYPE != null ? DB_TYPE.toUpperCase() : "") {
+            case "POSTGRES":
+                return new PostgresConnectionPool(DB_DRIVER, DB_URL, DB_MAX_POOL_SIZE, DB_CONNECTION_TIMEOUT, DB_USER, DB_PASSWORD);
+            case "MARIADB":
+                return new MariadbConnectionPool(DB_DRIVER, DB_URL, DB_MAX_POOL_SIZE, DB_CONNECTION_TIMEOUT, DB_USER, DB_PASSWORD);
+            case "H2":
+                return new H2ConnectionPool(DB_DRIVER, DB_URL, DB_MAX_POOL_SIZE, DB_CONNECTION_TIMEOUT, DB_USER, DB_PASSWORD);
+            case "":
+                throw new NoSuchElementException("Environment variable DB_TYPE is not set");
+            default:
+                throw new NoSuchElementException("Environment variable DB_TYPE=" + DB_TYPE + " have unsupported value");
+        }
+    }
 
     /**
      * Generate Service storage actions

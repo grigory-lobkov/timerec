@@ -34,23 +34,18 @@ public class RoleTable implements ITable<RoleRow> {
      * @throws Exception on error accessing storage
      */
     public RoleRow select(long object_id) throws Exception {
-        Connection conn = pool.connection();
-        PreparedStatement ps = conn.prepareStatement(
-                "SELECT * FROM role WHERE role_id = ?");
-        ps.setLong(1, object_id);
-        ResultSet rs = ps.executeQuery();
-        try {
-            if (!rs.next()) return null;
-
-            RoleRow r = new RoleRow();
-            r.role_id = rs.getLong("role_id");
-            r.name = rs.getString("name");
-            r.is_default = rs.getBoolean("is_default");
-            return r;
-        } finally {
-            rs.close();
-            ps.close();
-            conn.close();
+        try (Connection conn = pool.connection();
+             PreparedStatement ps = conn.prepareStatement("SELECT * FROM role WHERE role_id = ?")
+        ) {
+            ps.setLong(1, object_id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) return null;
+                RoleRow r = new RoleRow();
+                r.role_id = rs.getLong("role_id");
+                r.name = rs.getString("name");
+                r.is_default = rs.getBoolean("is_default");
+                return r;
+            }
         }
     }
 

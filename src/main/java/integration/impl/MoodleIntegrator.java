@@ -1,6 +1,7 @@
 package integration.impl;
 
 import integration.IIntegrator;
+import integration.Integrator;
 import model.ScheduleRow;
 import model.TzRow;
 import model.UserRow;
@@ -16,22 +17,23 @@ import java.util.HashMap;
 
 /**
  * MOODLE implementation of integration
- *
+ * <p>
  * https://moodle.org/
- *
+ * <p>
  * Class is singleton implemented
  * Constructor class: integration.Integrator
  */
 public class MoodleIntegrator implements IIntegrator {
 
-    private String MOODLE_USER_PROFILE_URL = "http://lms.progwards.ru/moodle/user/edit.php";
+    private String USER_PROFILE_URL = Integrator.getProperty("INTEGRATOR_MOODLE_USER_PROFILE_URL");
     private HashMap<String, Integer> moodleTzs;
     private ITable<TzRow> storageTz = StorageFactory.getTzInstance();
 
     /**
      * Initialization block
-     */
-    {
+     */ {
+        if (USER_PROFILE_URL == null)
+            throw new RuntimeException("Environment variable INTEGRATOR_MOODLE_USER_PROFILE_URL is not set");
         // from https://download.moodle.org/timezone/
         // Excel "MoodleIntegrator-java-init.xlsx" will help to refresh it
         moodleTzs = new HashMap<String, Integer>(1103);
@@ -428,12 +430,12 @@ public class MoodleIntegrator implements IIntegrator {
      * If user not found, it can be registered automatically
      * Procedure will get only {@code email} and {@code password}
      * and can fill other fields to create new user (role_id, name, e.t.c.)
-     *
+     * <p>
      * {@code user.password} is not encrypted
-     *
+     * <p>
      * Integrator expects {@code email} is equals to "MoodleSession" and
      * {@code password} have Moodle session cookie
-     *
+     * <p>
      * Событие возникает на странице "login". Определяет, разрешено ли
      * пользователю зарегистрироваться при авторизации.
      * {@code true} - не разрешено
@@ -460,9 +462,9 @@ public class MoodleIntegrator implements IIntegrator {
     }
 
     public UserRow getUserBySessionCookie(String moodleSession) throws IOException {
-        URL url = new URL(MOODLE_USER_PROFILE_URL);
+        URL url = new URL(USER_PROFILE_URL);
 
-        HttpURLConnection con = (HttpURLConnection)url.openConnection();
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setDoOutput(true);
         con.setRequestProperty("Cookie", "MoodleSession=" + moodleSession);
         con.connect();
@@ -486,45 +488,42 @@ public class MoodleIntegrator implements IIntegrator {
             String strPrevLine = null;
             while ((strCurrentLine = br.readLine()) != null) {
                 fromInLine++;
-                if (strCurrentLine.contains(idKey)){
+                if (strCurrentLine.contains(idKey)) {
                     id = strCurrentLine.substring(strCurrentLine.indexOf(idKey) + idKey.length());
                     id = id.substring(0, id.indexOf("\""));
-                }
-                else if (strCurrentLine.contains(inKey)) {
+                } else if (strCurrentLine.contains(inKey)) {
                     fromInLine = 0;
-                }
-                else if (fromInLine < 10 && strCurrentLine.contains(unKey)) {
+                } else if (fromInLine < 10 && strCurrentLine.contains(unKey)) {
                     // get user email, name
                     String value = strCurrentLine.substring(strCurrentLine.indexOf(unKey) + unKey.length());
                     value = value.substring(0, value.indexOf("\""));
-                    if(strPrevLine.contains("id=\"id_email\"")) {
+                    if (strPrevLine.contains("id=\"id_email\"")) {
                         user.email = value;
-                    } else if(strPrevLine.contains("id=\"id_firstname\"")) {
+                    } else if (strPrevLine.contains("id=\"id_firstname\"")) {
                         firstName = value;
-                    } else if(strPrevLine.contains("id=\"id_lastname\"")) {
+                    } else if (strPrevLine.contains("id=\"id_lastname\"")) {
                         lastName = value;
                     }
-                }
-                else if (strCurrentLine.contains(selKey) && strCurrentLine.contains(opKey)) {
+                } else if (strCurrentLine.contains(selKey) && strCurrentLine.contains(opKey)) {
                     // get user Timezone
                     String value = strCurrentLine.substring(strCurrentLine.indexOf(opKey) + opKey.length());
                     value = value.substring(0, value.indexOf("\""));
                     Integer offset = moodleTzs.get(value);
-                    if(offset != null)
+                    if (offset != null)
                         updateUserTz(user, offset);
                 }
                 strPrevLine = strCurrentLine;
             }
         }
 
-        if(id.isEmpty())
+        if (id.isEmpty())
             throw new RuntimeException("Cannot find USER_ID");
 
-        if(user.email.isEmpty())
-            throw new RuntimeException("Cannot find user ID="+id+" email!");
+        if (user.email.isEmpty())
+            throw new RuntimeException("Cannot find user ID=" + id + " email!");
 
-        if(user.tz_id == 0)
-            updateUserTz(user, (03)*60); // default is Moscow TZ (UTC+03)
+        if (user.tz_id == 0)
+            updateUserTz(user, (03) * 60); // default is Moscow TZ (UTC+03)
 
         user.name = firstName + ' ' + lastName;
         user.password = moodleSession;
@@ -545,9 +544,9 @@ public class MoodleIntegrator implements IIntegrator {
     /**
      * Allow registered user to be logged in
      * It can be denied even if user is registered
-     *
+     * <p>
      * {@code user.password} is encrypted
-     *
+     * <p>
      * Событие возникает на странице "login". Определяет, разрешено ли
      * зарегистрированному пользователю выполнить авторизацию.
      * {@code true} - разрешено
@@ -556,7 +555,7 @@ public class MoodleIntegrator implements IIntegrator {
      * @param user who is doing action
      * @return {@code true} to accept
      */
-    public boolean login_allowRegistered(UserRow user){
+    public boolean login_allowRegistered(UserRow user) {
         return true;
     }
 
@@ -564,9 +563,9 @@ public class MoodleIntegrator implements IIntegrator {
     /**
      * Allow new user to be registered
      * Procedure can change any field to store in database (role_id, name, e.t.c.)
-     *
+     * <p>
      * {@code user.password} is not encrypted
-     *
+     * <p>
      * Событие возникает на странице "register". Определяет, разрешено ли
      * данному пользователю пройти регистрацию (можно разрешить регистрацию
      * только e-mail из списка).
@@ -576,7 +575,7 @@ public class MoodleIntegrator implements IIntegrator {
      * @param user who is doing action
      * @return {@code true} to accept
      */
-    public boolean register_allowRegistration(UserRow user){
+    public boolean register_allowRegistration(UserRow user) {
         return true;
     }
 
@@ -584,9 +583,9 @@ public class MoodleIntegrator implements IIntegrator {
     /**
      * Allow user to make session
      * User can log-in several months ago. This method can prevent it.
-     *
+     * <p>
      * {@code user.password} is encrypted
-     *
+     * <p>
      * Определяет, может ли пользователь по сохраненным в кукис логину/паролю
      * создать новую сессию и начать работать с системой
      * {@code true} - может
@@ -595,27 +594,27 @@ public class MoodleIntegrator implements IIntegrator {
      * @param user who is doing action
      * @return {@code true} to accept
      */
-    public boolean session_allowUser(UserRow user){
+    public boolean session_allowUser(UserRow user) {
         return true;
     }
 
 
     /**
      * Allow user to make a record
-     *
+     * <p>
      * {@code user.password} is encrypted
-     *
+     * <p>
      * Событие возникает на странице "record", где пользователь делает запись
      * в расписание. Метод определяет, может ли данный пользователь {@code user}
      * сделать запись {@code schedule}.
      * {@code true} - может
      * {@code false} - не может
      *
-     * @param user who is doing action
+     * @param user     who is doing action
      * @param schedule chosen time and other data inside
      * @return {@code true} to accept
      */
-    public boolean record_allowRecord(UserRow user, ScheduleRow schedule){
+    public boolean record_allowRecord(UserRow user, ScheduleRow schedule) {
         return true;
     }
 
@@ -624,14 +623,14 @@ public class MoodleIntegrator implements IIntegrator {
      * Allow user to modify own profile
      * If {@code oldUser.password} not equals to {@code newUser.password}, then
      * {@code newUser.password} is not encrypted and contains a new password
-     *
+     * <p>
      * If {@code newUser.password==""}, then password is not changed
-     *
+     * <p>
      * Событие возникает на странице "profile". Определяет, может ли пользователь
      * внести данную правку в свой профиль.
      * {@code true} - может
      * {@code false} - не может
-     *
+     * <p>
      * Если {@code newUser.password} пустой, значит пользователь пароль не меняет.
      * Если {@code oldUser.password} не равен {@code newUser.password}, значит
      * {@code newUser.password} не зашифрован и хранит новый пароль пользователя.
@@ -640,7 +639,7 @@ public class MoodleIntegrator implements IIntegrator {
      * @param newUser new user data
      * @return {@code true} to accept
      */
-    public boolean profile_allowModification(UserRow oldUser, UserRow newUser){
+    public boolean profile_allowModification(UserRow oldUser, UserRow newUser) {
         return true;
     }
 

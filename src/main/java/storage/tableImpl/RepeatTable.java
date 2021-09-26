@@ -48,7 +48,7 @@ public class RepeatTable implements IMultiRowTable<RepeatRow> {
 
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
-                "SELECT * FROM repeat WHERE repeat_id IN (" + commaList + ")");
+                "SELECT * FROM repeats WHERE repeat_id IN (" + commaList + ")");
         ResultSet rs = ps.executeQuery();
 
         List<RepeatRow> result = new ArrayList<>();
@@ -83,7 +83,7 @@ public class RepeatTable implements IMultiRowTable<RepeatRow> {
     public List<RepeatRow> select(long parent_id) throws Exception {
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
-                "SELECT * FROM repeat WHERE service_id = ?");
+                "SELECT * FROM repeats WHERE service_id = ?");
         ps.setLong(1, parent_id);
         ResultSet rs = ps.executeQuery();
 
@@ -119,7 +119,7 @@ public class RepeatTable implements IMultiRowTable<RepeatRow> {
     public int update(List<RepeatRow> objects) throws Exception {
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
-                "UPDATE repeat SET service_id = ?, dow = ?, duration = ?, time_from = ?, time_to = ?" +
+                "UPDATE repeats SET service_id = ?, dow = ?, duration = ?, time_from = ?, time_to = ?" +
                         " WHERE repeat_id = ?");
 
         int affectedRows = 0;
@@ -155,7 +155,7 @@ public class RepeatTable implements IMultiRowTable<RepeatRow> {
         Connection conn = pool.connection();
         String resultColumns[] = new String[]{"repeat_id"};
         PreparedStatement ps = conn.prepareStatement(
-                "INSERT INTO repeat (repeat_id, service_id, dow, duration, time_from, time_to)" +
+                "INSERT INTO repeats (repeat_id, service_id, dow, duration, time_from, time_to)" +
                         "VALUES (" + preSeqNextval + "seq_repeat_id" + postSeqNextval + ", ?, ?, ?, ?, ?)", resultColumns);
 
         int affectedRows = 0;
@@ -194,7 +194,7 @@ public class RepeatTable implements IMultiRowTable<RepeatRow> {
     public int delete(long parent_id) throws Exception {
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
-                "DELETE FROM repeat WHERE service_id = ?");
+                "DELETE FROM repeats WHERE service_id = ?");
         ps.setLong(1, parent_id);
         try {
             int affectedRows = ps.executeUpdate();
@@ -224,7 +224,7 @@ public class RepeatTable implements IMultiRowTable<RepeatRow> {
         }
         Connection conn = pool.connection();
         PreparedStatement ps = conn.prepareStatement(
-                "DELETE FROM repeat WHERE repeat_id IN (" + commaList + ")");
+                "DELETE FROM repeats WHERE repeat_id IN (" + commaList + ")");
         try {
             int affectedRows = ps.executeUpdate();
             return affectedRows;
