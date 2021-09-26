@@ -85,10 +85,10 @@ class Updater {
     // Default users
     static final String ADMIN_NAME = "Admin";
     static final String ADMIN_EMAIL = "admin@timerec.ru";
-    static final String ADMIN_PASSWORD = "admin";
+    static final String ADMIN_PASSWORD = "timerec";
     static final String CLIENT_NAME = "Client";
     static final String CLIENT_EMAIL = "client@timerec.ru";
-    static final String CLIENT_PASSWORD = "client";
+    static final String CLIENT_PASSWORD = "timerec";
 
     // Basic roles
     static final String ROLE_ADMIN = "Administrators";
@@ -448,8 +448,8 @@ class Updater {
         exec("seq_repeat_id",
                 "CREATE SEQUENCE IF NOT EXISTS seq_repeat_id");
 
-        exec("repeat",
-                "CREATE TABLE IF NOT EXISTS repeat " +
+        exec("repeats",
+                "CREATE TABLE IF NOT EXISTS repeats " +
                         "(repeat_id BIGINT PRIMARY KEY, " +
                         " service_id BIGINT," +
                         " dow INTEGER," +
@@ -457,11 +457,11 @@ class Updater {
                         " time_from INTEGER," +
                         " time_to INTEGER)");
 
-        exec("repeat_pk_idx",
-                "CREATE INDEX IF NOT EXISTS repeat_pk_idx ON repeat (repeat_id)");
+        exec("repeats_pk_idx",
+                "CREATE INDEX IF NOT EXISTS repeat_pk_idx ON repeats (repeat_id)");
 
-        exec("repeat_service_idx",
-                "CREATE INDEX IF NOT EXISTS repeat_service_idx ON repeat (service_id)");
+        exec("repeats_service_idx",
+                "CREATE INDEX IF NOT EXISTS repeat_service_idx ON repeats (service_id)");
 
         //exec("schedule drop", "DROP TABLE IF EXISTS schedule");
 
@@ -473,7 +473,7 @@ class Updater {
                         "(schedule_id BIGINT PRIMARY KEY," +
                         " service_id BIGINT," +
                         " user_id BIGINT," +
-                        " date_from TIMESTAMP WITHOUT TIME ZONE," +
+                        " date_from TIMESTAMP," +
                         " duration INTEGER," +
                         " title VARCHAR(4000)," +
                         " description TEXT)");
