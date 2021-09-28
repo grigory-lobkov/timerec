@@ -1,11 +1,26 @@
 package storage;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 
 /**
  * Interface for class, returning one JDBC connection
  */
 public interface IConnectionPool {
+
+    /**
+     * Get full path to driver name
+     *
+     * @return
+     */
+    String getDbDriver();
+
+    /**
+     * Set pool dataSource
+     *
+     * @param dataSource
+     */
+    void setDataSource(DataSource dataSource);
 
     /**
      * Get one JDBC connection

@@ -1,5 +1,6 @@
 package storage.connectImpl;
 
+import org.h2.jdbcx.JdbcConnectionPool;
 import storage.IConnectionPool;
 
 import javax.sql.DataSource;
@@ -11,16 +12,8 @@ import java.sql.SQLException;
  */
 public class H2ConnectionPool implements IConnectionPool {
 
-    /**
-     * The main property of this class - connection to JDBC
-     */
-    private final DataSource pool;
-
-    /**
-     * Constructor of class
-     */
-    public H2ConnectionPool(DataSource pool) {
-        this.pool = pool;
+    public String getDbDriver() {
+        return "org.h2.Driver";
     }
 
     public String fromDual() {
@@ -51,15 +44,15 @@ public class H2ConnectionPool implements IConnectionPool {
         return "";
     }
 
-    /**
-     * Get one JDBC connection
-     *
-     * @return connection class
-     */
-    @Override
+    private DataSource dataSource;
+
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
     public Connection connection() {
         try {
-            return pool.getConnection();
+            return dataSource.getConnection();
         } catch (SQLException e) {
             e.printStackTrace();
         }

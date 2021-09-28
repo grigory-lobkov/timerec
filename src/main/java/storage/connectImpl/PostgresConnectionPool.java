@@ -11,16 +11,8 @@ import java.sql.SQLException;
  */
 public class PostgresConnectionPool implements IConnectionPool {
 
-    /**
-     * The main property of this class - connection to JDBC
-     */
-    private final DataSource pool;
-
-    /**
-     * Constructor of class
-     */
-    public PostgresConnectionPool(DataSource pool) {
-        this.pool = pool;
+    public String getDbDriver() {
+        return "org.postgresql.Driver";
     }
 
     public String fromDual() {
@@ -43,7 +35,6 @@ public class PostgresConnectionPool implements IConnectionPool {
         return "')";
     }
 
-
     public String preText() {
         return "";
     }
@@ -52,15 +43,15 @@ public class PostgresConnectionPool implements IConnectionPool {
         return "::text";
     }
 
-    /**
-     * Get one JDBC connection
-     *
-     * @return connection class
-     */
-    @Override
+    private DataSource dataSource;
+
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
     public Connection connection() {
         try {
-            return pool.getConnection();
+            return dataSource.getConnection();
         } catch (SQLException e) {
             e.printStackTrace();
         }
