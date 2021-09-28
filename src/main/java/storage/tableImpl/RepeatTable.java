@@ -12,7 +12,7 @@ import java.util.List;
 
 /**
  * JDBC storage access to {@code model.RepeatRow} objects
- *
+ * <p>
  * Parent filter field = "service_id"
  */
 public class RepeatTable implements IMultiRowTable<RepeatRow> {
@@ -20,12 +20,18 @@ public class RepeatTable implements IMultiRowTable<RepeatRow> {
     private IConnectionPool pool;
     private String preSeqNextval;
     private String postSeqNextval;
+    private String preSeqCurrval;
+    private String postSeqCurrval;
+    private String fromDual;
 
 
     public RepeatTable(IConnectionPool connection) {
         pool = connection;
         preSeqNextval = pool.preSeqNextval();
         postSeqNextval = pool.postSeqNextval();
+        preSeqCurrval = pool.preSeqCurrval();
+        postSeqCurrval = pool.postSeqCurrval();
+        fromDual = pool.fromDual();
     }
 
 
@@ -172,6 +178,12 @@ public class RepeatTable implements IMultiRowTable<RepeatRow> {
                     ResultSet generatedKeys = ps.getGeneratedKeys();
                     if (generatedKeys.next()) {
                         object.repeat_id = generatedKeys.getLong(1);
+                    } else { // when getGeneratedKeys() is not supported by DBMS
+                        PreparedStatement csps = conn.prepareStatement("SELECT " + preSeqCurrval + "seq_repeat_id" + postSeqCurrval + " " + fromDual);
+                        ResultSet csrs = csps.executeQuery();
+                        if (csrs.next()) {
+                            object.repeat_id = csrs.getLong(1);
+                        }
                     }
                 }
             }

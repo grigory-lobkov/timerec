@@ -17,11 +17,18 @@ public class ImageTable implements ITable<ImageRow> {
     private IConnectionPool pool;
     private String preSeqNextval;
     private String postSeqNextval;
+    private String preSeqCurrval;
+    private String postSeqCurrval;
+    private String fromDual;
+
 
     public ImageTable(IConnectionPool connection) {
         pool = connection;
         preSeqNextval = pool.preSeqNextval();
         postSeqNextval = pool.postSeqNextval();
+        preSeqCurrval = pool.preSeqCurrval();
+        postSeqCurrval = pool.postSeqCurrval();
+        fromDual = pool.fromDual();
     }
 
 
@@ -144,6 +151,12 @@ public class ImageTable implements ITable<ImageRow> {
                 ResultSet generatedKeys = ps.getGeneratedKeys();
                 if (generatedKeys.next()) {
                     image.image_id = generatedKeys.getLong(1);
+                } else { // when getGeneratedKeys() is not supported by DBMS
+                    PreparedStatement csps = conn.prepareStatement("SELECT " + preSeqCurrval + "seq_image_id" + postSeqCurrval + " " + fromDual);
+                    ResultSet csrs = csps.executeQuery();
+                    if (csrs.next()) {
+                        image.image_id = csrs.getLong(1);
+                    }
                 }
             }
             return affectedRows == 1;

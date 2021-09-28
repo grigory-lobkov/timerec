@@ -18,11 +18,18 @@ public class AccessTable implements ITable<AccessRow> {
     private IConnectionPool pool;
     private String preSeqNextval;
     private String postSeqNextval;
+    private String preSeqCurrval;
+    private String postSeqCurrval;
+    private String fromDual;
+
 
     public AccessTable(IConnectionPool connection) {
         pool = connection;
         preSeqNextval = pool.preSeqNextval();
         postSeqNextval = pool.postSeqNextval();
+        preSeqCurrval = pool.preSeqCurrval();
+        postSeqCurrval = pool.postSeqCurrval();
+        fromDual = pool.fromDual();
     }
 
     /**
@@ -140,6 +147,12 @@ public class AccessTable implements ITable<AccessRow> {
                 ResultSet generatedKeys = ps.getGeneratedKeys();
                 if (generatedKeys.next()) {
                     access.access_id = generatedKeys.getLong(1);
+                } else { // when getGeneratedKeys() is not supported by DBMS
+                    PreparedStatement csps = conn.prepareStatement("SELECT " + preSeqCurrval + "seq_access_id" + postSeqCurrval + " " + fromDual);
+                    ResultSet csrs = csps.executeQuery();
+                    if (csrs.next()) {
+                        access.access_id = csrs.getLong(1);
+                    }
                 }
             }
             return affectedRows == 1;

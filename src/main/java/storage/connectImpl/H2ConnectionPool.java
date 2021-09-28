@@ -1,6 +1,5 @@
 package storage.connectImpl;
 
-import org.h2.jdbcx.JdbcConnectionPool;
 import storage.IConnectionPool;
 
 import javax.sql.DataSource;
@@ -34,6 +33,14 @@ public class H2ConnectionPool implements IConnectionPool {
 
     public String postSeqNextval() {
         return ".nextval";
+    }
+
+    public String preSeqCurrval() {
+        return "";
+    }
+
+    public String postSeqCurrval() {
+        return ".currval";//?
     }
 
     public String preText() {

@@ -35,6 +35,15 @@ public class PostgresConnectionPool implements IConnectionPool {
         return "')";
     }
 
+    public String preSeqCurrval() {
+        return "currval('";
+    }
+
+    public String postSeqCurrval() {
+        return "')";
+    }
+
+
     public String preText() {
         return "";
     }

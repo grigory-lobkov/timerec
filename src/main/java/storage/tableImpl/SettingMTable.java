@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * JDBC storage access to {@code model.SettingRow} objects
  * Deprecated?
- *
+ * <p>
  * Parent filter field = "service_id"
  */
 public class SettingMTable implements IMultiRowTable<SettingRow> {
@@ -21,12 +21,18 @@ public class SettingMTable implements IMultiRowTable<SettingRow> {
     private IConnectionPool pool;
     private String preSeqNextval;
     private String postSeqNextval;
+    private String preSeqCurrval;
+    private String postSeqCurrval;
+    private String fromDual;
 
 
     public SettingMTable(IConnectionPool connection) {
         pool = connection;
         preSeqNextval = pool.preSeqNextval();
         postSeqNextval = pool.postSeqNextval();
+        preSeqCurrval = pool.preSeqCurrval();
+        postSeqCurrval = pool.postSeqCurrval();
+        fromDual = pool.fromDual();
     }
 
 
@@ -177,6 +183,12 @@ public class SettingMTable implements IMultiRowTable<SettingRow> {
                     ResultSet generatedKeys = ps.getGeneratedKeys();
                     if (generatedKeys.next()) {
                         object.setting_id = generatedKeys.getLong(1);
+                    } else { // when getGeneratedKeys() is not supported by DBMS
+                        PreparedStatement csps = conn.prepareStatement("SELECT " + preSeqCurrval + "seq_setting_id" + postSeqCurrval + " " + fromDual);
+                        ResultSet csrs = csps.executeQuery();
+                        if (csrs.next()) {
+                            object.setting_id = csrs.getLong(1);
+                        }
                     }
                 }
             }

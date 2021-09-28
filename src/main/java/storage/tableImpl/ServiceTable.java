@@ -7,6 +7,7 @@ import storage.ITable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,12 +19,18 @@ public class ServiceTable implements ITable<ServiceRow> {
     private IConnectionPool pool;
     private String preSeqNextval;
     private String postSeqNextval;
+    private String preSeqCurrval;
+    private String postSeqCurrval;
+    private String fromDual;
 
 
     public ServiceTable(IConnectionPool connection) {
         pool = connection;
         preSeqNextval = pool.preSeqNextval();
         postSeqNextval = pool.postSeqNextval();
+        preSeqCurrval = pool.preSeqCurrval();
+        postSeqCurrval = pool.postSeqCurrval();
+        fromDual = pool.fromDual();
     }
 
 
@@ -118,7 +125,7 @@ public class ServiceTable implements ITable<ServiceRow> {
         String resultColumns[] = new String[]{"service_id"};
         PreparedStatement ps = conn.prepareStatement(
                 "INSERT INTO service (service_id, name, description, image_id, duration, cost, owner_id)" +
-                        "VALUES (" + preSeqNextval + "seq_service_id" + postSeqNextval + ", ?, ?, ?, ?, ?, ?)", resultColumns);
+                        "VALUES (" + preSeqNextval + "seq_service_id" + postSeqNextval + ", ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         try {
             ps.setString(1, service.name);
             ps.setString(2, service.description);
@@ -129,9 +136,15 @@ public class ServiceTable implements ITable<ServiceRow> {
 
             int affectedRows = ps.executeUpdate();
             if (affectedRows == 1) {
-                java.sql.ResultSet generatedKeys = ps.getGeneratedKeys();
+                ResultSet generatedKeys = ps.getGeneratedKeys();
                 if (generatedKeys.next()) {
                     service.service_id = generatedKeys.getLong(1);
+                } else { // when getGeneratedKeys() is not supported by DBMS
+                    PreparedStatement csps = conn.prepareStatement("SELECT " + preSeqCurrval + "seq_service_id" + postSeqCurrval + " " + fromDual);
+                    ResultSet csrs = csps.executeQuery();
+                    if (csrs.next()) {
+                        service.service_id = csrs.getLong(1);
+                    }
                 }
             }
             return affectedRows == 1;

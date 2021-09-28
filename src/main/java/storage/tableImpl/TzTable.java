@@ -18,11 +18,18 @@ public class TzTable implements ITable<TzRow> {
     private IConnectionPool pool;
     private String preSeqNextval;
     private String postSeqNextval;
+    private String preSeqCurrval;
+    private String postSeqCurrval;
+    private String fromDual;
+
 
     public TzTable(IConnectionPool connection) {
         pool = connection;
         preSeqNextval = pool.preSeqNextval();
         postSeqNextval = pool.postSeqNextval();
+        preSeqCurrval = pool.preSeqCurrval();
+        postSeqCurrval = pool.postSeqCurrval();
+        fromDual = pool.fromDual();
     }
 
 
@@ -133,6 +140,12 @@ public class TzTable implements ITable<TzRow> {
                 ResultSet generatedKeys = ps.getGeneratedKeys();
                 if (generatedKeys.next()) {
                     tz.tz_id = generatedKeys.getLong(1);
+                } else { // when getGeneratedKeys() is not supported by DBMS
+                    PreparedStatement csps = conn.prepareStatement("SELECT " + preSeqCurrval + "seq_tz_id" + postSeqCurrval + " " + fromDual);
+                    ResultSet csrs = csps.executeQuery();
+                    if (csrs.next()) {
+                        tz.tz_id = csrs.getLong(1);
+                    }
                 }
             }
             return affectedRows == 1;

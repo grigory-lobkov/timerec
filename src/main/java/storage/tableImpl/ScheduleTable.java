@@ -19,11 +19,18 @@ public class ScheduleTable implements IScheduleTable<ScheduleRow> {
     private IConnectionPool pool;
     private String preSeqNextval;
     private String postSeqNextval;
+    private String preSeqCurrval;
+    private String postSeqCurrval;
+    private String fromDual;
+
 
     public ScheduleTable(IConnectionPool connection) {
         pool = connection;
         preSeqNextval = pool.preSeqNextval();
         postSeqNextval = pool.postSeqNextval();
+        preSeqCurrval = pool.preSeqCurrval();
+        postSeqCurrval = pool.postSeqCurrval();
+        fromDual = pool.fromDual();
     }
 
 
@@ -121,6 +128,12 @@ public class ScheduleTable implements IScheduleTable<ScheduleRow> {
                 ResultSet generatedKeys = ps.getGeneratedKeys();
                 if (generatedKeys.next()) {
                     schedule.schedule_id = generatedKeys.getLong(1);
+                } else { // when getGeneratedKeys() is not supported by DBMS
+                    PreparedStatement csps = conn.prepareStatement("SELECT " + preSeqCurrval + "seq_schedule_id" + postSeqCurrval + " " + fromDual);
+                    ResultSet csrs = csps.executeQuery();
+                    if (csrs.next()) {
+                        schedule.schedule_id = csrs.getLong(1);
+                    }
                 }
             }
             return affectedRows == 1;

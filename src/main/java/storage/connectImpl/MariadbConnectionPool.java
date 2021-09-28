@@ -11,9 +11,6 @@ import java.sql.SQLException;
  */
 public class MariadbConnectionPool implements IConnectionPool {
 
-    // JDBC driver name and database URL
-    private String dbDriver = "org.mariadb.jdbc.Driver";
-
     /**
      * The main property of this class - connection to JDBC
      */
@@ -23,7 +20,6 @@ public class MariadbConnectionPool implements IConnectionPool {
      * Constructor of class
      */
     public MariadbConnectionPool(DataSource pool) throws ClassNotFoundException {
-        Class.forName(dbDriver == null ? this.dbDriver : dbDriver);
         this.pool = pool;
     }
 
@@ -36,6 +32,14 @@ public class MariadbConnectionPool implements IConnectionPool {
     }
 
     public String postSeqNextval() {
+        return ")";
+    }
+
+    public String preSeqCurrval() {
+        return "lastval(";
+    }
+
+    public String postSeqCurrval() {
         return ")";
     }
 
