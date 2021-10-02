@@ -38,6 +38,11 @@ To choose integration type, set `INTEGRATOR_TYPE` environment variable, supporte
 For this integration type copy Body tag content from [record.html](https://github.com/grigory-lobkov/timerec/blob/master/src/main/webapp/integration/moodle/record.html)
 and put it where you need inside moodle page. Don't forget to configure moodle profile url through `INTEGRATOR_MOODLE_USER_PROFILE_URL` environment variable, for example: `"http://localhost/moodle/user/edit.php"`.
 
+- MoodleDB
+
+For this integration type copy Body tag content from [record.html](https://github.com/grigory-lobkov/timerec/blob/master/src/main/webapp/integration/moodle/record.html)
+and put it where you need inside moodle page. Don't forget to configure moodle `sessions` table name by `INTEGRATOR_MOODLEDB_SESSIONS_TABLE_NAME` environment variable, for example: `"mdl_sessions"`. Don't forget to configure moodle `user` table name by `INTEGRATOR_MOODLEDB_USER_TABLE_NAME` environment variable, for example: `"mdl_user"`.
+
 ## Alerting
 
 - by Email in profile

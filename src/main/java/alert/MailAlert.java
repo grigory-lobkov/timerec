@@ -39,11 +39,11 @@ public class MailAlert implements IAlert {
     }
 
     private String getSettingValue(String alias, String defName, String defDesc) {
-        SettingRow s = null;//SettingController.getSetting(alias);
+        SettingRow s = SettingController.getSetting(alias);
         if (s == null || s.value.isEmpty()) {
             System.out.println("MailAlert.getSettingValue() setting '" + alias + "' is not set!");
             validSettings = false;
-            if(s == null) {
+            if (s == null) {
                 s = new SettingRow();
                 s.value = "";
                 s.alias = alias;
@@ -57,11 +57,13 @@ public class MailAlert implements IAlert {
 
     @Override
     public void sendAlert(String toEmail, String title, String htmlText) {
-        if(!validSettings) {
-//            System.out.println("MailAlert.sendAlert() Cannot send email, because not all settings set.");
-//            System.out.println("toEmail="+toEmail);
-//            System.out.println("title="+title);
-//            System.out.println("htmlText="+htmlText);
+        if (!validSettings) {
+            System.out.println("MailAlert.sendAlert() Cannot send email, because not all settings set.");
+            return;
+        }
+        System.out.println("MailAlert.sendAlert(" + toEmail + ")");
+        if (!toEmail.contains("@")) {
+            System.out.println("Recipient email '" + toEmail + "' does not contain domain name");
             return;
         }
         Properties props = new Properties();
@@ -72,10 +74,10 @@ public class MailAlert implements IAlert {
         props.put("mail.smtp.port", "465");
         javax.mail.Session session = javax.mail.Session.getDefaultInstance(props);
         try {
-            Message message = new MimeMessage(session);
+            MimeMessage message = new MimeMessage(session);
             message.setFrom(new InternetAddress(emailFrom));
             message.setRecipient(Message.RecipientType.TO, new InternetAddress(toEmail));
-            message.setSubject("TimeRec: " + title);
+            message.setSubject("TimeRec: " + title, "UTF-8");
 
             String html = "<html><head><style type='text/css'>" +
                     "table,th,td{border:1px solid gray;border-collapse:collapse}" +

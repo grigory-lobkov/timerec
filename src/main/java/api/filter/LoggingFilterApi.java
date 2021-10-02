@@ -18,7 +18,8 @@ public class LoggingFilterApi implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         if (debugLog) {
-            String log = ((HttpServletRequest) servletRequest).getMethod() + " " + ((HttpServletRequest) servletRequest).getRequestURI();
+            String log = ((HttpServletRequest) servletRequest).getMethod() + " " + ((HttpServletRequest) servletRequest).getRequestURI()
+                    + "?" + ((HttpServletRequest) servletRequest).getQueryString();
             System.out.println("LoggingFilterApi.doFilter() START " + log);
 
             filterChain.doFilter(servletRequest, servletResponse);

@@ -15,11 +15,11 @@ import java.text.SimpleDateFormat;
 
 public class SessionUtils {
 
-    static public final int COOKIE_SESSION_LIFETIME = 60 * 60 * 24 * 30; // set user and password cookies lifetime in milliseconds
+    public static final int COOKIE_SESSION_LIFETIME = 60 * 60 * 24 * 30; // set user and password cookies lifetime in milliseconds
 
-    static private ITable<UserRow> storage = StorageFactory.getUserInstance();
+    private static ITable<UserRow> storage = StorageFactory.getUserInstance();
 
-    static private boolean debugLog = false;
+    private static boolean debugLog = true;
 
 
     /**
@@ -29,26 +29,25 @@ public class SessionUtils {
      * @param password user password to check
      * @return {@code model.UserRow} if {@code email} and {@code password} is correct
      */
-    static public UserRow checkAndGetUser(String email, String password) {
-        if (debugLog) System.out.println("SessionUtils.checkAndGetUser()");
+    public static UserRow checkAndGetUser(String email, String password) {
+        if (debugLog) System.out.println("SessionUtils.checkAndGetUser("+ (email != null ? email : "") + "," + (password != null ? password : "") +")");
         try {
             UserRow dbUser = storage.select(email);
             if (dbUser != null) {
-                String gotPass = Passwords.encrypt(password);
-                boolean success = password.equals(dbUser.password) || gotPass.equals(dbUser.password);
+                boolean success = password.equals(dbUser.password) || Passwords.encrypt(password).equals(dbUser.password);
                 if (success) {
                     if (debugLog)
-                        System.out.println("SessionUtils.checkAndGetUser(" + (email != null ? email : "") + "," + (password != null ? password : "") + ") success.");
+                        System.out.println("SessionUtils.checkAndGetUser success.");
                     return dbUser;
                 } else {
                     if (debugLog)
-                        System.out.println("SessionUtils.checkAndGetUser(" + (email != null ? email : "") + "," + (password != null ? password : "") + ") failure.");
+                        System.out.println("SessionUtils.checkAndGetUser failure.");
                     return null;
                 }
             }
         } catch (Exception e) {
             if (debugLog)
-                System.out.println("SessionUtils.checkAndGetUser(" + (email != null ? email : "") + "," + (password != null ? password : "") + ") not found in USER table.");
+                System.out.println("SessionUtils.checkAndGetUser not found in USER table.");
         }
         return null;
     }
@@ -80,9 +79,9 @@ public class SessionUtils {
      * @param req  user request
      * @param user information to save in session
      */
-    static public void createUserSession(HttpServletRequest req, UserRow user) {
+    public static void createUserSession(HttpServletRequest req, UserRow user) {
         if (debugLog) System.out.println("SessionUtils.createUserSession()");
-        if (Integrator.INSTANCE.session_allowUser(user)) {
+        if (Integrator.instance().session_allowUser(user)) {
             if (debugLog) System.out.println(req.getRemoteAddr() + " " +
                     (new SimpleDateFormat("HH:mm:ss")).format(new java.util.Date()) +
                     " SessionUtils.createUserSession " + user.name + " (" + user.email + ")");
@@ -101,7 +100,7 @@ public class SessionUtils {
      * @param resp servlet responce
      * @return
      */
-    static public void deleteUserSessionCook(HttpServletRequest req, HttpServletResponse resp) {
+    public static void deleteUserSessionCook(HttpServletRequest req, HttpServletResponse resp) {
         if (debugLog) System.out.println("SessionUtils.deleteUserSessionCook()");
         HttpSession session = req.getSession(false);
         if(session!=null) {
@@ -130,7 +129,7 @@ public class SessionUtils {
      * @param req user request
      * @return authorized {@code model.UserRow}
      */
-    static public UserRow createUserSessionCook(HttpServletRequest req) {
+    public static UserRow createUserSessionCook(HttpServletRequest req) {
         if (debugLog) System.out.println("SessionUtils.createUserSessionCook()");
         UserRow user = null;
         Cookie[] cookies = req.getCookies();

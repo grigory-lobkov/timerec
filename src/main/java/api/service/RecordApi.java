@@ -205,7 +205,7 @@ public class RecordApi extends HttpServlet {
                         resp.getWriter().println(row.user_id == 1 ? "{\"ban\":\"1\"}" : "{\"busy\":\"1\"}");
                         done1 = true;
                     } else {
-                        boolean allow = Integrator.INSTANCE.record_allowRecord(user, row);
+                        boolean allow = Integrator.instance().record_allowRecord(user, row);
                         if (allow && ScheduleController.makeRecord(row, user, user)) {
                             resp.setContentType("application/json; charset=UTF-8");
                             resp.getWriter().println("{\"success\":\"1\"}");

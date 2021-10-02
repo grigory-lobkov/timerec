@@ -5,6 +5,7 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 
 public class CreateStructure implements ServletContextListener {
@@ -75,7 +76,16 @@ public class CreateStructure implements ServletContextListener {
     @Override
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
         if (debugLog) System.out.println("CreateStructure.contextDestroyed()");
-        //StorageFactory.dbPool.close();
+        StorageFactory.dbPool.close();
+        // deregister JDBC driver
+        Enumeration<Driver> drivers = DriverManager.getDrivers();
+        while (drivers.hasMoreElements()) {
+            try {
+                DriverManager.deregisterDriver(drivers.nextElement());
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }

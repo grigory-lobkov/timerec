@@ -18,12 +18,12 @@ import java.util.List;
  */
 public class SettingMTable implements IMultiRowTable<SettingRow> {
 
-    private IConnectionPool pool;
-    private String preSeqNextval;
-    private String postSeqNextval;
-    private String preSeqCurrval;
-    private String postSeqCurrval;
-    private String fromDual;
+    private final IConnectionPool pool;
+    private final String preSeqNextval;
+    private final String postSeqNextval;
+    private final String preSeqCurrval;
+    private final String postSeqCurrval;
+    private final String fromDual;
 
 
     public SettingMTable(IConnectionPool connection) {

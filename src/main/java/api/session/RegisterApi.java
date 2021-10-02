@@ -83,7 +83,7 @@ public class RegisterApi extends HttpServlet {
                     data.user_id = 0;
                     data.owner_id = 0;
                     // integrator
-                    boolean allow = Integrator.INSTANCE.register_allowRegistration(data);
+                    boolean allow = Integrator.instance().register_allowRegistration(data);
                     // encrypt password
                     data.password = Passwords.encrypt(data.password);
                     // update storage

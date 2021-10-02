@@ -7,6 +7,7 @@ import storage.ITable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,12 +16,12 @@ import java.util.List;
  */
 public class RoleTable implements ITable<RoleRow> {
 
-    private IConnectionPool pool;
-    private String preSeqNextval;
-    private String postSeqNextval;
-    private String preSeqCurrval;
-    private String postSeqCurrval;
-    private String fromDual;
+    private final IConnectionPool pool;
+    private final String preSeqNextval;
+    private final String postSeqNextval;
+    private final String preSeqCurrval;
+    private final String postSeqCurrval;
+    private final String fromDual;
 
 
     public RoleTable(IConnectionPool connection) {
@@ -36,22 +37,18 @@ public class RoleTable implements ITable<RoleRow> {
     /**
      * Get {@code model.RoleRow} object from storage by {@code role_id}
      *
-     * @param object_id object identifier
+     * @param objectId object identifier
      * @return {@code model.RoleRow} object
      * @throws Exception on error accessing storage
      */
-    public RoleRow select(long object_id) throws Exception {
+    public RoleRow select(long objectId) throws Exception {
         try (Connection conn = pool.connection();
              PreparedStatement ps = conn.prepareStatement("SELECT * FROM role WHERE role_id = ?")
         ) {
-            ps.setLong(1, object_id);
+            ps.setLong(1, objectId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (!rs.next()) return null;
-                RoleRow r = new RoleRow();
-                r.role_id = rs.getLong("role_id");
-                r.name = rs.getString("name");
-                r.is_default = rs.getBoolean("is_default");
-                return r;
+                return extractRow(rs);
             }
         }
     }
@@ -65,26 +62,18 @@ public class RoleTable implements ITable<RoleRow> {
      * @throws Exception on error accessing storage
      */
     public RoleRow select(String filter) throws Exception {
-        Connection conn = pool.connection();
-        PreparedStatement ps = conn.prepareStatement(
-                "SELECT * FROM role" +
-                        " WHERE CASE" +
-                        "  WHEN is_default THEN \"1\"" +
-                        "  ELSE \"0\" END = ?");
-        ps.setString(1, filter);
-        ResultSet rs = ps.executeQuery();
-        try {
-            if (!rs.next()) return null;
-
-            RoleRow r = new RoleRow();
-            r.role_id = rs.getLong("role_id");
-            r.name = rs.getString("name");
-            r.is_default = rs.getBoolean("is_default");
-            return r;
-        } finally {
-            rs.close();
-            ps.close();
-            conn.close();
+        try (Connection conn = pool.connection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "SELECT * FROM role" +
+                             " WHERE CASE" +
+                             "  WHEN is_default THEN \"1\"" +
+                             "  ELSE \"0\" END = ?")
+        ) {
+            ps.setString(1, filter);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) return null;
+                return extractRow(rs);
+            }
         }
     }
 
@@ -97,21 +86,21 @@ public class RoleTable implements ITable<RoleRow> {
      * @throws Exception on error accessing storage
      */
     public boolean update(RoleRow role) throws Exception {
-        Connection conn = pool.connection();
-        PreparedStatement ps = conn.prepareStatement(
-                "UPDATE role SET name = ?, is_default = ?" +
-                        " WHERE role_id = ?");
-        try {
-            ps.setString(1, role.name);
-            ps.setBoolean(2, role.is_default);
+        try (Connection conn = pool.connection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "UPDATE role SET name = ?, is_default = ?" +
+                             " WHERE role_id = ?")
+        ) {
+            setFields(ps, role);
             ps.setLong(3, role.role_id);
-
             int affectedRows = ps.executeUpdate();
             return affectedRows == 1;
-        } finally {
-            ps.close();
-            conn.close();
         }
+    }
+
+    private void setFields(PreparedStatement ps, RoleRow role) throws SQLException {
+        ps.setString(1, role.name);
+        ps.setBoolean(2, role.is_default);
     }
 
 
@@ -124,14 +113,13 @@ public class RoleTable implements ITable<RoleRow> {
      * @throws Exception on error accessing storage
      */
     public boolean insert(RoleRow role) throws Exception {
-        Connection conn = pool.connection();
-        String resultColumns[] = new String[]{"role_id"};
-        PreparedStatement ps = conn.prepareStatement(
-                "INSERT INTO role (role_id, name, is_default)" +
-                        "VALUES (" + preSeqNextval + "seq_role_id" + postSeqNextval + ", ?, ?)", resultColumns);
-        try {
-            ps.setString(1, role.name);
-            ps.setBoolean(2, role.is_default);
+        String[] resultColumns = new String[]{"role_id"};
+        try (Connection conn = pool.connection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "INSERT INTO role (role_id, name, is_default)" +
+                             "VALUES (" + preSeqNextval + "seq_role_id" + postSeqNextval + ", ?, ?)", resultColumns)
+        ) {
+            setFields(ps, role);
 
             int affectedRows = ps.executeUpdate();
             if (affectedRows == 1) {
@@ -139,39 +127,35 @@ public class RoleTable implements ITable<RoleRow> {
                 if (generatedKeys.next()) {
                     role.role_id = generatedKeys.getLong(1);
                 } else { // when getGeneratedKeys() is not supported by DBMS
-                    PreparedStatement csps = conn.prepareStatement("SELECT " + preSeqCurrval + "seq_role_id" + postSeqCurrval + " " + fromDual);
-                    ResultSet csrs = csps.executeQuery();
-                    if (csrs.next()) {
-                        role.role_id = csrs.getLong(1);
+                    try (PreparedStatement csPs = conn.prepareStatement(
+                            "SELECT " + preSeqCurrval + "seq_role_id" + postSeqCurrval + " " + fromDual)
+                    ) {
+                        ResultSet csRs = csPs.executeQuery();
+                        if (csRs.next()) {
+                            role.role_id = csRs.getLong(1);
+                        }
                     }
                 }
             }
             return affectedRows == 1;
-        } finally {
-            ps.close();
-            conn.close();
         }
     }
 
     /**
      * Delete {@code model.RoleRow} object from storage by {@code role_id}
      *
-     * @param object_id
+     * @param objectId id
      * @return {@code true} on success
      * @throws Exception on error accessing storage
      */
-    @Override
-    public boolean delete(long object_id) throws Exception {
-        Connection conn = pool.connection();
-        PreparedStatement ps = conn.prepareStatement(
-                "DELETE FROM role WHERE role_id = ?");
-        ps.setLong(1, object_id);
-        try {
+    public boolean delete(long objectId) throws Exception {
+        try (Connection conn = pool.connection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "DELETE FROM role WHERE role_id = ?")
+        ) {
+            ps.setLong(1, objectId);
             int affectedRows = ps.executeUpdate();
             return affectedRows == 1;
-        } finally {
-            ps.close();
-            conn.close();
         }
     }
 
@@ -180,29 +164,28 @@ public class RoleTable implements ITable<RoleRow> {
      * Reads list of all roles
      *
      * @return list of shortened {@code model.RoleRow} objects
-     * @throws Exception
+     * @throws Exception db access
      */
-    @Override
     public List<RoleRow> select() throws Exception {
-        Connection conn = pool.connection();
-        PreparedStatement ps = conn.prepareStatement(
-                "SELECT * FROM role ORDER BY name");
-        ResultSet rs = ps.executeQuery();
-        List<RoleRow> list = new ArrayList<RoleRow>();
-        try {
+        try (Connection conn = pool.connection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "SELECT * FROM role ORDER BY name");
+             ResultSet rs = ps.executeQuery()
+        ) {
+            List<RoleRow> list = new ArrayList<>();
             while (rs.next()) {
-                RoleRow r = new RoleRow();
-                r.role_id = rs.getLong("role_id");
-                r.name = rs.getString("name");
-                r.is_default = rs.getBoolean("is_default");
-                list.add(r);
+                list.add(extractRow(rs));
             }
-        } finally {
-            rs.close();
-            ps.close();
-            conn.close();
+            return list;
         }
-        return list;
+    }
+
+    private RoleRow extractRow(ResultSet rs) throws SQLException {
+        RoleRow r = new RoleRow();
+        r.role_id = rs.getLong("role_id");
+        r.name = rs.getString("name");
+        r.is_default = rs.getBoolean("is_default");
+        return r;
     }
 
 
@@ -213,7 +196,6 @@ public class RoleTable implements ITable<RoleRow> {
      * @param role_id role to check
      * @return true if {@code role_id} is owner of object {@code object_id}
 
-    @Override
     public boolean checkIsOwner(long object_id, long role_id) throws SQLException {
         PreparedStatement ps = connectImpl.prepareStatement(
                 "SELECT * FROM role WHERE role_id = ? AND owner_id = ?");

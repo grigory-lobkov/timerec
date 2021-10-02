@@ -57,7 +57,7 @@ public class LoginApi extends HttpServlet {
 
                     jsonStr = "{\"success\":\"0\"}";
                     if (dbUser != null) {
-                        if (Integrator.INSTANCE.login_allowRegistered(dbUser)) {
+                        if (Integrator.instance().login_allowRegistered(dbUser)) {
                             jsonStr = "{\"success\":\"1\",\"user\":" + gson.toJson(dbUser) + "}";
                             resp.setStatus(HttpServletResponse.SC_CREATED);
                             SessionUtils.setResponceCookies(resp, dbUser.email, dbUser.password);
@@ -94,9 +94,11 @@ public class LoginApi extends HttpServlet {
     }
 
     private UserRow tryAutoRegister(UserRow data, HttpServletRequest req, HttpServletResponse resp) {
+        if (debugLog) System.out.println("LoginApi.tryAutoRegister("+data+")");
         data.owner_id = 0;
         data.role_id = 0;
-        boolean autoReg = Integrator.INSTANCE.login_denyAutoRegister(data);
+        boolean autoReg = Integrator.instance().login_denyAutoRegister(data);
+        if (debugLog) System.out.println("LoginApi.tryAutoRegister login_denyAutoRegister="+autoReg+" "+data);
         if (!autoReg) {
             data.user_id = 0;
             if (data.name == null || data.name.isEmpty()) {
@@ -109,12 +111,14 @@ public class LoginApi extends HttpServlet {
             }
             String savePassword = data.password;
             try {
+                if (debugLog) System.out.println("LoginApi.tryAutoRegister new "+data);
                 data.password = Passwords.encrypt(data.password);
                 // check storage for already registered account
                 UserRow dbUser = storage.select(data.email);
                 if (dbUser == null) {
                     // update storage
                     if (storage.insert(data)) {
+                        if (debugLog) System.out.println("LoginApi.tryAutoRegister inserted.");
                         return data;
                     }
                 } else {
@@ -124,6 +128,7 @@ public class LoginApi extends HttpServlet {
                             dbUser.image_id != data.image_id || dbUser.owner_id != data.owner_id) {
                         // update storage
                         storage.update(data);
+                        if (debugLog) System.out.println("LoginApi.tryAutoRegister updated.");
                     }
                     return data;
                 }

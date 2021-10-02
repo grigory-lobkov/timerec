@@ -3,21 +3,10 @@
 <head><meta charset="utf-8"></head>
 <body>
 <!-- You need to paste this code somewhere on your Moodle page -->
-
 <!-- TimeRec moodle plugin -->
-<script src="/timerec/js/common.js"></script>
-<script src="/timerec/js/record.js"></script>
-<!-- Bootstrap CSS -->
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
-
+<!--<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">-->
 <!-- this style and div.container is copy-pasted from record.html -->
 <!-- CONTENT -->
-<style>
-.container .btn { margin: 0.3em }
-#serviceList .row {
-    margin-bottom: 1em;
-}
-</style>
 <div class="container">
     <form role="form" class="sRepeat">
         <hr>
@@ -27,8 +16,8 @@
                 <div id="alertMessage"></div>
 
                 <div class="form-group" id="servicePage" style="display:none">
-                    <h2 id="hService">Choose service</h2>
-                    <hr>
+                    <!--<h2 id="hService">Choose service</h2>-->
+                    <!--<hr>-->
                     <div id="serviceList">...</div>
                 </div>
 
@@ -81,24 +70,25 @@
     </div>
 </div>
 <script>
-//document.cookie = "MoodleSession=mj1tngvhe8apnblferc70a68he; path=/timerec/integration/moodle/; max-age=360000"; //debug
+COOKIE_NAME = "MoodleSession";
+//document.cookie = COOKIE_NAME + "=mj1tngvhe8apnblferc70a68he; path=/timerec/integration/moodle/; max-age=360000"; //debug
 
-var API_URL = "/timerec/api/" + "record/";
-var API_DEL_URL = "/timerec/api/" + "schedule/records";
-var API_LOGIN_URL = "/timerec/api/" + "login/";
+const API_URL = "/timerec/api/" + "record/";
+const API_DEL_URL = "/timerec/api/" + "schedule/records";
+const API_LOGIN_URL = "/timerec/api/" + "login/";
 
-MSG_CANT_AUTH = "Cannot authenticate user. Sorry";
-MSG_NO_COOKIE = "Cannot find ''MoodleSession'' cookie. Sorry";
+let MSG_CANT_AUTH = "Cannot authenticate user. Sorry";
+let MSG_NO_COOKIE = "Cannot find ''" + COOKIE_NAME + "'' cookie. Sorry";
 
 function translateMyForm() {
-  if(USER_LANG == 'ru-RU') {
-    MSG_CANT_AUTH = "Не могу авторизовать Вашего пользователя. Обратитесь к администратору";
-    MSG_NO_COOKIE = "Не могу найти куки ''MoodleSession''. Обратитесь к администратору";
-  }
+    if (USER_LANG == 'ru-RU') {
+        MSG_CANT_AUTH = "Не могу авторизовать Вашего пользователя. Обратитесь к администратору";
+        MSG_NO_COOKIE = "Не могу найти куки ''MoodleSession''. Обратитесь к администратору";
+    }
 }
 
 function loadForm() {
-    var moodleSessionValue = getCookie("MoodleSession");
+    const moodleSessionValue = getCookie(COOKIE_NAME);
     if( moodleSessionValue ) {
         getAjaxJson( {
             method: "POST",
@@ -121,13 +111,53 @@ function loadForm() {
     }
 }
 
-document.addEventListener( 'DOMContentLoaded', function() { translateMyForm(); translateForm(); loadForm() } );
+let SCRIPTS_LOADED = 0;
+const SCRIPTS_COUNT = 2;
+
+function afterScriptsLoaded() {
+    SCRIPTS_LOADED = SCRIPTS_LOADED + 1
+    if (SCRIPTS_LOADED >= SCRIPTS_COUNT) {
+        translateMyForm();
+        translateForm();
+        loadForm();
+    }
+}
+
+function attachScript(src) {
+    const script = document.createElement('script');
+    script.src = src;
+    script.type = 'text/javascript';
+    script.onload = function() {
+        afterScriptsLoaded();
+    };
+    document.getElementsByTagName('head')[0].appendChild(script);
+}
+
+function attachStype() {
+    const css = '.container .btn { margin: 0.3em; padding: 0.4em 1.5em } ' +
+        '#serviceList .row { margin-bottom: 1em } ' +
+        '.btn-primary:focus, .btn-primary.focus { outline: .2rem solid #114477 } ';
+    const style = document.createElement('style');
+    style.type = 'text/css';
+    if (style.styleSheet) {
+        style.styleSheet.cssText = css; // for IE8 and below
+    } else {
+        style.appendChild(document.createTextNode(css));
+    }
+    document.getElementsByTagName('head')[0].appendChild(style);
+}
+window.addEventListener("load", function() {
+    attachScript("/timerec/js/common.js");
+    attachScript("/timerec/js/record.js");
+    attachStype();
+});
 </script>
 <!-- /CONTENT -->
 
-<script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+
+<!--<script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous"></script>-->
+<!--<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>-->
+<!--<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>-->
 <!-- end timeRec plugin-->
 
 </body>

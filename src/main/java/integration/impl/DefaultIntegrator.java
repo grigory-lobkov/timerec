@@ -24,7 +24,7 @@ public class DefaultIntegrator implements IIntegrator {
      * пользователю зарегистрироваться при авторизации.
      * {@code true} - не разрешено
      * {@code false} - разрешено
-     * Инверсия "deny" делана для того, чтобы "не вникая" все методы
+     * Инверсия "deny" сделана для того, чтобы "не вникая" все методы
      * интегратора по-умолчанию возвращали "true"
      *
      * @param user who is doing action

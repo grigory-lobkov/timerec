@@ -171,20 +171,40 @@ public class StorageFactory {
         return tzInstance;
     }
 
+
+    private static volatile ITable<IntegratorMoodleSessionsRow> integratorMoodleSessionsInstance = null;
+
     /**
-     * Generate parameter-based storage {@code ITable} object
-     * Used to determine owner inside AccessFilterApi. Deprecated.
+     * Generate Tz storage actions
      *
-     * @param object name of object
      * @return singleton instance
      */
-//    public static ITable getInstance(String object) {
-//        switch(object) {
-//            case "service": return getServiceInstance();
-//            case "user": return getUserInstance();
-//            case "access": return getAccessInstance();
-//        }
-//        return null;
-//    }
+    public static ITable<IntegratorMoodleSessionsRow> getIntegratorMoodleSessionsInstance() {
+        if (integratorMoodleSessionsInstance == null)
+            synchronized (StorageFactory.class) {
+                if (integratorMoodleSessionsInstance == null) {
+                    integratorMoodleSessionsInstance = new IntegratorMoodleSessionsTable(dbPool);
+                }
+            }
+        return integratorMoodleSessionsInstance;
+    }
+
+
+    private static volatile ITable<IntegratorMoodleUserRow> integratorMoodleUserRowInstance = null;
+
+    /**
+     * Generate Tz storage actions
+     *
+     * @return singleton instance
+     */
+    public static ITable<IntegratorMoodleUserRow> getIntegratorMoodleUserInstance() {
+        if (integratorMoodleUserRowInstance == null)
+            synchronized (StorageFactory.class) {
+                if (integratorMoodleUserRowInstance == null) {
+                    integratorMoodleUserRowInstance = new IntegratorMoodleUserTable(dbPool);
+                }
+            }
+        return integratorMoodleUserRowInstance;
+    }
 
 }

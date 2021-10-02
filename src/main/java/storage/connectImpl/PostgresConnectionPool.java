@@ -1,5 +1,6 @@
 package storage.connectImpl;
 
+import com.zaxxer.hikari.HikariDataSource;
 import storage.IConnectionPool;
 
 import javax.sql.DataSource;
@@ -56,5 +57,11 @@ public class PostgresConnectionPool implements IConnectionPool {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public void close() {
+        if(dataSource.getClass() == HikariDataSource.class) {
+            ((HikariDataSource) dataSource).close();
+        }
     }
 }

@@ -1,6 +1,6 @@
 package storage.connectImpl;
 
-import org.h2.jdbcx.JdbcConnectionPool;
+import com.zaxxer.hikari.HikariDataSource;
 import storage.IConnectionPool;
 
 import javax.sql.DataSource;
@@ -57,5 +57,11 @@ public class H2ConnectionPool implements IConnectionPool {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public void close() {
+        if(dataSource.getClass() == HikariDataSource.class) {
+            ((HikariDataSource) dataSource).close();
+        }
     }
 }

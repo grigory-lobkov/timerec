@@ -58,4 +58,10 @@ public class MariadbConnectionPool implements IConnectionPool {
         }
         return null;
     }
+
+    public void close() {
+        if(dataSource.getClass() == HikariDataSource.class) {
+            ((HikariDataSource) dataSource).close();
+        }
+    }
 }
